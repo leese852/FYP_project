@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.leese.usercenter.model.Dish;
 import com.leese.usercenter.service.DishService;
 import com.leese.usercenter.mapper.DishMapper;
+import jakarta.annotation.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -12,8 +14,10 @@ import org.springframework.stereotype.Service;
 * @createDate 2025-12-09 14:22:19
 */
 @Service
-public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
-    implements DishService{
+public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements DishService{
+    @Autowired
+    DishMapper dishMapper;
+
 
 }
 

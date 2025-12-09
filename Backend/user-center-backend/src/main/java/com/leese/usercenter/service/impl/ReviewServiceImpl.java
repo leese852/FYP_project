@@ -1,9 +1,7 @@
 package com.leese.usercenter.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.leese.usercenter.model.Review;
 import com.leese.usercenter.service.ReviewService;
-import com.leese.usercenter.mapper.ReviewMapper;
 import org.springframework.stereotype.Service;
 
 /**

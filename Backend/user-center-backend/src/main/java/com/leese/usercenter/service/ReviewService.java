@@ -1,6 +1,5 @@
 package com.leese.usercenter.service;
 
-import com.leese.usercenter.model.Review;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**

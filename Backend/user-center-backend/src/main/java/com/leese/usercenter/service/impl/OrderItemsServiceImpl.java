@@ -1,9 +1,7 @@
 package com.leese.usercenter.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.leese.usercenter.model.OrderItems;
 import com.leese.usercenter.service.OrderItemsService;
-import com.leese.usercenter.mapper.OrderItemsMapper;
 import org.springframework.stereotype.Service;
 
 /**

@@ -9,11 +9,13 @@
             <result property="orderId" column="orderId" />
             <result property="dishId" column="dishId" />
             <result property="dishName" column="dishName" />
+            <result property="dishFlavor" column="dishFlavor" />
             <result property="quantity" column="quantity" />
             <result property="price" column="price" />
     </resultMap>
 
     <sql id="Base_Column_List">
-        id,orderId,dishId,dishName,quantity,price
+        id,orderId,dishId,dishName,dishFlavor,quantity,
+        price
     </sql>
 </mapper>

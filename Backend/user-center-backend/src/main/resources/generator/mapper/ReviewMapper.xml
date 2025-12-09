@@ -10,13 +10,14 @@
             <result property="orderId" column="orderId" />
             <result property="rating" column="rating" />
             <result property="comment" column="comment" />
+            <result property="likes" column="likes" />
             <result property="createTime" column="createTime" />
             <result property="updateTime" column="updateTime" />
             <result property="isDelete" column="isDelete" />
     </resultMap>
 
     <sql id="Base_Column_List">
-        id,userId,orderId,rating,comment,createTime,
-        updateTime,isDelete
+        id,userId,orderId,rating,comment,likes,
+        createTime,updateTime,isDelete
     </sql>
 </mapper>

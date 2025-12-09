@@ -11,8 +11,16 @@
             <result property="addressId" column="addressId" />
             <result property="status" column="status" />
             <result property="totalAmount" column="totalAmount" />
-            <result property="paymentMethod" column="paymentMethod" />
+            <result property="payMethod" column="payMethod" />
+            <result property="payStatus" column="payStatus" />
             <result property="remark" column="remark" />
+            <result property="cancelReason" column="cancelReason" />
+            <result property="cancelTime" column="cancelTime" />
+            <result property="rejectionReason" column="rejectionReason" />
+            <result property="estimatedDeliveryTime" column="estimatedDeliveryTime" />
+            <result property="deliveryStatus" column="deliveryStatus" />
+            <result property="deliveryTime" column="deliveryTime" />
+            <result property="packAmount" column="packAmount" />
             <result property="createTime" column="createTime" />
             <result property="updateTime" column="updateTime" />
             <result property="isDelete" column="isDelete" />
@@ -20,6 +28,8 @@
 
     <sql id="Base_Column_List">
         id,orderId,userId,addressId,status,totalAmount,
-        paymentMethod,remark,createTime,updateTime,isDelete
+        payMethod,payStatus,remark,cancelReason,cancelTime,
+        rejectionReason,estimatedDeliveryTime,deliveryStatus,deliveryTime,packAmount,
+        createTime,updateTime,isDelete
     </sql>
 </mapper>

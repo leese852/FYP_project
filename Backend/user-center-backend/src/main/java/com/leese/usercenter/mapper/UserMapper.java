@@ -1,13 +1,13 @@
 package com.leese.usercenter.mapper;
 
-import com.leese.usercenter.model.User;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.leese.usercenter.model.User;
 
 /**
-* @author wuhao
+* @author leese
 * @description 针对表【user】的数据库操作Mapper
-* @createDate 2025-07-29 14:57:46
-* @Entity com.leese.usercenter.model.User
+* @createDate 2025-12-09 14:22:19
+* @Entity generator.domain.User
 */
 public interface UserMapper extends BaseMapper<User> {
 

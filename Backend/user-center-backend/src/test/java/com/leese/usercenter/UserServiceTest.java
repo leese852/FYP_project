@@ -16,14 +16,14 @@ public class UserServiceTest {
     @Test
     public void testAddUser() {
         User user = new User();
-        user.setUsername("dogLeese");
-        user.setUserPassword("123");
-        user.setUserAccount("leese");
+        user.setUsername("testLeese");
+        user.setUserPassword("test123");
+        user.setUserAccount("testleese");
         user.setAvatarUrl("https://baomidou.com/assets/asset.cIbiVTt_.svg");
         user.setGender(18);
         user.setEmail("leese@gmail.com");
         user.setTel("53000849");
-        user.setPlanteCode("1145");
+        user.setPlantCode("1145");
         boolean result = userService.save(user);
         System.out.println(user.getId());
         Assertions.assertTrue(result);

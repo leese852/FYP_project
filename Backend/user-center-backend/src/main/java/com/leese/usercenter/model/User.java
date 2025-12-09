@@ -63,7 +63,7 @@ public class User {
     /**
      * 创建时间
      */
-    private Date creaetTime;
+    private Date createTime;
 
     /**
      * 更新時間
@@ -85,5 +85,10 @@ public class User {
     /**
      * 星球編號
      */
-    private String planteCode;
+    private String plantCode;
+
+    /**
+     * 标签
+     */
+    private String tags;
 }

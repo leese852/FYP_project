@@ -15,7 +15,7 @@
             <option name="ignoreFieldSuffix" value="" />
             <option name="ignoreTablePrefix" value="" />
             <option name="ignoreTableSuffix" value="" />
-            <option name="moduleName" value="user-center" />
+            <option name="moduleName" value="user-center-backend" />
             <option name="modulePath" value="$PROJECT_DIR$" />
             <option name="moduleUIInfoList">
               <list>
@@ -68,6 +68,30 @@
             <option name="tableUIInfoList">
               <list>
                 <TableUIInfo>
+                  <option name="className" value="Address" />
+                  <option name="tableName" value="address" />
+                </TableUIInfo>
+                <TableUIInfo>
+                  <option name="className" value="Categories" />
+                  <option name="tableName" value="categories" />
+                </TableUIInfo>
+                <TableUIInfo>
+                  <option name="className" value="Dish" />
+                  <option name="tableName" value="dish" />
+                </TableUIInfo>
+                <TableUIInfo>
+                  <option name="className" value="OrderItems" />
+                  <option name="tableName" value="order_items" />
+                </TableUIInfo>
+                <TableUIInfo>
+                  <option name="className" value="Orders" />
+                  <option name="tableName" value="orders" />
+                </TableUIInfo>
+                <TableUIInfo>
+                  <option name="className" value="Review" />
+                  <option name="tableName" value="review" />
+                </TableUIInfo>
+                <TableUIInfo>
                   <option name="className" value="User" />
                   <option name="tableName" value="user" />
                 </TableUIInfo>
@@ -78,7 +102,7 @@
             <option name="useLombokPlugin" value="true" />
           </GenerateConfig>
         </option>
-        <option name="moduleName" value="user-center" />
+        <option name="moduleName" value="user-center-backend" />
         <option name="projectPath" value="$PROJECT_DIR$" />
         <option name="templateName" value="mybatis-plus3" />
       </TemplateContext>

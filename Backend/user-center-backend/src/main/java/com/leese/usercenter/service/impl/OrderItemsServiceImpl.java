@@ -1,0 +1,22 @@
+package com.leese.usercenter.service.impl;
+
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.leese.usercenter.model.OrderItems;
+import com.leese.usercenter.service.OrderItemsService;
+import com.leese.usercenter.mapper.OrderItemsMapper;
+import org.springframework.stereotype.Service;
+
+/**
+* @author leese
+* @description 针对表【order_items】的数据库操作Service实现
+* @createDate 2025-12-09 14:22:19
+*/
+@Service
+public class OrderItemsServiceImpl extends ServiceImpl<OrderItemsMapper, OrderItems>
+    implements OrderItemsService{
+
+}
+
+
+
+

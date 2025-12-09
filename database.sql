@@ -5,6 +5,8 @@ DROP TABLE IF EXISTS `orders`;
 DROP TABLE IF EXISTS `dish`;
 DROP TABLE IF EXISTS `address`;
 DROP TABLE IF EXISTS `categories`;
+drop table if exists `dish_flavor`;
+drop table if exists 'cart';
 DROP TABLE IF EXISTS `user`;
 
 create table user
@@ -21,9 +23,9 @@ create table user
     createTime   datetime default current_timestamp() null comment '创建时间',
     updateTime   datetime default current_timestamp() null on update current_timestamp() comment '更新時間',
     isDelete     tinyint  default 0                   not null comment '是否删除',
-    userRole     int      default 0                   not null comment '用户角色 0-普通用户 1-管理员',
-    plantCode   varchar(512)                         null comment '編號',
-    tags         varchar(1024)                        null comment '标签列表'
+    userRole     int      default 0                   not null comment '用户角色 0-普通用户 1-管理员'
+    -- plantCode   varchar(128)                         null comment '編號',
+    -- tags         varchar(1024)                        null comment '标签列表'
 );
 -- 2. 創建 categories（不依賴其他業務表）
 CREATE TABLE `categories`(
@@ -42,12 +44,13 @@ CREATE TABLE `dish`(
                        price DECIMAL(10,2) NOT NULL COMMENT '價錢',
                        categoryId INT NOT NULL COMMENT '類別ID',
                        description VARCHAR(512) NULL COMMENT '菜品介紹',
-                       imgUrl VARCHAR(512) NULL COMMENT '圖片地址',
+                       imgUrl LONGBLOB NULL COMMENT '圖片',
                        isAvailable TINYINT NULL DEFAULT 1 COMMENT '0-禁用/下架 1-正常',
+                       createUser int null comment '員工創建',
                        createTime DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
                        updateTime DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新時間',
-                       isDelete TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除 1-刪除',
-                       FOREIGN KEY (categoryId) REFERENCES categories(id)
+                       isDelete TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除 1-刪除'
+    -- FOREIGN KEY (categoryId) REFERENCES categories(id) on update cascade on delete cascade
 );
 
 -- 4. 創建 address（依賴 user）
@@ -60,8 +63,8 @@ CREATE TABLE `address`(
                           isDefault TINYINT DEFAULT 0 COMMENT '是否默認 1=default',
                           createTime DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
                           updateTime DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新時間',
-                          isDelete TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除 1-刪除',
-                          FOREIGN KEY (userId) REFERENCES user(id)
+                          isDelete TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除 1-刪除'
+    -- FOREIGN KEY (userId) REFERENCES user(id) on update cascade on delete cascade
 );
 
 -- 5. 創建 orders（依賴 user 和 address）
@@ -70,15 +73,23 @@ CREATE TABLE `orders`(
                          orderId VARCHAR(50) UNIQUE NOT NULL COMMENT '訂單編號',
                          userId INT NOT NULL COMMENT '用户id',
                          addressId INT NOT NULL COMMENT '地址id',
-                         status TINYINT NULL DEFAULT 1 COMMENT '1-待处理 2-准备中 3-配送中 4-已送达 5-已取消',
+                         status TINYINT NULL DEFAULT 1 COMMENT '1待付款 2待接单 3已接单 4派送中 5已完成 6已取消 7退款',
                          totalAmount DECIMAL(10,2) NULL COMMENT '縂價錢',
-                         paymentMethod VARCHAR(50) NULL COMMENT '支付方法',
+                         payMethod VARCHAR(50) NULL COMMENT '支付方法',
+                         payStatus tinyint not null default 0 comment '支付状态 0未支付 1已支付 2已退款',
                          remark VARCHAR(512) NULL COMMENT '備注',
+                         cancelReason varchar(255) null comment '取消原因',
+                         cancelTime datetime default null comment '取消時間',
+                         rejectionReason varchar(255 ) null comment '拒绝原因',
+                         estimatedDeliveryTime datetime default null comment '預計送達時間',
+                         deliveryStatus tinyint not null default 1 comment '配送狀態 1立即送出  0选择具体时间',
+                         deliveryTime datetime null comment '送達時間',
+                         packAmount int default null comment '打包費',
                          createTime DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
                          updateTime DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新時間',
-                         isDelete TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除 1-刪除',
-                         FOREIGN KEY (userId) REFERENCES user(id),
-                         FOREIGN KEY (addressId) REFERENCES address(id)
+                         isDelete TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除 1-刪除'
+    -- FOREIGN KEY (userId) REFERENCES user(id) on update cascade on delete cascade,
+    -- FOREIGN KEY (addressId) REFERENCES address(id) on update cascade on delete cascade
 );
 
 -- 6. 創建 order_items（依賴 orders 和 dish）
@@ -87,10 +98,11 @@ CREATE TABLE `order_items`(
                               orderId INT NOT NULL COMMENT '訂單id',
                               dishId INT NOT NULL COMMENT '菜品id',
                               dishName VARCHAR(100) NULL COMMENT '菜品名稱快照',
+                              dishFlavor varchar(128) null comment '菜品口味 JSON格式',
                               quantity INT NOT NULL COMMENT '菜品數量',  -- 建議改為 NOT NULL
-                              price DECIMAL(10,2) NOT NULL COMMENT '價錢快照',  -- 建議改為 NOT NULL
-                              FOREIGN KEY (orderId) REFERENCES orders(id),
-                              FOREIGN KEY (dishId) REFERENCES dish(id)
+                              price DECIMAL(10,2) NOT NULL COMMENT '價錢快照'  -- 建議改為 NOT NULL
+    -- FOREIGN KEY (orderId) REFERENCES orders(id) on update cascade on delete cascade,
+    -- FOREIGN KEY (dishId) REFERENCES dish(id) on update cascade on delete cascade
 );
 
 -- 7. 創建 review（依賴 user 和 orders）
@@ -100,9 +112,48 @@ CREATE TABLE `review`(
                          orderId INT NOT NULL UNIQUE COMMENT '訂單id',
                          rating TINYINT NOT NULL COMMENT '評分1-5，1最低',  -- 建議改為 NOT NULL
                          comment VARCHAR(1000) NULL COMMENT '評論内容',
+                         likes int null default 0 comment '點贊數',
+                         likesUserId int UNIQUE null comment '点赞用户',
                          createTime DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
                          updateTime DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新時間',
-                         isDelete TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除 1-刪除',
-                         FOREIGN KEY (userId) REFERENCES user(id),
-                         FOREIGN KEY (orderId) REFERENCES orders(id)
+                         isDelete TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除 1-刪除'
+    -- FOREIGN KEY (userId) REFERENCES user(id) on update cascade on delete cascade,
+    -- FOREIGN KEY (orderId) REFERENCES orders(id) on update cascade on delete cascade
+);
+
+-- 8 菜品口味
+create table `dish_flavor`(
+                        id int auto_increment primary key,
+                        tag varchar(64) not null comment '标签 eg. 温度',
+                        list varchar(255) not null comment '标签子列表 eg[热,温,冷]',
+                        dishId int not null
+    -- foreign key (dishId) references dish(id) on update cascade on delete cascade
+);
+
+create table `cart` (
+                        id int not null auto_increment primary key,
+                        name varchar(32) null comment '商品名称',
+                        userId int not null comment '主键',
+                        dishId int null comment '菜品id',
+                        dishFlavor varchar(50) null comment '口味',
+                        number int not null default '1' comment '数量',
+                        amount decimal(10,2) not null comment '金额',
+                        create_time datetime null comment '创建时间'
+);
+
+create table `employee`(
+                           id int not null auto_increment primary key,
+                           name varchar(64) not null default '员工',
+                           account varchar(64) unique not null,
+                           password varchar(255) not null,
+                           phone varchar(16) null,
+                           age int null,
+                           gender tinyint null,
+                           pic longblob null,
+                           status tinyint not null default 0,
+                           userRole int default 0 not null comment '用户角色 0-普通用户 1-管理员',
+                           create_user int null,    -- 可能是自己注册，也可能是管理员帮忙操作
+                           update_user int null,    -- 存的是user的id
+                           create_time datetime not null default now(),
+                           update_time datetime not null default now()
 );

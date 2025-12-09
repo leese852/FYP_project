@@ -1,6 +1,5 @@
-package com.leese.usercenter.model.request;
+package com.leese.usercenter.model.dto;
 
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.Data;
 
 import java.io.Serializable;

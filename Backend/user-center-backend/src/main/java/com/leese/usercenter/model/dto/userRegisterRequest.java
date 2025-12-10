@@ -1,4 +1,4 @@
-package com.leese.usercenter.model.request;
+package com.leese.usercenter.model.dto;
 
 import lombok.Data;
 

@@ -10,7 +10,6 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 * @Entity com.leese.usercenter.model.Dish
 */
 public interface DishMapper extends BaseMapper<Dish> {
-
 }
 
 

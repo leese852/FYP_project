@@ -49,6 +49,17 @@ public class UserServiceTest {
         long result = userService.userRegister(userAccount,userPassword,checkPassword);
         System.out.println(result);
     }
+
+    @Test
+    void testDish(){
+        DishDTO dish = new DishDTO();
+        dish.setDishName("testDish");
+        dish.setPrice(new BigDecimal("50.00"));
+        dish.setCategoryId(1);
+
+
+
+    }
     @Test
     public void testUpdateDishDoesNotLoseCreateTime() throws InterruptedException {
         // 1. 先创建一个测试菜品

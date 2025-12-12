@@ -13,9 +13,11 @@ import java.util.List;
 */
 public interface DishService extends IService<Dish> {
     void addDish(DishDTO dish);
-    List<Dish> searchDishByName(String DishName);
     void updateDish(DishDTO dish);
     void onOff(int id);
     void deleteBatch(List<Integer> ids);
+    List<Dish> getDishByName(String DishName);
+    List<Dish> getAllDish();
+    List<Dish> getDishByCategory(int category);
 
 }

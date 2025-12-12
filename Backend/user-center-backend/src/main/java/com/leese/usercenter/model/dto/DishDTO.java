@@ -1,6 +1,6 @@
 package com.leese.usercenter.model.dto;
 
-import com.leese.usercenter.model.DishFlavor;
+import com.leese.usercenter.model.entity.DishFlavor;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

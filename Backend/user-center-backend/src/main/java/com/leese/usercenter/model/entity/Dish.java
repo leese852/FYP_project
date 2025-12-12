@@ -1,11 +1,14 @@
-package com.leese.usercenter.model;
+package com.leese.usercenter.model.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.math.BigDecimal;
 import java.util.Date;
+
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 
@@ -13,6 +16,8 @@ import lombok.Data;
  */
 @TableName(value ="dish")
 @Data
+@NoArgsConstructor //无参构造
+@AllArgsConstructor //有参构造
 public class Dish {
 
     @TableId(type = IdType.AUTO)

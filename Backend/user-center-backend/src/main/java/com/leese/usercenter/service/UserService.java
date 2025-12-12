@@ -1,6 +1,6 @@
 package com.leese.usercenter.service;
 
-import com.leese.usercenter.model.User;
+import com.leese.usercenter.model.entity.User;
 import com.baomidou.mybatisplus.extension.service.IService;
 import jakarta.servlet.http.HttpServletRequest;
 

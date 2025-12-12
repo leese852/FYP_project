@@ -1,6 +1,6 @@
 package com.leese.usercenter.service;
 
-import com.leese.usercenter.model.Cart;
+import com.leese.usercenter.model.entity.Cart;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**

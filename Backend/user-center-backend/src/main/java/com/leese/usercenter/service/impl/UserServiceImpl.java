@@ -7,7 +7,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.leese.usercenter.common.ErrorCode;
 import com.leese.usercenter.exception.BusinessException;
-import com.leese.usercenter.model.User;
+import com.leese.usercenter.model.entity.User;
 import com.leese.usercenter.service.UserService;
 import com.leese.usercenter.mapper.UserMapper;
 import jakarta.annotation.Resource;

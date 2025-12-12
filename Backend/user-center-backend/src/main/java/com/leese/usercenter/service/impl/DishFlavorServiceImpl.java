@@ -1,7 +1,7 @@
 package com.leese.usercenter.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.leese.usercenter.model.DishFlavor;
+import com.leese.usercenter.model.entity.DishFlavor;
 import com.leese.usercenter.service.DishFlavorService;
 import com.leese.usercenter.mapper.DishFlavorMapper;
 import org.springframework.stereotype.Service;
@@ -12,8 +12,7 @@ import org.springframework.stereotype.Service;
 * @createDate 2025-12-10 16:24:55
 */
 @Service
-public class DishFlavorServiceImpl extends ServiceImpl<DishFlavorMapper, DishFlavor>
-    implements DishFlavorService{
+public class DishFlavorServiceImpl extends ServiceImpl<DishFlavorMapper, DishFlavor> implements DishFlavorService{
 
 }
 

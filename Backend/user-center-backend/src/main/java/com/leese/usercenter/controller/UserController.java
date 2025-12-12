@@ -5,7 +5,7 @@ import com.leese.usercenter.common.ErrorCode;
 import com.leese.usercenter.common.ResultUtils;
 import com.leese.usercenter.constant.UserConstant;
 import com.leese.usercenter.exception.BusinessException;
-import com.leese.usercenter.model.User;
+import com.leese.usercenter.model.entity.User;
 import com.leese.usercenter.model.dto.userLoginRequest;
 import com.leese.usercenter.model.dto.userRegisterRequest;
 import com.leese.usercenter.service.UserService;

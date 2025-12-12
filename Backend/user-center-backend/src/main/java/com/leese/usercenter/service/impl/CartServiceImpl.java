@@ -1,7 +1,7 @@
 package com.leese.usercenter.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.leese.usercenter.model.Cart;
+import com.leese.usercenter.model.entity.Cart;
 import com.leese.usercenter.service.CartService;
 import com.leese.usercenter.mapper.CartMapper;
 import org.springframework.stereotype.Service;

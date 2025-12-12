@@ -1,7 +1,9 @@
 package com.leese.usercenter.service;
 
-import com.leese.usercenter.model.DishFlavor;
+import com.leese.usercenter.model.entity.DishFlavor;
 import com.baomidou.mybatisplus.extension.service.IService;
+
+import java.util.List;
 
 /**
 * @author leese
@@ -9,5 +11,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
 * @createDate 2025-12-10 16:24:55
 */
 public interface DishFlavorService extends IService<DishFlavor> {
-
+//    List<DishFlavor> getDishFlavorById(int ids);
 }

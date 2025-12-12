@@ -1,8 +1,9 @@
 package com.leese.usercenter.service;
 
-import com.leese.usercenter.model.Dish;
+import com.leese.usercenter.model.entity.Dish;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.leese.usercenter.model.dto.DishDTO;
+import com.leese.usercenter.model.vo.DishVO;
 
 import java.util.List;
 
@@ -13,9 +14,11 @@ import java.util.List;
 */
 public interface DishService extends IService<Dish> {
     void addDish(DishDTO dish);
-    List<Dish> searchDishByName(String DishName);
     void updateDish(DishDTO dish);
     void onOff(int id);
     void deleteBatch(List<Integer> ids);
+    List<DishVO> getDishByName(String DishName);
+//    List<DishVO> getAllDish();
+    List<DishVO> getDishByCategory(int category);
 
 }

@@ -1,15 +1,20 @@
-package com.leese.usercenter.model;
+package com.leese.usercenter.model.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.math.BigDecimal;
 import java.util.Date;
+
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @TableName cart
  */
 @TableName(value ="cart")
 @Data
+@NoArgsConstructor //无参构造
+@AllArgsConstructor //有参构造
 public class Cart {
     private Integer id;
 

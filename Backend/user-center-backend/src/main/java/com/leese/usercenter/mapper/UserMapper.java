@@ -1,7 +1,7 @@
 package com.leese.usercenter.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.leese.usercenter.model.User;
+import com.leese.usercenter.model.entity.User;
 
 /**
 * @author leese

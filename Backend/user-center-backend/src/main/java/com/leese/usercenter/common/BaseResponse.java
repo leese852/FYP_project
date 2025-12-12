@@ -9,6 +9,7 @@ import java.io.Serializable;
  * @param <T>
  */
 @Data
+//统一响应格式
 public class BaseResponse<T> implements Serializable {
 
     private int code;

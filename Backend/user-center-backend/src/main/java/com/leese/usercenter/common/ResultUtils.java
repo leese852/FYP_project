@@ -14,6 +14,9 @@ public class ResultUtils {
     public static <T> BaseResponse<T> success(T data){
         return new BaseResponse<>(0,data,"ok");
     }
+    public static <T> BaseResponse<T> success(){
+        return new BaseResponse<>(0,null,"ok");
+    }
 
     /**
      * 失敗

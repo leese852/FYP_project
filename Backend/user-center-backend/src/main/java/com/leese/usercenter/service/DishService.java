@@ -18,7 +18,7 @@ public interface DishService extends IService<Dish> {
     void onOff(int id);
     void deleteBatch(List<Integer> ids);
     List<DishVO> getDishByName(String DishName);
-//    List<DishVO> getAllDish();
-    List<DishVO> getDishByCategory(int category);
+    DishVO getDishById(int id);
 
+//    List<DishVO> getAllDish();
 }

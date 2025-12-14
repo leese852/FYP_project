@@ -34,7 +34,8 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
     DishFlavorMapper dishFlavorMapper;
     @Autowired
     DishFlavorService dishFlavorService;
-
+    @Autowired
+    private DishService dishService;
 
 
     @Override
@@ -70,7 +71,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
         queryWrapper.eq("isAvailable",1);
         queryWrapper.orderByAsc("createTime");
         List<Dish>dishList = this.list(queryWrapper);
-        return convertToVO(dishList);
+        return convertToVOList(dishList);
     }
 
     @Override
@@ -144,17 +145,25 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
 //    }
 
     @Override
-    public List<DishVO>getDishByCategory(int category){
+    public DishVO getDishById(int ids){
+//        Dish dish = dishService.getById(ids);
         QueryWrapper<Dish> qw = new QueryWrapper<>();
         qw.eq("isDelete",StatusConstant.NOT_DELETED);
         qw.eq("isAvailable",StatusConstant.ENABLE);
-        qw.eq("categoryId",category);
         qw.orderByAsc("createTime");
-        List<Dish> dishList = this.list(qw);
-        return convertToVO(dishList);
+        Dish dish = this.getOne(qw);
+        //进行属性转换
+        DishVO dishVO = new DishVO();
+        BeanUtils.copyProperties(dish,dishVO);
+        //查询口味
+        QueryWrapper<DishFlavor> qwFlavor = new QueryWrapper<>();
+        qwFlavor.eq("dishId",ids);
+        List<DishFlavor> flavors = dishFlavorService.list(qwFlavor);
+        dishVO.setFlavors(flavors);
+        return dishVO;
     }
 
-    public List<DishVO> convertToVO(List<Dish> dishList){
+    public List<DishVO> convertToVOList(List<Dish> dishList){
         List<DishVO> voList = new ArrayList<>();
         for(Dish d : dishList){
             DishVO dishVO = new DishVO();

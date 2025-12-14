@@ -75,14 +75,14 @@ public class UserController implements UserConstant{
         return ResultUtils.success(user);
     }
 
-    @GetMapping("/search")
-    public BaseResponse<List<User>> searchUsers(String username,HttpServletRequest request){
-        if(!isAdmin(request)){
-            throw new BusinessException(ErrorCode.NO_AUTH);
-        }
-        List<User> list = userService.searchUsers(username);
-        return ResultUtils.success(list);
-    }
+//    @GetMapping("/search")
+//    public BaseResponse<List<User>> searchUsers(String username,HttpServletRequest request){
+//        if(!isAdmin(request)){
+//            throw new BusinessException(ErrorCode.NO_AUTH);
+//        }
+//        List<User> list = userService.searchUsers(username);
+//        return ResultUtils.success(list);
+//    }
 
     @GetMapping("/current")
     public BaseResponse<User>  getCurrentUser(HttpServletRequest request){
@@ -97,19 +97,19 @@ public class UserController implements UserConstant{
         return ResultUtils.success(safetyUser);
     }
 
-    @PostMapping("/delete")
-    public BaseResponse<Boolean> deleteUser(@RequestBody Long id,HttpServletRequest request){
-        // TODO 完成false工具类分装
-        if(!isAdmin(request)){
-            return null;
-        }
-        if(id <= 0){
-            return null;
-        }
-        //调用mybatis 的逻辑删除，将删除转变为更新
-        boolean result = userService.removeById(id);
-        return ResultUtils.success(result);
-    }
+//    @PostMapping("/delete")
+//    public BaseResponse<Boolean> deleteUser(@RequestBody Long id,HttpServletRequest request){
+//        // TODO 完成false工具类分装
+//        if(!isAdmin(request)){
+//            return null;
+//        }
+//        if(id <= 0){
+//            return null;
+//        }
+//        //调用mybatis 的逻辑删除，将删除转变为更新
+//        boolean result = userService.removeById(id);
+//        return ResultUtils.success(result);
+//    }
 
     @PostMapping("/logout")
     public BaseResponse<Integer> userLogout(HttpServletRequest request){
@@ -120,11 +120,11 @@ public class UserController implements UserConstant{
         return ResultUtils.success(result);
     }
 
-    private boolean isAdmin(HttpServletRequest request){
-        //仅管理
-        Object userObject = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User user = (User) userObject;
-        return user != null && user.getUserRole() == ADMIN_ROLE;
-    }
+//    private boolean isAdmin(HttpServletRequest request){
+//        //仅管理
+//        Object userObject = request.getSession().getAttribute(USER_LOGIN_STATE);
+//        User user = (User) userObject;
+//        return user != null && user.getUserRole() == ADMIN_ROLE;
+//    }
 
 }

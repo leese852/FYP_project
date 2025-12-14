@@ -19,7 +19,7 @@ public class DishController {
     private DishService dishService;
 
     @GetMapping("/list")
-    public BaseResponse<List<DishVO>> getDishListByName(@RequestBody String name){
+    public BaseResponse<List<DishVO>> getDishListByName(@RequestParam String name){
 
         List<DishVO> result= dishService.getDishByName(name);
         return ResultUtils.success(result);

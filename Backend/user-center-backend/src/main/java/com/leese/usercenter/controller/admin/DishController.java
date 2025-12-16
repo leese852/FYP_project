@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Slf4j
+@Slf4j //log注解api
 @CrossOrigin(origins = {"http://localhost:3000"}, allowCredentials = "true")
-@RestController
+@RestController("adminDishController")
 @RequestMapping("admin/dish")
 public class DishController {
     @Autowired

@@ -60,10 +60,10 @@ public class DishServiceTest {
     @Test
     public void testAddDish(){
         DishDTO dish = new DishDTO();
-        dish.setDishName("红烧肉");
+        dish.setDishName("Leese");
         dish.setPrice(new BigDecimal("58.00"));
         dish.setCategoryId(2);
-        dish.setDescription("肥而不腻");
+        dish.setDescription("新菜品");
         dish.setImgUrl(null); // 测试中可为 null
 
         DishFlavor flavor1 = new DishFlavor();

@@ -49,3 +49,8 @@ src/main/resources/
   - 职责：接收客户端（如浏览器、App、其他服务）的 HTTP 请求，解析参数，调用相应的 service 层方法，并将处理结果封装成响应（如 JSON、页面等）返回。
 - service 层
   - 职责：实现具体的业务逻辑，比如用户注册、订单创建、数据校验、事务管理等。
+
+
+### vue視頻推薦
+【03 - key，v-show，computed｜【入门篇】从零开始学习Vue3核心技术知识】 
+https://www.bilibili.com/video/BV1LN4y1V7HZ/?share_source=copy_web&vd_source=ece8fb8218df902298339068fe3eb769

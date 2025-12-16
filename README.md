@@ -8,7 +8,7 @@
 
 ## 技术选型
 
-前端：三件套 + vue + 组件库 Ant Design Pro + vant（选一个就好了）
+前端：三件套 + vue + 组件库 Ant Design Pro + vant（組件庫选一个就好了）
 
 后端：
 - java

@@ -1,4 +1,4 @@
-import HomePage from "@/page/HomePage.vue";
+import HomePage from "@/page/user/HomePage.vue";
 import UserLoginPage from "@/page/user/UserLoginPage.vue";
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 import HomeView from "../views/HomeView.vue";

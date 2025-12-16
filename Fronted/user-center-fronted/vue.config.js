@@ -6,5 +6,5 @@ const { defineConfig } = require("@vue/cli-service");
 // 这样做可以让 VS Code 等编辑器更好地识别配置项（智能提示、跳转等）
 module.exports = defineConfig({
   transpileDependencies: true,
-  lintOnSave: "false",
+  // lintOnSave: false,
 });

@@ -31,9 +31,11 @@ import GlobalHeader from "@/components/GlobalHeader.vue";
   width: 100%;
   padding: 10px;
 }
+
 #basicLayout .content {
   margin-bottom: 20px;
 }
+
 #basicLayout .header {
   background: white;
   text-align: center;

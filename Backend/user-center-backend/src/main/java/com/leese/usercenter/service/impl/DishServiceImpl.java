@@ -34,8 +34,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
     DishFlavorMapper dishFlavorMapper;
     @Autowired
     DishFlavorService dishFlavorService;
-    @Autowired
-    private DishService dishService;
+
 
 
     @Override

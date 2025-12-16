@@ -12,14 +12,14 @@ import java.util.List;
 
 
 @CrossOrigin(origins = {"http://localhost:3000"}, allowCredentials = "true")
-@RestController
+@RestController("userDishController")
 @RequestMapping("user/dish")
 public class DishController {
     @Autowired
     private DishService dishService;
 
     @GetMapping("/list")
-    public BaseResponse<List<DishVO>> getDishListByName(@RequestParam String name){
+    public BaseResponse<List<DishVO>> getDishListByName(@RequestParam(required = false) String name){
 
         List<DishVO> result= dishService.getDishByName(name);
         return ResultUtils.success(result);

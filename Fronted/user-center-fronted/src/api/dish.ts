@@ -2,24 +2,16 @@ import myAxios from "@/request"
 import {dishItem} from "@/types/dish.d";
 
 /**
- * 根据菜品名称搜索菜品
- * @param params
+ * 获取菜品列表（通用函数）
+ * 不传name：获取所有菜品
+ * 传name：搜索对应菜品
+ * @param name 菜品名称（可选）
  */
-export const getDishByName = async (params: any) => {
+export const getDishList = async (name?:string) => {
     return await myAxios.request<dishItem[]>({
         url: "/user/dish/list",
         method: "get",
+        params: name ? {name} : {},
     });
 };
 
-/**
- * 所有菜品
- *
- */
-export const getAllDish = async(name?:string) =>{
-    return await myAxios.request<dishItem>({
-        url: "/user/dish/list",
-        method: "get",
-        params: name,
-    });
-}

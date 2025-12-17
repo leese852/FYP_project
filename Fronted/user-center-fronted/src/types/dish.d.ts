@@ -6,7 +6,7 @@ export type dishItem = {
     price: number
     categoryId: number
     description: string
-    imgUrl: string
+    imgUrl?: string
     flavors?: flavorItem[]
 }
 

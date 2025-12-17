@@ -4,7 +4,7 @@ import { errorMessages } from "@vue/compiler-core";
 
 const myAxios = axios.create({
     baseURL: "http://localhost:8080",
-    timeout: 10000,
+    timeout: 10000, //设置全局请求timeOut
     // headers: { "X-Custom-Header": "foobar" },
     //携带cookie
     withCredentials: true,

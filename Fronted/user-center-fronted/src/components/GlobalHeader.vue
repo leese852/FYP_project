@@ -17,6 +17,18 @@
         @click="doMenuClick"
       />
     </a-col>
+
+    <a-col flex="auto">
+      <div class="search-bar">
+        <a-input-search
+            v-model:value="searchValue"
+            placeholder="input search text"
+            enter-button
+            @search="onSearch"
+            @pressEnter="searchValue"
+        />
+      </div>
+    </a-col>
     <a-col flex="100px">
       <div class="user-login-status">
         <div v-if="loginUserStore.loginUser.id">
@@ -54,8 +66,12 @@ import { useRouter } from "vue-router";
 import { useLoginUserStore } from "@/store/useLoginUserStore";
 
 const loginUserStore = useLoginUserStore();
-
 console.log("📊 组件中的 loginUser:", loginUserStore.loginUser);
+
+const searchValue = ref("");
+const onSearch = (searchValue : string) => {
+  console.log(searchValue);
+}
 
 const onClick = ({ key }: { key: string }) => {
   if (key === "2") {
@@ -71,6 +87,8 @@ const doMenuClick = ({ key }: { key: string }) => {
     path: key,
   });
 };
+
+
 
 const current = ref(["mail"]);
 router.afterEach((to) => {
@@ -109,5 +127,9 @@ const items = ref([
 .logo {
   margin-top: 15px;
   height: 36px;
+}
+.search-bar{
+  margin-top: 15px;
+  width: 500px;
 }
 </style>

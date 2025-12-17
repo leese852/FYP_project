@@ -14,12 +14,14 @@ export const useLoginUserStore = defineStore("loginUser", () => {
   //远程获取登录用户信息
   async function fetchLoginUser() {
     try{
-      const res = await getCurrentUser();
-      if (res.data.code === 0 && res.data.data) {
-        loginUser.value = res.data.data;
-      }
+      const userData = await getCurrentUser();
+      loginUser.value = userData;
+      console.log("✅ 获取用户信息成功:", userData);
+      // if (res.data.code === 0 && res.data.data) {
+      //   loginUser.value = res.data.data;
+      // }
     }catch(error:any){
-       console.log();
+      console.log(error.message);
     }
   }
   //单独设置信息，并进行更新

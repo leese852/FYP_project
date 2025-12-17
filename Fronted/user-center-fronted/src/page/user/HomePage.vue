@@ -17,4 +17,10 @@ import { ref } from 'vue';
 const value = ref<string>('');
 </script>
 
-<style scoped></style>
+<style scoped>
+  #search-bar{
+    margin-top: 30px;
+    height: auto;
+    width: 400px;
+  }
+</style>

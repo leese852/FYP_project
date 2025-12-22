@@ -33,3 +33,11 @@ createApp(App) // 创建以 App.vue 为根组件的应用实例
   .use(Antd) // 注册 Ant Design Vue 组件库（使 <a-button> 等全局可用）
   .use(router) // 注册 Vue Router（启用路由功能）
   .mount("#app"); // 将整个应用挂载到 index.html 中 id="app" 的 DOM 元素上
+
+const originalError = console.error
+console.error = (...args) => {
+    if (/ResizeObserver/.test(args[0])) {
+        return // 忽略 ResizeObserver 错误
+    }
+    originalError.apply(console, args)
+}

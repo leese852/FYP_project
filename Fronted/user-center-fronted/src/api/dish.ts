@@ -1,5 +1,5 @@
 import myAxios from "@/request"
-import {dishItem} from "@/types/dish.d";
+import {dishItem} from "@/types/dish";
 
 /**
  * 获取菜品列表（通用函数）

@@ -147,6 +147,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
     public DishVO getDishById(int ids){
 //        Dish dish = dishService.getById(ids);
         QueryWrapper<Dish> qw = new QueryWrapper<>();
+        qw.eq("id", ids);
         qw.eq("isDelete",StatusConstant.NOT_DELETED);
         qw.eq("isAvailable",StatusConstant.ENABLE);
         qw.orderByAsc("createTime");

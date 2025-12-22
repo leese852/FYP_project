@@ -15,3 +15,11 @@ export const getDishList = async (name?:string) => {
     });
 };
 
+export const getDishById = async (id:number)=>{
+    return await myAxios.request<dishItem>({
+        url: `/user/dish/${id}`,
+        method: "get",
+        // params: {id},
+    });
+}
+

@@ -47,12 +47,13 @@ myAxios.interceptors.response.use(
             return Promise.reject(new Error(data.message || '未登录'))
         }
 
-        if(data.code !=0 && data.code != 200){
-            const errorMsg = data.message || `请求失败，错误码: ${data.code}`;
-            message.error(errorMsg);
-            return Promise.reject(new Error(errorMsg));
+        if(data.status != 200  && data.code !=0){
+            // const errorMsg = data.message || `请求失败，错误码: ${data.code}`;
+            // message.error(errorMsg);
+            // return Promise.reject(new Error(errorMsg));
+            return Promise.reject()
         }
-        return data.data;
+        return data;
     },
     function (error) {
         // 超出  范围的状态码都会触发该函数

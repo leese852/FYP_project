@@ -24,4 +24,10 @@ public class DishController {
         List<DishVO> result= dishService.getDishByName(name);
         return ResultUtils.success(result);
     }
+
+    @GetMapping("/{id}")
+    public BaseResponse<DishVO> getDishById(@PathVariable int id){
+        DishVO result= dishService.getDishById(id);
+        return ResultUtils.success(result);
+    }
 }

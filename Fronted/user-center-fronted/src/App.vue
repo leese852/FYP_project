@@ -9,7 +9,7 @@
 import BasicLayout from "@/layout/BasicLayout.vue";
 import { useLoginUserStore } from "@/store/useLoginUserStore";
 
-//编写脚本获取用户信息
-const loginUserStore = useLoginUserStore();
-loginUserStore.fetchLoginUser();
+//编写脚本默认获取用户信息
+// const loginUserStore = useLoginUserStore();
+// loginUserStore.fetchLoginUser();
 </script>

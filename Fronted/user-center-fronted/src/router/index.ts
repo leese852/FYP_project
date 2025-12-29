@@ -3,7 +3,8 @@ import UserLoginPage from "@/page/user/UserLoginPage.vue";
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 import HomeView from "../views/HomeView.vue";
 import UserRegisterPage from "@/page/user/UserRegisterPage.vue";
-import DishDetailPage from "@/page/user/DishDetailPage.vue";
+import DishDetailPage from "@/page/user/dish/DishDetailPage.vue";
+import DishDetailPageExample from "@/page/user/DishDetailPageExample.vue";
 
 // const routes: Array<RouteRecordRaw
 const routes = [

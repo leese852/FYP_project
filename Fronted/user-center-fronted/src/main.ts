@@ -6,21 +6,9 @@ import { createApp } from "vue";
 //    Pinia 用于集中管理应用的全局状态（如用户信息、购物车等）
 import { createPinia } from "pinia";
 
-// 3. 导入根组件 App.vue
-//    这是整个应用的最外层组件，所有页面都嵌套在它内部
 import App from "./App.vue";
-
-// 4. 导入路由配置（通常来自 ./router/index.ts 或类似文件）
-//    路由负责根据 URL 显示不同的页面组件（如 /home → Home.vue）
 import router from "./router";
-
-// 5. 导入 Ant Design Vue 组件库（适用于 Vue 3 的企业级 UI 框架）
-//    提供按钮、表格、表单等高质量组件
 import Antd from "ant-design-vue";
-
-// 6. 导入 Ant Design Vue 的基础样式重置文件
-//    `reset.css` 会统一浏览器默认样式，确保 UI 在不同浏览器表现一致
-//    注意：这是 Ant Design Vue 5.x+ 的新写法（旧版用的是 `antd.less` 或 `antd.css`）
 import "ant-design-vue/dist/reset.css";
 
 // 7. 创建 Pinia 实例（状态管理容器）

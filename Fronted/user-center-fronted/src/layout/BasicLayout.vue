@@ -1,15 +1,19 @@
 <script setup lang="ts">
 import GlobalHeader from "@/components/GlobalHeader.vue";
+import {computed} from "vue";
 // import { getCurrentUser } from "@/api/user";
 // getCurrentUser().then((res) => {
 //   console.log(res);
 // });
+// 计算属性：根据当前路由的meta信息决定是否显示Header
+
 </script>
 
 <template>
   <div id="basicLayout">
     <a-layout>
-      <a-layout-header class="header">
+<!--      用router/index里的name-->
+      <a-layout-header v-if="!['dishDetail'].includes($route.name as string)" class="header">
         <GlobalHeader />
       </a-layout-header>
       <a-layout-content class="content">

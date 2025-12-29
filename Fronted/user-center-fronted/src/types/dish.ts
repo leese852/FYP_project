@@ -1,4 +1,4 @@
-
+// 数据类型
 // 菜品列表
 export type dishItem = {
     id: number

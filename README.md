@@ -1,14 +1,8 @@
-## 二、使用步骤
 
-下载完源代码并分别在 vscode 和 IDEA 打开项目
-记得将数据库打开，并在 IDEA 中连接数据库
-
-前端的話需要在終端輸入 npm install
-完成之後你會發現多了 node_modules 文件
 
 ## 技术选型
 
-前端：三件套 + vue + 组件库 Ant Design Pro + vant（組件庫选一个就好了）
+前端：三件套 + vue + 组件库: Ant Design Pro + vant
 
 后端：
 - java

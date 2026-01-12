@@ -1,20 +1,21 @@
-package com.leese.usercenter.controller;
+package com.leese.usercenter.controller.user;
 
 import com.leese.usercenter.common.BaseResponse;
 import com.leese.usercenter.common.ErrorCode;
 import com.leese.usercenter.common.ResultUtils;
 import com.leese.usercenter.constant.UserConstant;
 import com.leese.usercenter.exception.BusinessException;
+import com.leese.usercenter.model.dto.AddresDTO;
+import com.leese.usercenter.model.dto.UserUpdateDTO;
+import com.leese.usercenter.model.entity.Address;
 import com.leese.usercenter.model.entity.User;
-import com.leese.usercenter.model.dto.userLoginRequest;
-import com.leese.usercenter.model.dto.userRegisterRequest;
+import com.leese.usercenter.model.dto.UserLoginDTO;
+import com.leese.usercenter.model.dto.UserRegisterDTO;
 import com.leese.usercenter.service.UserService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 
 /**
@@ -37,15 +38,15 @@ public class UserController implements UserConstant{
     //PostMapping 服务器输入映射
     //@RequestBody 映射json数据到java对象
     @PostMapping("/register")
-    public BaseResponse<Long> userRegister(@RequestBody userRegisterRequest userRegisterRequest) {
-        if(userRegisterRequest == null){
+    public BaseResponse<Long> userRegister(@RequestBody UserRegisterDTO UserRegisterDTO) {
+        if(UserRegisterDTO == null){
 //            return ResultUtils.error(ErrorCode.PARAM_ERROR);
             throw new BusinessException(ErrorCode.PARAM_ERROR,"参数为空");
         }
 
-        String userAccount = userRegisterRequest.getUserAccount();
-        String userPassword = userRegisterRequest.getUserPassword();
-        String checkPassword = userRegisterRequest.getCheckPassword();
+        String userAccount = UserRegisterDTO.getUserAccount();
+        String userPassword = UserRegisterDTO.getUserPassword();
+        String checkPassword = UserRegisterDTO.getCheckPassword();
 
         if(StringUtils.isAnyBlank(userAccount,userPassword,checkPassword)){
             throw new BusinessException(ErrorCode.PARAM_ERROR);
@@ -61,12 +62,12 @@ public class UserController implements UserConstant{
     // Servlet 容器就会创建一个 HttpServletRequest 对象来表示这个请求，
     // 并将其传递给相应的 Servlet 或控制器方法进行处理。
     @PostMapping("/login")
-    public BaseResponse<User> doLogin (@RequestBody userLoginRequest userLoginRequest,HttpServletRequest request){
-        if(userLoginRequest == null){
+    public BaseResponse<User> doLogin (@RequestBody UserLoginDTO UserLoginDTO, HttpServletRequest request){
+        if(UserLoginDTO == null){
             return ResultUtils.error(ErrorCode.PARAM_ERROR);
         }
-        String userAccount = userLoginRequest.getUserAccount();
-        String userPassword = userLoginRequest.getUserPassword();
+        String userAccount = UserLoginDTO.getUserAccount();
+        String userPassword = UserLoginDTO.getUserPassword();
         if(StringUtils.isAnyBlank(userAccount,userPassword)){
             return ResultUtils.error(ErrorCode.PARAM_ERROR);
         }
@@ -91,7 +92,7 @@ public class UserController implements UserConstant{
         if(currentUser == null){
             return null;
         }
-        Long userId = currentUser.getId();
+        int userId = currentUser.getId();
         User user = userService.getById(userId);
         User safetyUser = userService.getSafetyUser(user);
         return ResultUtils.success(safetyUser);
@@ -116,10 +117,20 @@ public class UserController implements UserConstant{
         if(request == null){
             return null;
         }
-        int result = userService.userLogout(request);
-        return ResultUtils.success(result);
+        userService.userLogout(request);
+        return ResultUtils.success();
     }
 
+    @PostMapping("/updateInfo")
+    public BaseResponse<User> updateUser(UserUpdateDTO dto,HttpServletRequest request){
+        User user = userService.updateUser(dto,request);
+        return ResultUtils.success(user);
+    }
+
+    @PostMapping("/address")
+    public BaseResponse<Address>addAddres(AddresDTO dto){
+
+    }
 //    private boolean isAdmin(HttpServletRequest request){
 //        //仅管理
 //        Object userObject = request.getSession().getAttribute(USER_LOGIN_STATE);

@@ -4,9 +4,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.leese.usercenter.common.ErrorCode;
+import com.leese.usercenter.common.ResultUtils;
 import com.leese.usercenter.exception.BusinessException;
+import com.leese.usercenter.model.dto.UserFixPwdDTO;
+import com.leese.usercenter.model.dto.UserUpdateDTO;
 import com.leese.usercenter.model.entity.User;
 import com.leese.usercenter.service.UserService;
 import com.leese.usercenter.mapper.UserMapper;
@@ -115,7 +120,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             return null;
         }
 
-        //記錄用戶的登錄態
+        //記錄用戶的登錄態 !!!
         User safetyUser = getSafetyUser(user);
         request.getSession().setAttribute(USER_LOGIN_STATE, safetyUser);
         return safetyUser;
@@ -134,7 +139,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         safetyUser.setTel(originUser.getTel());
         safetyUser.setUserStatus(originUser.getUserStatus());
         safetyUser.setCreateTime(originUser.getCreateTime());
-        safetyUser.setUpdateTime(new Date());
+//        safetyUser.setUpdateTime(new Date());
         safetyUser.setUserRole(originUser.getUserRole());
         return safetyUser;
     }
@@ -147,11 +152,80 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
         List<User> userList = this.list(queryWrapper);
         return userList.stream().map(this::getSafetyUser).collect(Collectors.toList());
-
     }
+
     @Override
-    public int userLogout(HttpServletRequest request) {
+    public void userLogout(HttpServletRequest request) {
         request.getSession().removeAttribute(USER_LOGIN_STATE);
-        return 1;
+    }
+
+    @Override
+    public User updateUser(UserUpdateDTO userUpdateDTO, HttpServletRequest request) {
+        if(request == null && userUpdateDTO == null){
+            throw new BusinessException(ErrorCode.PARAM_ERROR);
+        }
+        int userId = getCurUser(request).getId();
+        UpdateWrapper<User> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("id",userId);
+        if(StringUtils.isNotBlank(userUpdateDTO.getUsername())){
+            updateWrapper.set("username",userUpdateDTO.getUsername());
+        }
+        Byte gender = userUpdateDTO.getGender();
+        if (gender != null && (gender == 0 || gender == 1)) { // 根据你的业务范围调整
+            updateWrapper.set("gender", gender);
+        }
+        if (StringUtils.isNotBlank(userUpdateDTO.getEmail())) {
+            updateWrapper.set("email", userUpdateDTO.getEmail());
+        }
+        if (StringUtils.isNotBlank(userUpdateDTO.getTel())) {
+            updateWrapper.set("tel", userUpdateDTO.getTel());
+        }
+        if (StringUtils.isNotBlank(userUpdateDTO.getAvatar())) {
+            updateWrapper.set("avatar_url", userUpdateDTO.getAvatar());
+        }
+        //设置更新时间
+        updateWrapper.set("update_Time",new Date());
+
+        boolean updated = this.update(updateWrapper);
+        if (!updated) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "更新失败");
+        }
+        User safetyUser = getSafetyUser(this.getById(userId));
+        request.getSession().setAttribute(USER_LOGIN_STATE, safetyUser);
+        return safetyUser;
+    }
+
+    @Override
+    public User getCurUser(HttpServletRequest request){
+        Object user = request.getSession(false).getAttribute(USER_LOGIN_STATE);
+        return (User) user;
+    }
+
+    @Override
+    public Boolean changePassword(UserFixPwdDTO dto,HttpServletRequest request){
+        if(StringUtils.isAnyBlank(dto.getNewPwd(),dto.getOldPwd())){
+            throw new BusinessException(ErrorCode.PARAM_ERROR,"参数不能为空");
+        };
+        int userId = getCurUser(request).getId();
+        //因为session存入的是脱敏后的数据，所以需要重新获取
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("id",userId);
+        User user = this.getOne(queryWrapper);
+
+        boolean isMatch = encryptPassword.matches(dto.getOldPwd(),user.getUserPassword());
+        if(!isMatch){
+            throw new BusinessException(ErrorCode.USER_PASSWORD_ERROR,"密码错误");
+        }
+
+        String newEncryPwd = encryptPassword.encode(dto.getNewPwd());
+        User updateUser = new User();
+        updateUser.setId(userId);
+        updateUser.setUserPassword(newEncryPwd);
+        updateUser.setUpdateTime(new Date());
+        boolean isSuccess = this.updateById(updateUser);
+        if (!isSuccess) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "密码更新失败");
+        }
+        return true;
     }
 }

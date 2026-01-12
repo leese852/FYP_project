@@ -1,5 +1,7 @@
 package com.leese.usercenter.service;
 
+import com.leese.usercenter.model.dto.UserFixPwdDTO;
+import com.leese.usercenter.model.dto.UserUpdateDTO;
 import com.leese.usercenter.model.entity.User;
 import com.baomidou.mybatisplus.extension.service.IService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,7 +23,6 @@ import java.util.List;
 //当其他组件使用 @Autowired 注入 UserService 时，Spring 会自动将 UserServiceImpl 的实例注入。
 //最终，调用的是 UserServiceImpl 中的方法。
 public interface UserService extends IService<User> {
-
 
     /**
      *
@@ -53,5 +54,11 @@ public interface UserService extends IService<User> {
      * @param request
      * @return
      */
-    int userLogout(HttpServletRequest request);
+    void userLogout(HttpServletRequest request);
+
+    User getCurUser(HttpServletRequest request);
+
+    User updateUser(UserUpdateDTO userUpdateDTO, HttpServletRequest request);
+
+    Boolean changePassword(UserFixPwdDTO dto,HttpServletRequest request);
 }

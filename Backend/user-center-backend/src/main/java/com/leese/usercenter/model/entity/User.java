@@ -22,7 +22,7 @@ public class User {
      * id
      */
     @TableId(type = IdType.AUTO)
-    private Long id;
+    private int id;
 
     /**
      * 用戶昵稱
@@ -86,13 +86,4 @@ public class User {
      */
     private Integer userRole;
 
-    /**
-     * 星球編號
-     */
-    private String plantCode;
-
-    /**
-     * 标签
-     */
-    private String tags;
 }

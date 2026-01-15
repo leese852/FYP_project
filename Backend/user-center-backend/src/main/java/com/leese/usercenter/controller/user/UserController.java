@@ -5,9 +5,7 @@ import com.leese.usercenter.common.ErrorCode;
 import com.leese.usercenter.common.ResultUtils;
 import com.leese.usercenter.constant.UserConstant;
 import com.leese.usercenter.exception.BusinessException;
-import com.leese.usercenter.model.dto.AddresDTO;
 import com.leese.usercenter.model.dto.UserUpdateDTO;
-import com.leese.usercenter.model.entity.Address;
 import com.leese.usercenter.model.entity.User;
 import com.leese.usercenter.model.dto.UserLoginDTO;
 import com.leese.usercenter.model.dto.UserRegisterDTO;
@@ -127,10 +125,7 @@ public class UserController implements UserConstant{
         return ResultUtils.success(user);
     }
 
-    @PostMapping("/address")
-    public BaseResponse<Address>addAddres(AddresDTO dto){
 
-    }
 //    private boolean isAdmin(HttpServletRequest request){
 //        //仅管理
 //        Object userObject = request.getSession().getAttribute(USER_LOGIN_STATE);

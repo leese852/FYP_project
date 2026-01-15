@@ -2,7 +2,7 @@ package com.leese.usercenter.constant;
 
 public interface UserConstant {
     String USER_LOGIN_STATE = "userLoginState";
-
+    String EMP_LOGIN_STATE = "empLoginState";
     String EMPLOYEE_ID = "employeeId";
     String USER_ID = "userId";
 

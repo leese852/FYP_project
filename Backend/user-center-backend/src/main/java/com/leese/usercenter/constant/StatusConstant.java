@@ -6,4 +6,7 @@ public class StatusConstant {
 
     public final static int DELETED = 1;
     public final static int NOT_DELETED = 0;
+
+    public final static int DEFAULT = 1;
+    public final static int NOT_DEFAULT = 0;
 }

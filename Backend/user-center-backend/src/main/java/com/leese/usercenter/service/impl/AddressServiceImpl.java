@@ -46,12 +46,13 @@ public class AddressServiceImpl extends ServiceImpl<AddressMapper, Address> impl
             throw new BusinessException(ErrorCode.SYSTEM_ERROR);
         }
     }
+
     private void cancelDefaultAddress(int userId){
         UpdateWrapper<Address> wrapper = new UpdateWrapper<>();
-        wrapper.eq("user_id", userId)
-                .eq("is_delete", NOT_DELETED)
-                .eq("is_default", DEFAULT)
-                .set("is_default", NOT_DEFAULT);
+        wrapper.eq("userId", userId)
+                .eq("isDelete", NOT_DELETED)
+                .eq("isDefault", DEFAULT)
+                .set("isDefault", NOT_DEFAULT);
         this.update(wrapper);
     }
     @Override
@@ -81,6 +82,7 @@ public class AddressServiceImpl extends ServiceImpl<AddressMapper, Address> impl
 
     @Override
     public AddressDTO getAddressById(Integer addressId, HttpServletRequest request) {
+        AuthUtil.checkUserLogin(request);
         QueryWrapper<Address> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("id",addressId);
         Address add = this.getById(queryWrapper);

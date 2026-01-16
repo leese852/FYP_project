@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.*;
  * @since 2022-05-09
  */
 @CrossOrigin(origins = {"http://localhost:3000"}, allowCredentials = "true")
-@RestController
+@RestController()
 // @RestController 当 Spring MVC 发现方法上有 @ResponseBody（或类上有 @RestController），
 // 它会启动一个叫做 HttpMessageConverter（HTTP 消息转换器）的机制
 @RequestMapping("/user")
@@ -120,7 +120,7 @@ public class UserController implements UserConstant{
     }
 
     @PostMapping("/updateInfo")
-    public BaseResponse<User> updateUser(UserUpdateDTO dto,HttpServletRequest request){
+    public BaseResponse<User> updateUser(@RequestBody UserUpdateDTO dto,HttpServletRequest request){
         User user = userService.updateUser(dto,request);
         return ResultUtils.success(user);
     }

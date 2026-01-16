@@ -12,7 +12,7 @@ import java.util.List;
 
 
 @CrossOrigin(origins = {"http://localhost:3000"}, allowCredentials = "true")
-@RestController("userDishController")
+@RestController()
 @RequestMapping("user/dish")
 public class DishController {
     @Autowired

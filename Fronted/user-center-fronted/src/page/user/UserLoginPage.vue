@@ -73,7 +73,11 @@ const loginUserStore = useLoginUserStore();
 const handleSubmit = async (values: any) => {
   try {
     const res = await userLogin(values);
-    console.log("登录响应", res);
+    // console.log("登录响应", res);
+    // console.log('响应数据data字段:', res.data);
+    // console.log('code:', res.data.code);
+    // console.log('data:', res.data.data);
+    // console.log('data类型:', typeof res.data.data);
     //登录成功，把状态保存到全局状态中
     if (res.data.code === 0 && res.data.data) {
       await loginUserStore.fetchLoginUser();
@@ -83,6 +87,9 @@ const handleSubmit = async (values: any) => {
         replace: true,
       });
     } else {
+      console.log('进入失败分支，原因：code不为0或data为空');
+      console.log('code === 0?', res.data.code === 0);
+      console.log('data存在?', !!res.data.data);
       message.error("登录失败" + res.data.description);
     }
   } catch (error: any) {

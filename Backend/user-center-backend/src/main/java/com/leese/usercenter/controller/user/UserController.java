@@ -12,6 +12,7 @@ import com.leese.usercenter.model.dto.UserRegisterDTO;
 import com.leese.usercenter.service.UserService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @CrossOrigin(origins = {"http://localhost:3000"}, allowCredentials = "true")
 @RestController()
+@Slf4j
 // @RestController 当 Spring MVC 发现方法上有 @ResponseBody（或类上有 @RestController），
 // 它会启动一个叫做 HttpMessageConverter（HTTP 消息转换器）的机制
 @RequestMapping("/user")

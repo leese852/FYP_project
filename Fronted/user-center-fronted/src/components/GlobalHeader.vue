@@ -31,10 +31,10 @@
     </a-col>
     <a-col flex="100px">
       <div class="user-login-status">
-        <div v-if="loginUserStore.loginUser.id">
-          <a-dropdown size="5" @click="onClick">
+        <div v-if="isLoggedIn">
+          <a-dropdown size="5" >
             <a class="ant-dropdown-link" @click.prevent>
-              {{ loginUserStore.loginUser.username }}
+              {{ displayName }}
               <DownOutlined />
             </a>
             <template #overlay>
@@ -53,7 +53,7 @@
   </a-row>
 </template>
 <script setup lang="ts">
-import { h, ref } from "vue";
+import {computed, h, ref} from "vue";
 import {
   HomeOutlined,
   AppstoreOutlined,
@@ -72,6 +72,21 @@ const searchValue = ref("");
 const onSearch = (searchValue : string) => {
   console.log(searchValue);
 }
+// 计算属性：判断是否登录
+const isLoggedIn = computed(() => {
+  const user = loginUserStore.loginUser;
+  console.log("🔍 登录状态检查:", user);
+  return user && user.id;
+});
+
+// 计算属性：显示名称
+const displayName = computed(() => {
+  const user = loginUserStore.loginUser;
+  if (!user) return "用户";
+
+  // 优先显示username，如果为null则显示userAccount
+  return user.username || user.userAccount || "用户";
+});
 
 const onClick = ({ key }: { key: string }) => {
   if (key === "2") {
@@ -79,16 +94,20 @@ const onClick = ({ key }: { key: string }) => {
     router.push({
       path: "/user/login",
     });
+  }else if (key === "1") {
+    router.push({
+      path: "/user/profile",
+    });
   }
 };
+
 const router = useRouter();
+// 菜单点击事件
 const doMenuClick = ({ key }: { key: string }) => {
   router.push({
     path: key,
   });
 };
-
-
 
 const current = ref(["mail"]);
 router.afterEach((to) => {
@@ -102,10 +121,10 @@ const items = ref([
     title: "Home",
   },
   {
-    key: "/user/login",
+    key: "/user/address",
     icon: () => h(PlusSquareOutlined),
-    label: "用户登录",
-    title: "用户登录",
+    label: "地址管理",
+    title: "地址管理",
   },
   {
     key: "/user/register",

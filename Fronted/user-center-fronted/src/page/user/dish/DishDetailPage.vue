@@ -134,7 +134,7 @@
               </div>
               <div class="item-content">
                 <h4>餐厅地址</h4>
-                <p>上海市黄浦区南京东路123号美食广场3楼</p>
+                <p>香港九龙美食广场3楼</p>
               </div>
             </div>
 
@@ -277,7 +277,7 @@ const loadDishDetail = async (id: number) => {
 
   try {
     const result = await getDishById(id)
-    dish.value = result.data;
+    dish.value = result.data.data;
     console.log('获取菜品详情成功:', result);
 
   } catch(error: any) {

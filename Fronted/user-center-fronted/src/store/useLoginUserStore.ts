@@ -6,7 +6,8 @@ import { ref } from "vue";
 // 如果你熟悉组合式 API 的话，
 // 你可能会认为可以通过一行简单的 export const state = reactive({})
 // 来共享一个全局状态。
-export const useLoginUserStore = defineStore("loginUser", () => {
+export const useLoginUserStore
+    = defineStore("loginUser", () => {
   const loginUser = ref<any>({
     username: "未登录",
   });
@@ -15,13 +16,12 @@ export const useLoginUserStore = defineStore("loginUser", () => {
   async function fetchLoginUser() {
     try{
       const userData = await getCurrentUser();
-      loginUser.value = userData;
-      console.log("✅ 获取用户信息成功:", userData);
-      // if (res.data.code === 0 && res.data.data) {
-      //   loginUser.value = res.data.data;
-      // }
+      // console.log("✅ 获取用户信息成功:", userData);
+      if (userData.data.code === 0 && userData.data.data) {
+        loginUser.value = userData.data.data;
+      }
     }catch(error:any){
-      console.log(error.message);
+      console.log(error.message,"沒有保存用戶信息");
     }
   }
   //单独设置信息，并进行更新

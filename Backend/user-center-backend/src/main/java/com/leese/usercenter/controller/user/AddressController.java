@@ -5,11 +5,12 @@ import com.leese.usercenter.common.ResultUtils;
 import com.leese.usercenter.model.dto.AddressDTO;
 import com.leese.usercenter.service.AddressService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.*;
 
 @CrossOrigin(origins = {"http://localhost:3000"}, allowCredentials = "true")
 @RestController()
@@ -18,7 +19,26 @@ import java.util.List;
 public class AddressController {
     @Autowired
     AddressService addressService;
+    @GetMapping("/debug")
+    public BaseResponse<Map<String, Object>> debugSession(HttpServletRequest request) {
+        Map<String, Object> result = new HashMap<>();
+        HttpSession session = request.getSession(false);
+        result.put("sessionId", session != null ? session.getId() : "no session");
+        result.put("sessionCreated", session != null ? new Date(session.getCreationTime()) : null);
+        result.put("sessionLastAccessed", session != null ? new Date(session.getLastAccessedTime()) : null);
 
+        if (session != null) {
+            Enumeration<String> attributeNames = session.getAttributeNames();
+            Map<String, Object> attributes = new HashMap<>();
+            while (attributeNames.hasMoreElements()) {
+                String name = attributeNames.nextElement();
+                attributes.put(name, session.getAttribute(name));
+            }
+            result.put("attributes", attributes);
+        }
+
+        return ResultUtils.success(result);
+    }
     @PostMapping("/add")
     public BaseResponse<String> addAddress(@RequestBody AddressDTO dto, HttpServletRequest request){
         log.info("要添加的地址信息：{}",dto);

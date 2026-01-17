@@ -4,7 +4,8 @@ import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 import HomeView from "../views/HomeView.vue";
 import UserRegisterPage from "@/page/user/UserRegisterPage.vue";
 import DishDetailPage from "@/page/user/dish/DishDetailPage.vue";
-import DishDetailPageExample from "@/page/user/DishDetailPageExample.vue";
+import AddressPage from "@/page/user/address/AddressPage.vue";
+
 
 // const routes: Array<RouteRecordRaw
 const routes = [
@@ -28,7 +29,11 @@ const routes = [
     name: "dishDetail",
     component: DishDetailPage,
   },
-
+  {
+    path: "/user/address",
+    name: "address",
+    component: AddressPage,
+  },
 ];
 
 const router = createRouter({

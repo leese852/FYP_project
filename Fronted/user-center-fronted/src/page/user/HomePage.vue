@@ -47,7 +47,7 @@ const loadAllDishes = async () => {
   loading.value = true;
   try{
     const result = await getDishList();
-    dishes.value = result.data;
+    dishes.value = result.data.data;
     console.log('获取菜品成功:', result);
 
   }catch (error:any){

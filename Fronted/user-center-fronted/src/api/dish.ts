@@ -7,16 +7,17 @@ import {dishItem} from "@/types/dish";
  * 传name：搜索对应菜品
  * @param name 菜品名称（可选）
  */
+// <dishItem[]>
 export const getDishList = async (name?:string) => {
-    return await myAxios.request<dishItem[]>({
+    return await myAxios.request({
         url: "/user/dish/list",
         method: "get",
         params: name ? {name} : {},
     });
 };
-
+// <dishItem>
 export const getDishById = async (id:number)=>{
-    return await myAxios.request<dishItem>({
+    return await myAxios.request({
         url: `/user/dish/${id}`,
         method: "get",
         // params: {id},

@@ -17,6 +17,8 @@ import com.leese.usercenter.service.UserService;
 import com.leese.usercenter.mapper.UserMapper;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -27,6 +29,7 @@ import static com.leese.usercenter.constant.UserConstant.USER_LOGIN_STATE;
 /**
 * 用戶服務實現類
 */
+@Slf4j
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService{
 
@@ -78,6 +81,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         User user = new User();
         user.setUserAccount(userAccount);
         user.setUserPassword(encodePassword);
+        user.setUsername(userAccount);
         boolean saveResult = this.save(user);
         if(!saveResult){
             throw new BusinessException(ErrorCode.SYSTEM_ERROR,"");
@@ -122,7 +126,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         //記錄用戶的登錄態 !!!
         User safetyUser = getSafetyUser(user);
-        request.getSession().setAttribute(USER_LOGIN_STATE, safetyUser);
+        HttpSession session = request.getSession();
+        session.setAttribute(USER_LOGIN_STATE, safetyUser);
+
+        // 4. 添加调试日志
+        log.info("=== 用户登录成功 ===");
+        log.info("Session ID: {}", session.getId());
+        log.info("用户ID: {}", safetyUser.getId());
+        log.info("用户账号: {}", safetyUser.getUserAccount());
+        log.info("存储的属性名: USER_LOGIN_STATE");
+        log.info("属性值类型: {}", safetyUser.getClass().getName());
+        log.info("=== 登录结束 ===");
         return safetyUser;
     }
 

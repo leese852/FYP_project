@@ -83,7 +83,7 @@ const handleSubmit = async (values: any) => {
   }
   const res = await userRegister(values);
   // 注册成功，跳转到登录页面
-  if (res.data.code === 0 && res.data.data) {
+  if (res.code === 0 && res.data) {
     message.success("注册成功");
     router.push({
       path: "/user/login",

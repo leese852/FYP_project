@@ -1,11 +1,11 @@
 import HomePage from "@/page/user/HomePage.vue";
-import UserLoginPage from "@/page/user/UserLoginPage.vue";
+import UserLoginPage from "@/page/user/common/UserLoginPage.vue";
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 import HomeView from "../views/HomeView.vue";
-import UserRegisterPage from "@/page/user/UserRegisterPage.vue";
+import UserRegisterPage from "@/page/user/common/UserRegisterPage.vue";
 import DishDetailPage from "@/page/user/dish/DishDetailPage.vue";
 import AddressPage from "@/page/user/address/AddressPage.vue";
-
+import UserInfoPage from "@/page/user/common/UserInfoPage.vue";
 
 // const routes: Array<RouteRecordRaw
 const routes = [
@@ -34,6 +34,11 @@ const routes = [
     name: "address",
     component: AddressPage,
   },
+  {
+    path: "/user/info",
+    name:"userInfo",
+    component: UserInfoPage,
+  }
 ];
 
 const router = createRouter({

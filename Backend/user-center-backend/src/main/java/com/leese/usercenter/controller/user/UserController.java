@@ -121,7 +121,7 @@ public class UserController implements UserConstant{
         return ResultUtils.success();
     }
 
-    @PostMapping("/updateInfo")
+    @PutMapping("/updateInfo")
     public BaseResponse<User> updateUser(@RequestBody UserUpdateDTO dto,HttpServletRequest request){
         User user = userService.updateUser(dto,request);
         return ResultUtils.success(user);

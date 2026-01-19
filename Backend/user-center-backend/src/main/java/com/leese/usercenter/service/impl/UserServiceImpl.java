@@ -175,10 +175,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public User updateUser(UserUpdateDTO userUpdateDTO, HttpServletRequest request) {
-        if(request == null && userUpdateDTO == null){
+        if(userUpdateDTO == null){
             throw new BusinessException(ErrorCode.PARAM_ERROR);
         }
-        int userId = getCurUser(request).getId();
+        int userId = 0;
+        if (request != null) {
+            userId = getCurUser(request).getId();
+        }else{
+            throw new BusinessException(ErrorCode.PARAM_ERROR);
+        }
         UpdateWrapper<User> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("id",userId);
         if(StringUtils.isNotBlank(userUpdateDTO.getUsername())){
@@ -195,10 +200,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             updateWrapper.set("tel", userUpdateDTO.getTel());
         }
         if (StringUtils.isNotBlank(userUpdateDTO.getAvatar())) {
-            updateWrapper.set("avatar_url", userUpdateDTO.getAvatar());
+            updateWrapper.set("avatarUrl", userUpdateDTO.getAvatar());
         }
-        //设置更新时间
-        updateWrapper.set("update_Time",new Date());
 
         boolean updated = this.update(updateWrapper);
         if (!updated) {

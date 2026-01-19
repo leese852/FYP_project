@@ -53,7 +53,7 @@ public class AddressController {
         return ResultUtils.success();
     }
 
-    @DeleteMapping()
+    @PostMapping("/delete")
     public BaseResponse<String> deleteAddress(@RequestParam Integer addressId, HttpServletRequest request){
         log.info("删除的地址id：{}",addressId);
         addressService.deleteAddress(addressId,request);

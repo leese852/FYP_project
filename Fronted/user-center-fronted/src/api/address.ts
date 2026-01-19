@@ -38,8 +38,8 @@ export const updateAddress = async (data:any) => {
 // 删除地址
 export const deleteAddress = async (addressId:number) => {
     return await myAxios.request({
-        url: '/user/address',
-        method: 'delete',
+        url: '/user/address/delete',
+        method: 'post',
         params: { addressId }
     })
 }

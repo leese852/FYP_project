@@ -27,7 +27,7 @@ myAxios.interceptors.response.use(
     // 范围内的状态码都会触发该函数。
     function (response) {
         // 对响应数据做点什么
-        console.log('API响应:', response);
+        console.log('axios显示API响应:', response);
         // const { data } = response;
 
         // 根据的 BaseResponse 结构：
@@ -38,7 +38,6 @@ myAxios.interceptors.response.use(
 
         if (response.data.code === 40100) {
             if (
-                !response.request.responseURL.includes("user/current") &&
                 !window.location.pathname.includes("/user/login")
             ) {
                 message.warning('请先登录');
@@ -47,12 +46,10 @@ myAxios.interceptors.response.use(
             return Promise.reject(new Error(response.data.message || '未登录'))
         }
 
-        if(response.data.code !=0){
-            const errorMsg = response.data.message || `请求失败，错误码: ${response.data.code}`;
-            message.error(errorMsg);
-            return Promise.reject(new Error(errorMsg));
-
-        }
+        // if(response.data.code !== 0){
+        //     const errorMsg = response.data.message || `请求失败，错误码: ${response.data.code}`;
+        //     message.error(errorMsg);
+        // }
         return response;
     },
     function (error) {

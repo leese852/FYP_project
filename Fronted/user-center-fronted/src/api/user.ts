@@ -18,6 +18,15 @@ export const userLogin = async (params: any) => {
   });
 };
 
+// 用户信息更新
+export const userUpdate = async (params: any) => {
+  return await myAxios.request({
+    url: "/user/updateInfo",
+    method: "put",
+    data: params,
+  });
+};
+
 // 获取用户信息接口
 export const getCurrentUser = async () => {
   return await myAxios.request({

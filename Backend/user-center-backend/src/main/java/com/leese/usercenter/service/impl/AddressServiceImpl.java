@@ -71,8 +71,18 @@ public class AddressServiceImpl extends ServiceImpl<AddressMapper, Address> impl
 
     @Override
     public void deleteAddress(Integer addressId, HttpServletRequest request) {
-        AuthUtil.checkUserLogin(request);
-        Address add = this.getById(addressId);
+        User user = AuthUtil.checkUserLogin(request);
+//        Address add = this.getById(addressId);
+        // 2. 查询并验证权限（三合一：存在性 + 用户归属 + 未删除）
+        Address add = this.lambdaQuery()
+                .eq(Address::getId, addressId)
+                .eq(Address::getUserId, user.getId())
+                .eq(Address::getIsDelete, NOT_DELETED) // 如果需要的话
+                .one();
+
+        if (add == null) {
+            throw new BusinessException(ErrorCode.NULL_ERROR);
+        }
         add.setIsDelete(DELETED);
         boolean deleted = this.updateById(add);
         if (!deleted) {
@@ -84,7 +94,8 @@ public class AddressServiceImpl extends ServiceImpl<AddressMapper, Address> impl
     public AddressDTO getAddressById(Integer addressId, HttpServletRequest request) {
         AuthUtil.checkUserLogin(request);
         QueryWrapper<Address> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("id",addressId);
+        queryWrapper.eq("id",addressId)
+            .eq("isDelete",NOT_DELETED);
         Address add = this.getById(queryWrapper);
         AddressDTO addressDTO = new AddressDTO();
         BeanUtils.copyProperties(add,addressDTO);

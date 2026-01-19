@@ -96,7 +96,7 @@ const onClick = ({ key }: { key: string }) => {
     });
   }else if (key === "1") {
     router.push({
-      path: "/user/profile",
+      path: "/user/info",
     });
   }
 };

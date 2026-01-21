@@ -19,7 +19,7 @@
         <div class="dish-image">
           <img v-if="dish.imgUrl" :src="`data:image/jpeg;base64,${dish.imgUrl}`" :alt="dish.dishName" class="dish-img"/>
           <div v-else class="empty-image">
-            <img src="@/assets/logo.png" alt="默认图片" class="default-image" />
+            <img src="../../../assets/logo.png" alt="默认图片" class="default-image" />
           </div>
         </div>
         <div class="dish-info">

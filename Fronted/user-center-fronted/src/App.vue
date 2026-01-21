@@ -1,7 +1,18 @@
 <template>
+
   <div class="app">
-    <BasicLayout />
+    <!--  wdnmd，嵌套渲染 真史山代码-->
+    <!--    <BasicLayout />-->
+
+    <!-- 根据路由决定是否显示布局 -->
+<!--    <router-view v-slot="{ Component }">-->
+<!--      <component :is="Component" />-->
+<!--    </router-view>-->
+    <router-view>
+
+    </router-view>
   </div>
+
 </template>
 
 <style></style>

@@ -10,7 +10,7 @@ import {dishItem} from "@/types/dish";
 // <dishItem[]>
 export const getDishList = async (name?:string) => {
     return await myAxios.request({
-        url: "/user/dish/list",
+        url: "/admin/dish/list",
         method: "get",
         params: name ? {name} : {},
     });
@@ -18,9 +18,17 @@ export const getDishList = async (name?:string) => {
 // <dishItem>
 export const getDishById = async (id:number)=>{
     return await myAxios.request({
-        url: `/user/dish/${id}`,
+        url: `/admin/dish/${id}`,
         method: "get",
         // params: {id},
+    });
+}
+
+export const setOnOff = async(id:number)=> {
+    return await myAxios.request({
+        url: "/admin/dish/status",
+        method: "put",
+        data: id,
     });
 }
 

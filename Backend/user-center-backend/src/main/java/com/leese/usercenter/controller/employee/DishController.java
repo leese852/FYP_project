@@ -45,14 +45,12 @@ public class DishController {
 
     /**
      * 获取菜品
-     * @param dishName
+     * @param name
      * @return
      */
     @GetMapping("/list")
-    public BaseResponse<List<DishVO>> getDishByName(@RequestBody String dishName){
-        log.info("用户传进来的dish name,{}",dishName);
-        List<DishVO> result = dishService.getDishByName(dishName);
-
+    public BaseResponse<List<DishVO>> getDishByName(@RequestParam(required = false) String name){
+        List<DishVO> result= dishService.getDishByName(name);
         return ResultUtils.success(result);
     }
 

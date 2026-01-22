@@ -375,7 +375,7 @@ const onBreakpoint = (broken) => {
 }
 
 const handleMenuClick = ({ key }) => {
-  router.push({ name: key })
+  router.push({ path: key })
 }
 
 const handleRefresh = () => {

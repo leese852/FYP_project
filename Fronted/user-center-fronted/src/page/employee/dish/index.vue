@@ -35,9 +35,9 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import {ref, reactive, onMounted, h} from 'vue'
 import { useRouter } from 'vue-router'
-import { message } from 'ant-design-vue'
+import {message, Tag} from 'ant-design-vue'
 import { PictureOutlined } from '@ant-design/icons-vue'
 import {getDishList} from '@/api/dish'
 
@@ -91,15 +91,19 @@ const columns = [
     dataIndex: 'isAvailable',
     key: 'status',
     width: 100,
-    align: 'center'
+    align: 'center',
+    customRender: ({ text }) => {
+      if (text === null || text === undefined) return '';
+      return h(Tag, { color: text === 1 ? 'green' : 'red' }, () => text === 1 ? '正常' : '下架');
+    }
   },
-  {
-    title: '更新时间',
-    dataIndex: 'updateTime',
-    key: 'updateTime',
-    width: 180,
-    align: 'center'
-  },
+  // {
+  //   title: '更新时间',
+  //   dataIndex: 'updateTime',
+  //   key: 'updateTime',
+  //   width: 180,
+  //   align: 'center'
+  // },
   {
     title: '口味',
     key: 'flavors',

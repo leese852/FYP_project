@@ -43,22 +43,6 @@ public class DishController {
         return ResultUtils.success();
     }
 
-    /**
-     * 获取菜品
-     * @param name
-     * @return
-     */
-    @GetMapping("/list")
-    public BaseResponse<List<DishVO>> getDishByName(@RequestParam(required = false) String name){
-        List<DishVO> result= dishService.getDishByName(name);
-        return ResultUtils.success(result);
-    }
-
-    @GetMapping
-    public BaseResponse<DishVO> getDishById(@RequestParam int id){
-        DishVO result = dishService.getDishById(id);
-        return ResultUtils.success(result);
-    }
 
     @PutMapping("/status")
     public BaseResponse onOff(@RequestBody int id){

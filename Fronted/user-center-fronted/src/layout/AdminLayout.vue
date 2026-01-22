@@ -58,19 +58,19 @@
 
       <!-- 右侧：用户信息 -->
       <div class="header-right">
-        <!-- 搜索框 -->
-        <a-auto-complete
-            v-model:value="searchValue"
-            class="search-box"
-            placeholder="搜索菜单、功能..."
-            :options="searchOptions"
-            @select="handleSearchSelect"
-            @search="handleSearch"
-        >
-          <template #prefix>
-            <search-outlined />
-          </template>
-        </a-auto-complete>
+<!--        &lt;!&ndash; 搜索框 &ndash;&gt;-->
+<!--        <a-auto-complete-->
+<!--            v-model:value="searchValue"-->
+<!--            class="search-box"-->
+<!--            placeholder="搜索菜单、功能..."-->
+<!--            :options="searchOptions"-->
+<!--            @select="handleSearchSelect"-->
+<!--            @search="handleSearch"-->
+<!--        >-->
+<!--          <template #prefix>-->
+<!--            <search-outlined />-->
+<!--          </template>-->
+<!--        </a-auto-complete>-->
 
         <!-- 用户信息下拉菜单 -->
         <a-dropdown placement="bottomRight" :trigger="['click']">
@@ -242,15 +242,6 @@
           <div class="footer-content">
             <div class="copyright">
               © {{ currentYear }} 管理系统 |
-              <a href="https://github.com/your-repo" target="_blank">GitHub</a> |
-              <a href="#" @click.prevent="showAbout">关于系统</a>
-            </div>
-            <div class="footer-links">
-              <a href="#">帮助中心</a>
-              <a-divider type="vertical" />
-              <a href="#">服务条款</a>
-              <a-divider type="vertical" />
-              <a href="#">隐私政策</a>
             </div>
           </div>
         </a-layout-footer>
@@ -701,7 +692,7 @@ onMounted(() => {
 /* 主要内容区域样式 */
 .main-content {
   background: #f0f2f5;
-  min-height: calc(100vh - 64px);
+
 }
 
 .tab-nav {
@@ -754,7 +745,6 @@ onMounted(() => {
 .page-content {
   flex: 1;
   background: white;
-  padding: 24px;
   border-radius: 8px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
 }

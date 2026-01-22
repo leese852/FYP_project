@@ -53,24 +53,6 @@
   </a-row>
 </template>
 <script setup lang="ts">
-import { onMounted, onBeforeUnmount } from "vue";
-
-console.log('🔵 GlobalHeader 脚本执行'); // 每次组件实例化都会执行
-
-onMounted(() => {
-  console.log('🟢 GlobalHeader 被挂载到 DOM', Date.now());
-  console.log('📍 组件实例:', this);
-
-  // 检查 DOM 中的实例数量
-  setTimeout(() => {
-    const headers = document.querySelectorAll('[data-global-header]');
-    console.log('📊 DOM 中 GlobalHeader 数量:', headers.length);
-  }, 100);
-});
-
-onBeforeUnmount(() => {
-  console.log('🔴 GlobalHeader 即将卸载');
-});
 
 
 import {computed, h, ref} from "vue";

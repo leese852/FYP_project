@@ -55,7 +55,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: "dish/list",
         name: "dishList",
-        component: () => import("@/page/employee/dish/index.vue")
+        component: () => import("@/page/employee/dish/Index.vue")
       }
     ]
   }

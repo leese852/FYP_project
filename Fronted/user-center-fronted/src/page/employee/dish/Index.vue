@@ -3,15 +3,6 @@
   <div class="dish-list-page">
     <!-- 搜索和操作栏 -->
     <div class="list-header">
-      <div class="search-box">
-        <a-input-search
-            v-model:value="searchKeyword"
-            placeholder="搜索菜品名称"
-            enter-button="搜索"
-            style="width: 300px"
-            @search="handleSearch"
-        />
-      </div>
 
       <div class="action-buttons">
         <a-button type="primary" @click="handleAddDish">
@@ -37,14 +28,12 @@
 <script setup>
 import {ref, reactive, onMounted, h} from 'vue'
 import { useRouter } from 'vue-router'
-import {message, Tag} from 'ant-design-vue'
+import {Button, message, Tag} from 'ant-design-vue'
 import { PictureOutlined } from '@ant-design/icons-vue'
 import {getDishList} from '@/api/dish'
 
 const router = useRouter()
 
-// 搜索关键词
-const searchKeyword = ref('')
 // 菜品列表
 const dishList = ref([])
 // 加载状态
@@ -64,26 +53,36 @@ const columns = [
     dataIndex: 'imgUrl',
     key: 'image',
     width: 100,
-    align: 'center'
+    align: 'center',
+    customRender: ({ text }) => {
+      if (text) {
+        return h('img', {
+          src: text,
+          style: 'width: 60px; height: 60px; object-fit: cover; border-radius: 4px;'
+        })
+      }
+      return h(PictureOutlined, { style: 'font-size: 24px; color: #ccc;' })
+    }
   },
   {
     title: '菜品名称',
     dataIndex: 'dishName',
     key: 'dishName',
-    width: 200
+    width: 150,
+    align: 'center'
   },
   {
     title: '价格',
     dataIndex: 'price',
     key: 'price',
-    width: 120,
+    width: 100,
     align: 'center'
   },
   {
     title: '分类',
     dataIndex: 'categoryId',
     key: 'category',
-    width: 120,
+    width: 100,
     align: 'center'
   },
   {
@@ -94,26 +93,51 @@ const columns = [
     align: 'center',
     customRender: ({ text }) => {
       if (text === null || text === undefined) return '';
-      return h(Tag, { color: text === 1 ? 'green' : 'red' }, () => text === 1 ? '正常' : '下架');
+      return h(Tag, { color: text === 1 ? 'green' : 'red' }, () => text === 1 ? '起售' : '停售');
     }
   },
-  // {
-  //   title: '更新时间',
-  //   dataIndex: 'updateTime',
-  //   key: 'updateTime',
-  //   width: 180,
-  //   align: 'center'
-  // },
   {
-    title: '口味',
-    key: 'flavors',
-    width: 150
+    title: '更新时间',
+    dataIndex: 'updateTime',
+    key: 'updateTime',
+    width: 180,
+    align: 'center'
   },
   {
     title: '操作',
     key: 'actions',
     width: 150,
-    align: 'center'
+    align: 'center',
+    customRender: ({ record }) => {
+      function handleDelete(record) {
+        return undefined;
+      }
+
+      return h('div', { style: 'display: flex; gap: 8px; justify-content: center;' }, [
+        // 编辑按钮
+        h(Button, {
+          type: 'primary',
+          size: 'small',
+          onClick: () => handleEdit(record)
+        }, () => '更新'),
+
+        // 删除按钮
+        h(Button, {
+          type: 'primary',
+          danger: true,
+          size: 'small',
+          onClick: () => handleDelete(record)
+        }, () => '删除'),
+
+        // // 下架/上架按钮
+        // h(Button, {
+        //   type: 'dashed',
+        //   size: 'small',
+        //   danger: record.isAvailable === 1,
+        //   onClick: () => handleToggleStatus(record)
+        // }, () => record.isAvailable === 1 ? '下架' : '上架')
+      ])
+    }
   }
 ]
 
@@ -139,18 +163,6 @@ const loadDishList = async () => {
   }
 }
 
-// 搜索
-const handleSearch = () => {
-  pagination.current = 1
-  loadDishList()
-}
-
-// 表格变化（分页）
-const handleTableChange = (newPagination) => {
-  pagination.current = newPagination.current
-  pagination.pageSize = newPagination.pageSize
-  loadDishList()
-}
 
 // 编辑菜品
 const handleEdit = (record) => {
@@ -167,38 +179,6 @@ const handleAddDish = () => {
   })
 }
 
-// 切换状态
-const handleToggleStatus = async (record) => {
-  try {
-    const response = await dishApi.toggleDishStatus(record.id)
-    if (response.code === 200) {
-      message.success(record.isAvailable === 1 ? '下架成功' : '上架成功')
-      loadDishList()
-    } else {
-      message.error(response.message || '操作失败')
-    }
-  } catch (error) {
-    console.error('切换状态失败:', error)
-    message.error('操作失败，请稍后重试')
-  }
-}
-
-// 工具函数：图片处理
-const getImageUrl = (imgData) => {
-  if (!imgData || imgData.length === 0) return ''
-  // 如果是字节数组，转换成base64
-  if (Array.isArray(imgData)) {
-    const binaryString = imgData.reduce((acc, byte) => acc + String.fromCharCode(byte), '')
-    return `data:image/jpeg;base64,${btoa(binaryString)}`
-  }
-  return imgData
-}
-
-// 工具函数：截断文本
-const truncateText = (text, length) => {
-  if (!text) return ''
-  return text.length > length ? text.substring(0, length) + '...' : text
-}
 
 // 初始化
 onMounted(() => {

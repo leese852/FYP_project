@@ -29,6 +29,18 @@ export const setOnOff = async(id:number)=> {
         url: "/admin/dish/status",
         method: "put",
         data: id,
+
+
     });
 }
+
+export const addDish = async(data:any)=>{
+    return await myAxios.request({
+        url: "/admin/dish/add_dish",
+        method: "post",
+        data
+    })
+}
+
+export const updateDish = async
 

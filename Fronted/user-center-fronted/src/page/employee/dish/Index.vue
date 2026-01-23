@@ -175,7 +175,7 @@ const handleEdit = (record) => {
 // 新增菜品
 const handleAddDish = () => {
   router.push({
-    name: 'dishAdd'
+    path: "/admin/dish/add"
   })
 }
 

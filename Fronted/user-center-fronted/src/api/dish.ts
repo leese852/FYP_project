@@ -42,5 +42,19 @@ export const addDish = async(data:any)=>{
     })
 }
 
-export const updateDish = async
+export const updateDish = async(data:any)=>{
+    return await myAxios.request({
+        url:"/admin/dish/update_dish",
+        method:"put",
+        data
+    })
+}
+
+export const deleteDish = async(data:any)=>{
+    return await myAxios.request({
+        url:"/admin/dish/delete",
+        method:"delete",
+        data
+    })
+}
 

@@ -160,20 +160,20 @@
                 <span>{{ menu.title }}</span>
               </a-menu-item>
 
-              <!-- 如果有子菜单，渲染子菜单 -->
-              <a-sub-menu v-else :key="menu.path">
-                <template #icon>
-                  <component v-if="menu.iconComponent" :is="menu.iconComponent" />
-                  <component v-else-if="menu.icon" :is="getIcon(menu.icon)" />
-                </template>
-                <template #title>{{ menu.title }}</template>
-                <a-menu-item
-                    v-for="child in menu.children"
-                    :key="child.path"
-                >
-                  <span>{{ child.title }}</span>
-                </a-menu-item>
-              </a-sub-menu>
+<!--              &lt;!&ndash; 如果有子菜单，渲染子菜单 &ndash;&gt;-->
+<!--              <a-sub-menu v-else :key="menu.path">-->
+<!--                <template #icon>-->
+<!--                  <component v-if="menu.iconComponent" :is="menu.iconComponent" />-->
+<!--                  <component v-else-if="menu.icon" :is="getIcon(menu.icon)" />-->
+<!--                </template>-->
+<!--                <template #title>{{ menu.title }}</template>-->
+<!--                <a-menu-item-->
+<!--                    v-for="child in menu.children"-->
+<!--                    :key="child.path"-->
+<!--                >-->
+<!--                  <span>{{ child.title }}</span>-->
+<!--                </a-menu-item>-->
+<!--              </a-sub-menu>-->
             </template>
           </a-menu>
         </div>

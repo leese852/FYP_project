@@ -51,7 +51,7 @@ public class DishController {
         return ResultUtils.success();
     }
 
-    @DeleteMapping
+    @DeleteMapping("/delete")
     public BaseResponse deleteBatch(@RequestBody List<Integer> ids){
         log.info("用户传过来的用户id_list，{}", ids);
         dishService.deleteBatch(ids);

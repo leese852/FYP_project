@@ -250,6 +250,7 @@ const handleSubmit = async () => {
 
     if (response.data.code === 0) {
       message.success('添加成功')
+      router.push({ path: "/admin/dish/list" })
       // 重置表单
       resetForm()
     } else {

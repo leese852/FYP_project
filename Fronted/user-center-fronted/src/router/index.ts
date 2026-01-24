@@ -61,7 +61,12 @@ const routes: RouteRecordRaw[] = [
         path: "dish/add",
         name: "addDish",
         component: ()=> import("@/page/employee/dish/AddDish.vue")
-      }
+      },
+      {
+        path: "dish/update/:id",
+        name: "updateDish",
+        component: ()=> import("@/page/employee/dish/Update.vue")
+      },
     ]
   }
 ];

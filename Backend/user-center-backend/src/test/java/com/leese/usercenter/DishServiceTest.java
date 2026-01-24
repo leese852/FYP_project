@@ -18,6 +18,8 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.test.annotation.Rollback;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -78,7 +80,7 @@ public class DishServiceTest {
     }
     @Test
     public void testGetDish(){
-        List<DishVO> result = dishService.getDishByName("更新");
+        List<DishVO> result = dishService.getDishByName("更新",1);
         log.info("共查询到 {} 个菜品", result.size());
         for(DishVO dish : result){
             log.info("ID: {}, 菜名: {}, 价格: {}, 分类ID: {}, 上架状态: {},",
@@ -138,5 +140,15 @@ public class DishServiceTest {
 
         up.setFlavors(Arrays.asList(newFlavor1, newFlavor2));
         return up;
+    }
+
+    @Transactional
+    @Rollback
+    @Test
+    void testOnOff() {
+
+        dishService.onOff(1);
+        Dish updatedDish = dishService.getById(1);
+        assertEquals(1, updatedDish.getIsAvailable());
     }
 }

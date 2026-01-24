@@ -28,9 +28,9 @@
 <script setup>
 import {ref, reactive, onMounted, h} from 'vue'
 import { useRouter } from 'vue-router'
-import {Button, message, Tag} from 'ant-design-vue'
+import {Button, message, Modal, Tag} from 'ant-design-vue'
 import { PictureOutlined } from '@ant-design/icons-vue'
-import {getDishList} from '@/api/dish'
+import {deleteDish, getDishList, getDishListAdmin, setOnOff} from '@/api/dish'
 
 const router = useRouter()
 
@@ -109,9 +109,7 @@ const columns = [
     width: 150,
     align: 'center',
     customRender: ({ record }) => {
-      function handleDelete(record) {
-        return undefined;
-      }
+
 
       return h('div', { style: 'display: flex; gap: 8px; justify-content: center;' }, [
         // 编辑按钮
@@ -129,23 +127,59 @@ const columns = [
           onClick: () => handleDelete(record)
         }, () => '删除'),
 
-        // // 下架/上架按钮
-        // h(Button, {
-        //   type: 'dashed',
-        //   size: 'small',
-        //   danger: record.isAvailable === 1,
-        //   onClick: () => handleToggleStatus(record)
-        // }, () => record.isAvailable === 1 ? '下架' : '上架')
+        // 下架/上架按钮
+        h(Button, {
+          // type: 'dashed',
+          size: 'small',
+          onClick: () => handleSetOnOff(record)
+        }, () => record.isAvailable === 1 ? '下架' : '上架')
       ])
     }
   }
 ]
 
+const handleSetOnOff = async (record) =>{
+  const response = await setOnOff(record.id);
+  if (response.data.code === 0) {
+    loadDishList() // 重新加载列表
+  } else {
+    message.error(response.data.message || '切换状态失败')
+  }
+}
+
+//删除菜品
+const handleDelete = async (record) => {
+  Modal.confirm({
+    title: '确认删除',
+    content: `确定要删除菜品 "${record.dishName}" 吗？此操作不可恢复。`,
+    okText: '确认',
+    okType: 'danger',
+
+
+    cancelText: '取消',
+    async onOk() {
+      try {
+
+        const response = await deleteDish(record.id)
+        if (response.data.code === 0) {
+          message.success('删除成功')
+          loadDishList() // 重新加载列表
+        } else {
+          message.error(response.data.message || '删除失败')
+        }
+      } catch (error) {
+        console.error('删除菜品失败:', error)
+        message.error('删除失败，请稍后重试')
+      }
+    }
+  })
+}
+
 // 加载菜品列表
 const loadDishList = async () => {
   loading.value = true
   try {
-    const response = await getDishList()
+    const response = await getDishListAdmin()
 
     if (response.data.code === 0) {
       dishList.value = response.data.data || []
@@ -163,12 +197,10 @@ const loadDishList = async () => {
   }
 }
 
-
 // 编辑菜品
 const handleEdit = (record) => {
   router.push({
-    name: 'dishEdit',
-    params: { id: record.id }
+    path: `/admin/dish/update/${record.id}`,
   })
 }
 

@@ -60,14 +60,17 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
     }
 
     @Override
-    public List<DishVO> getDishByName(String DishName) {
+    public List<DishVO> getDishByName(String DishName,Integer status) {
         QueryWrapper<Dish> queryWrapper = new QueryWrapper<>();
         // 如果搜索关键词为空，返回空列表，避免全表扫描
         if (DishName != null && !DishName.trim().isEmpty()) {
             queryWrapper.like("dishName",DishName.trim());
         }
         queryWrapper.eq("isDelete",0);
-        queryWrapper.eq("isAvailable",1);
+        if (status != null) {
+            queryWrapper.eq("isAvailable", 1);
+        }
+//        queryWrapper.eq("isAvailable",1);
         queryWrapper.orderByAsc("createTime");
         List<Dish>dishList = this.list(queryWrapper);
         return convertToVOList(dishList);
@@ -133,6 +136,18 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
         dishFlavorService.remove(qw);
     }
 
+    @Override
+    public void deleteDish(int id) {
+        Dish dish = this.getById(id);
+        if(dish.getIsAvailable() == StatusConstant.ENABLE){
+            throw new BusinessException(ErrorCode.DISH_STATUS_ERROR,"菜品:" + dish.getDishName() + "菜品狀態為啓用");
+        }
+        boolean success = this.removeById(id);
+        if(!success){
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"菜品删除失败");
+        }
+        this.removeById(id);
+    }
 //    @Override
 //    public List<DishVO>getAllDish(){
 //        QueryWrapper<Dish> qw = new QueryWrapper<>();

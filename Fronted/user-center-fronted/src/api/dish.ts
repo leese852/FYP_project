@@ -15,6 +15,14 @@ export const getDishList = async (name?:string) => {
         params: name ? {name} : {},
     });
 };
+
+export const getDishListAdmin = async (name?:string) => {
+    return await myAxios.request({
+        url: "/admin/dish/list",
+        method: "get",
+        params: name ? {name} : {},
+    });
+};
 // <dishItem>
 export const getDishById = async (id:number)=>{
     return await myAxios.request({
@@ -24,13 +32,14 @@ export const getDishById = async (id:number)=>{
     });
 }
 
-export const setOnOff = async(id:number)=> {
+export const setOnOff = async(data:any)=> {
     return await myAxios.request({
         url: "/admin/dish/status",
         method: "put",
-        data: id,
-
-
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        data,
     });
 }
 
@@ -38,6 +47,9 @@ export const addDish = async(data:any)=>{
     return await myAxios.request({
         url: "/admin/dish/add_dish",
         method: "post",
+        headers: {
+            'Content-Type': 'application/json'
+        },
         data
     })
 }
@@ -50,10 +62,20 @@ export const updateDish = async(data:any)=>{
     })
 }
 
+export const deleteDishs = async(data:any)=>{
+    return await myAxios.request({
+        url:"/admin/dish/deletes",
+        method:"delete",
+        data
+    })
+}
 export const deleteDish = async(data:any)=>{
     return await myAxios.request({
         url:"/admin/dish/delete",
-        method:"delete",
+        method:"post",
+        headers: {
+            'Content-Type': 'application/json'
+        },
         data
     })
 }

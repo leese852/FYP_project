@@ -30,7 +30,12 @@ public class DishController {
         dishService.addDish(dishDTO);
         return ResultUtils.success();
     }
+    @GetMapping("/list")
+    public BaseResponse<List<DishVO>> getDishListByName(@RequestParam(required = false) String name){
 
+        List<DishVO> result= dishService.getDishByName(name,null);
+        return ResultUtils.success(result);
+    }
     /**
      * 更新菜品
      * @param dishDTO
@@ -43,7 +48,6 @@ public class DishController {
         return ResultUtils.success();
     }
 
-
     @PutMapping("/status")
     public BaseResponse onOff(@RequestBody int id){
         log.info("用户传过来的用户id，{}", id);
@@ -51,10 +55,17 @@ public class DishController {
         return ResultUtils.success();
     }
 
-    @DeleteMapping("/delete")
-    public BaseResponse deleteBatch(@RequestBody List<Integer> ids){
-        log.info("用户传过来的用户id_list，{}", ids);
+    @DeleteMapping("/deletes")
+    public BaseResponse deleteBatch(@RequestBody List<Integer> ids) {
+        log.info("用户传过来的菜品id_list，{}", ids);
         dishService.deleteBatch(ids);
+        return ResultUtils.success();
+    }
+
+    @PostMapping("/delete")
+    public BaseResponse deleteDish(@RequestBody int ids){
+        log.info("用户传过来的菜品id，{}", ids);
+        dishService.deleteDish(ids);
         return ResultUtils.success();
     }
 }

@@ -20,8 +20,7 @@ public class DishController {
 
     @GetMapping("/list")
     public BaseResponse<List<DishVO>> getDishListByName(@RequestParam(required = false) String name){
-
-        List<DishVO> result= dishService.getDishByName(name);
+        List<DishVO> result= dishService.getDishByName(name,1);
         return ResultUtils.success(result);
     }
 

@@ -36,11 +36,7 @@ public class DishController {
         List<DishVO> result= dishService.getDishByName(name,null);
         return ResultUtils.success(result);
     }
-    /**
-     * 更新菜品
-     * @param dishDTO
-     * @return
-     */
+
     @PutMapping("/update_dish")
     public BaseResponse updateDish(@RequestBody DishDTO dishDTO){
         log.info("用户传过来的新菜品数据，{}", dishDTO);

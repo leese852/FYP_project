@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin(origins = {"http://localhost:3000"}, allowCredentials = "true")
 @RestController()
 @Slf4j
+
 // @RestController 当 Spring MVC 发现方法上有 @ResponseBody（或类上有 @RestController），
 // 它会启动一个叫做 HttpMessageConverter（HTTP 消息转换器）的机制
 @RequestMapping("/user")

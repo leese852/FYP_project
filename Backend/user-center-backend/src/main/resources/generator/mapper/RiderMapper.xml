@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.leese.usercenter.mapper.RiderMapper">
+
+    <!-- 映射数据库字段到 RiderEntity -->
+    <resultMap id="BaseResultMap" type="com.leese.usercenter.model.entity.RiderEntity">
+        <id property="employeeId" column="employee_id"/>
+        <result property="name" column="name"/>
+        <result property="role" column="role"/>
+        <result property="loginCredentials" column="login_credentials"/>
+        <result property="restaurantId" column="restaurant_id"/>
+    </resultMap>
+
+    <!-- 可复用的列清单 -->
+    <sql id="Base_Column_List">
+        employee_id, name, role, login_credentials, restaurant_id
+    </sql>
+
+    <!-- 查询骑手信息 -->
+    <select id="findById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM riders
+        WHERE employee_id = #{employeeId}
+    </select>
+
+</mapper>

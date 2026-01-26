@@ -9,7 +9,10 @@ import UserInfoPage from "@/page/user/common/UserInfoPage.vue";
 // import * as path from "node:path";
 import AdminLayout from "@/layout/AdminLayout.vue";
 import BasicLayout from "@/layout/BasicLayout.vue";
-
+import OrderStaffView from "@/page/order/OrderStaffView.vue";      // ⭐
+import OrderCustomerView from "@/page/order/OrderCustomerView.vue"; // ⭐
+import OrderRiderView from "@/page/order/OrderRiderView.vue";       // ⭐
+import OrderCancelPage from "@/page/order/OrderCancelPage.vue"; // ⭐ 新增 import
 // const routes: Array<RouteRecordRaw
 const routes: RouteRecordRaw[] = [
   {
@@ -45,7 +48,25 @@ const routes: RouteRecordRaw[] = [
         path: "user/info",
         name:"userInfo",
         component: UserInfoPage,
-      }
+      },
+      {
+        path: "order/staff",          // ⭐
+        name: "orderStaff",           // ⭐
+        component: OrderStaffView,    // ⭐
+      },
+      {
+        path: "order/customer",       // ⭐
+        name: "orderCustomer",        // ⭐
+        component: OrderCustomerView, // ⭐
+      },
+      {
+        path: "order/rider",          // ⭐
+        name: "orderRider",           // ⭐
+        component: OrderRiderView,    // ⭐
+      },
+      { path: "order/cancel", // ⭐ 新增路由
+        name: "orderCancel",
+        component: OrderCancelPage, }
     ]
   },
   {

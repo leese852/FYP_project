@@ -3,6 +3,13 @@ package com.leese.usercenter.service;
 import com.leese.usercenter.model.vo.OrderVO;
 
 public interface OrderService {
+    /**
+     * 根據訂單 ID 獲取訂單詳情
+     */
     OrderVO getOrderDetails(Long orderId);
-    void updateOrderStatus(Long orderId, String status);
+
+    /**
+     * 更新訂單狀態
+     */
+    void updateOrderStatus(Long orderId, Integer status);
 }

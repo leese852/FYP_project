@@ -12,7 +12,7 @@ public class AcceptOrderCommand extends AbstractOrderCommand {
     }
 
     @Override
-    protected String getStatus() {
-        return "ACCEPTED";
+    protected Integer getStatus() {
+        return 3; // 已接單
     }
 }

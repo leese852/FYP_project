@@ -11,7 +11,7 @@ public class CancelOrderCommand extends AbstractOrderCommand {
     }
 
     @Override
-    protected String getStatus() {
-        return "Canceled";
+    protected Integer getStatus() {
+        return 6; // 已取消
     }
 }

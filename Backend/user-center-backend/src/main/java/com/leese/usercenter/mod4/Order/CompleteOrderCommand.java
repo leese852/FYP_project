@@ -12,7 +12,7 @@ public class CompleteOrderCommand extends AbstractOrderCommand {
     }
 
     @Override
-    protected String getStatus() {
-        return "Completed";
+    protected Integer getStatus() {
+        return 5; // 已完成
     }
 }

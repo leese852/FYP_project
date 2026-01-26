@@ -43,6 +43,8 @@ public class OrderVO {
     private Integer deliveryStatus;  // 配送狀態 (1立即送出 0選擇時間)
     private String rideAddress;      // 地址快照
     private String riderName;        // 騎手姓名
+    private String riderPhone;       // 騎手電話 ✅ 新增
+    private String riderLocation;    // 騎手位置 ✅ 新增
 
     // 顧客資訊
     private String customerName;     // 顧客姓名 (可從 user 表 join 出來)

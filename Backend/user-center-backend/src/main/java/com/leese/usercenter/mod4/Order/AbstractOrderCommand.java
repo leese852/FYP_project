@@ -1,6 +1,8 @@
 package com.leese.usercenter.mod4.Order;
+
 import com.leese.usercenter.command.Command;
 import com.leese.usercenter.service.OrderService;
+
 public abstract class AbstractOrderCommand implements Command {
     protected final OrderService orderService;
     protected Long orderId;
@@ -13,7 +15,8 @@ public abstract class AbstractOrderCommand implements Command {
         this.orderId = orderId;
     }
 
-    protected abstract String getStatus();
+    // ✅ 改成 Integer
+    protected abstract Integer getStatus();
 
     @Override
     public void execute() {

@@ -12,7 +12,7 @@ public class DeliverOrderCommand extends AbstractOrderCommand {
     }
 
     @Override
-    protected String getStatus() {
-        return "Completed";
+    protected Integer getStatus() {
+        return 4; // 派送中
     }
 }

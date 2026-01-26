@@ -12,10 +12,11 @@ import com.leese.usercenter.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-//sss
+
 @Service
 public class OrderServiceImpl implements OrderService {
     private final OrderMapper orderMapper;
@@ -32,13 +33,17 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderVO getOrderDetails(Long orderId) {
         OrderEntity order = orderMapper.findById(orderId);
+        if (order == null) {
+            throw new RuntimeException("訂單不存在: " + orderId);
+        }
+
         List<OrderItemEntity> items = orderItemMapper.findByOrderId(orderId);
-        RiderEntity rider = riderMapper.findById(order.getEmployeeId());
+        RiderEntity rider = riderMapper.findById(order.getRiderId());
         return convertToVO(order, items, rider);
     }
 
     @Override
-    public void updateOrderStatus(Long orderId, String status) {
+    public void updateOrderStatus(Long orderId, Integer status) {
         orderMapper.updateStatus(orderId, status);
     }
 
@@ -77,22 +82,29 @@ public class OrderServiceImpl implements OrderService {
         vo.setDeliveryStatus(order.getDeliveryStatus());
         vo.setRideAddress(order.getRideAddress());
         vo.setRiderName(rider != null ? rider.getName() : null);
+        vo.setRiderPhone(rider != null ? rider.getPhone() : null);
+
 
         // 顧客資訊 (可從 user 表 join 出來，這裡先留空)
         vo.setCustomerName("顧客姓名");
 
-        // 菜品明細 (直接用 Entity 的 dishName)
+        // 菜品明細
         List<OrderItemVO> itemVOs = new ArrayList<>();
         for (OrderItemEntity item : items) {
             OrderItemVO itemVO = new OrderItemVO();
             itemVO.setId(item.getId());
             itemVO.setOrderId(item.getOrderId());
             itemVO.setDishId(item.getDishId());
-            itemVO.setDishName(item.getDishName()); // ✅ 改成直接取 Entity 的值
+            itemVO.setDishName(item.getDishName());
             itemVO.setDishFlavor(item.getDishFlavor());
             itemVO.setQuantity(item.getQuantity());
             itemVO.setPrice(item.getPrice());
-            itemVO.setSubtotal(item.getPrice() * item.getQuantity()); // 小計
+
+            // 小計用 BigDecimal 計算，避免浮點誤差
+            BigDecimal subtotal = BigDecimal.valueOf(item.getPrice())
+                    .multiply(BigDecimal.valueOf(item.getQuantity()));
+            itemVO.setSubtotal(subtotal.doubleValue());
+
             itemVOs.add(itemVO);
         }
         vo.setItems(itemVOs);

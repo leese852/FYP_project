@@ -1,0 +1,22 @@
+package com.leese.usercenter.mod4.Order;
+import com.leese.usercenter.command.Command;
+import com.leese.usercenter.service.OrderService;
+public abstract class AbstractOrderCommand implements Command {
+    protected final OrderService orderService;
+    protected Long orderId;
+
+    public AbstractOrderCommand(OrderService orderService) {
+        this.orderService = orderService;
+    }
+
+    public void setOrderId(Long orderId) {
+        this.orderId = orderId;
+    }
+
+    protected abstract String getStatus();
+
+    @Override
+    public void execute() {
+        orderService.updateOrderStatus(orderId, getStatus());
+    }
+}

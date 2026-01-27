@@ -1,27 +1,31 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/leese
-#    ?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&zeroDateTimeBehavior=convertToNull&transformedBitIsBoolean=true&allowMultiQueries=true
+    url: jdbc:mysql://localhost:3306/leese?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Hong_Kong
     username: root
     password:
 
   application:
     name: user-center
-  # session超时时间
+
+  # session 超时时间 (秒)
   session:
     timeout: 86400
+
 mybatis-plus:
+  # 指定 Mapper XML 路徑，根據你的實際目錄修改
+  mapper-locations: classpath*:generator/mapper/*.xml
+  type-aliases-package: com.leese.usercenter.model.entity
+
   configuration:
+    # 是否開啟駝峰轉換 (false 表示關閉)
     map-underscore-to-camel-case: false
+
   global-config:
     db-config:
-      logic-delete-field: isDelete # 全局逻辑删除字段名
-      logic-delete-va lue: 1 # 逻辑已删除值。可选，默认值为 1
-      logic-not-delete-value: 0
+      logic-delete-field: isDelete        # 全局邏輯刪除字段名
+      logic-delete-value: 1               # 邏輯已刪除值
+      logic-not-delete-value: 0           # 邏輯未刪除值
 
 server:
   port: 8080
-
-
-

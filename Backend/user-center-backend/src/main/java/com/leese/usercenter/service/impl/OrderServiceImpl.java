@@ -11,6 +11,8 @@ import com.leese.usercenter.model.vo.OrderVO;
 import com.leese.usercenter.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
@@ -22,6 +24,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderMapper orderMapper;
     private final OrderItemMapper orderItemMapper;
     private final RiderMapper riderMapper;
+    private static final Logger log = LoggerFactory.getLogger(OrderServiceImpl.class);
 
     @Autowired
     public OrderServiceImpl(OrderMapper orderMapper, OrderItemMapper orderItemMapper, RiderMapper riderMapper) {
@@ -63,11 +66,11 @@ public class OrderServiceImpl implements OrderService {
         vo.setTotalAmount(order.getTotalAmount());
         vo.setPackAmount(order.getPackAmount());
 
-        // 備註與原因
-        vo.setRemark(order.getRemark());
-        vo.setCancelReason(order.getCancelReason());
-        vo.setRejectionReason(order.getRejectionReason());
-        vo.setOrderComment(order.getOrderComment());
+//        // 備註與原因
+//        vo.setRemark(order.getRemark());
+//        vo.setCancelReason(order.getCancelReason());
+//        vo.setRejectionReason(order.getRejectionReason());
+//        vo.setOrderComment(order.getOrderComment());
 
         // 時間欄位格式化
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -79,10 +82,10 @@ public class OrderServiceImpl implements OrderService {
         vo.setUpdateTime(order.getUpdateTime() != null ? sdf.format(order.getUpdateTime()) : null);
 
         // 配送資訊
-        vo.setDeliveryStatus(order.getDeliveryStatus());
-        vo.setRideAddress(order.getRideAddress());
-        vo.setRiderName(rider != null ? rider.getName() : null);
-        vo.setRiderPhone(rider != null ? rider.getPhone() : null);
+//        vo.setDeliveryStatus(order.getDeliveryStatus());
+//        vo.setRideAddress(order.getRideAddress());
+//        vo.setRiderName(rider != null ? rider.getName() : null);
+//        vo.setRiderPhone(rider != null ? rider.getPhone() : null);
 
 
         // 顧客資訊 (可從 user 表 join 出來，這裡先留空)
@@ -127,4 +130,21 @@ public class OrderServiceImpl implements OrderService {
             default: return "待處理";
         }
     }
+
+    @Override
+
+    public List<OrderEntity> findByUserId(Integer userId) {
+        log.info("🔍 Service 層接收到的 userId = {}", userId);
+        List<OrderEntity> orders = orderMapper.findByUserId(userId);
+        log.info("🔍 查詢結果 = {}", orders);
+        return orders;
+    }
+
+
+    @Override
+    public List<OrderEntity> findAll() {
+        return orderMapper.findAll();
+    }
+
+
 }

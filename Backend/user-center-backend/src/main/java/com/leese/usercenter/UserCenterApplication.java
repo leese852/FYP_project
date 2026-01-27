@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @SpringBootApplication //@ComponentScan 默认扫描 com.leese.usercenter 及其子包（包括 controller, service 等）
-@MapperScan("com.leese.usercenter.mapper")
+@MapperScan({"com.leese.usercenter.mapper","com.leese.usercenter.mod5.mapper"})
 //自动扫描指定包下的 Mapper 接口，并将它们注册为 Spring 容器中的 Bean。
 public class UserCenterApplication {
 

@@ -12,8 +12,9 @@ import BasicLayout from "@/layout/BasicLayout.vue";
 import OrderStaffView from "@/page/order/OrderStaffView.vue";      // ⭐
 import OrderCustomerView from "@/page/order/OrderCustomerView.vue"; // ⭐
 import OrderRiderView from "@/page/order/OrderRiderView.vue";       // ⭐
-import OrderCancelPage from "@/page/order/OrderCancelPage.vue"; // ⭐ 新增 import
-// const routes: Array<RouteRecordRaw
+import OrderCancelPage from "@/page/order/OrderCancelPage.vue";
+import  OrderList from  "@/page/order/OrderList.vue";// ⭐ 新增 import
+// const routes: Array<RouteRecordRawOrderList
 const routes: RouteRecordRaw[] = [
   {
     path: "/",
@@ -49,11 +50,7 @@ const routes: RouteRecordRaw[] = [
         name:"userInfo",
         component: UserInfoPage,
       },
-      {
-        path: "order/staff",          // ⭐
-        name: "orderStaff",           // ⭐
-        component: OrderStaffView,    // ⭐
-      },
+
       {
         path: "order/customer",       // ⭐
         name: "orderCustomer",        // ⭐
@@ -63,6 +60,10 @@ const routes: RouteRecordRaw[] = [
         path: "order/rider",          // ⭐
         name: "orderRider",           // ⭐
         component: OrderRiderView,    // ⭐
+      }, {
+        path: "order/customeorderlist",          // ⭐
+        name: "orderCustomerlist",           // ⭐
+        component: OrderList,    // ⭐
       },
       { path: "order/cancel", // ⭐ 新增路由
         name: "orderCancel",
@@ -73,7 +74,14 @@ const routes: RouteRecordRaw[] = [
     path:"/admin",
     component: AdminLayout,
     children: [
+
       {
+        path: "order/staff",          // ⭐
+        name: "orderStaff",           // ⭐
+        component: OrderStaffView,    // ⭐
+      },
+      {
+
         path: "dish/list",
         name: "dishList",
         component: () => import("@/page/employee/dish/Index.vue")

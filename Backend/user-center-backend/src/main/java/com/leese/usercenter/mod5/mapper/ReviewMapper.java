@@ -19,13 +19,13 @@ public interface ReviewMapper extends BaseMapper<Review> {
      * 根据订单ID查询评价
      */
     @Select("SELECT * FROM review WHERE orderId = #{orderId} AND isDelete = 0")
-    Review selectByOrderId(Long orderId);
+    Review selectByOrderId(Integer orderId);
 
     /**
      * 根据用户ID查询评价
      */
     @Select("SELECT * FROM review WHERE userId = #{userId} AND isDelete = 0 ORDER BY createTime DESC")
-    List<Review> selectByUserId(Long userId);
+    List<Review> selectByUserId(Integer userId);
 
     /**
      * 根据菜品ID查询评价

@@ -75,7 +75,7 @@ public class ReviewServiceImpl extends ServiceImpl<ReviewMapper, Review>
     }
 
     @Override
-    public ReviewResponse getReviewByOrderId(Long orderId) {
+    public ReviewResponse getReviewByOrderId(Integer orderId) {
         Review review = this.baseMapper.selectByOrderId(orderId);
         if (review == null) {
             return null;
@@ -84,7 +84,7 @@ public class ReviewServiceImpl extends ServiceImpl<ReviewMapper, Review>
     }
 
     @Override
-    public List<ReviewResponse> getReviewsByUserId(Long userId) {
+    public List<ReviewResponse> getReviewsByUserId(Integer userId) {
         List<Review> reviews = this.baseMapper.selectByUserId(userId);
         List<ReviewResponse> responses = new ArrayList<>();
         for (Review review : reviews) {

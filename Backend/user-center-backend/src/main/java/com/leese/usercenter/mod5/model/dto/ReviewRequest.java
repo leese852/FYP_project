@@ -2,14 +2,11 @@ package com.leese.usercenter.mod5.model.dto;
 
 import java.util.List;
 
-/**
- * 评价请求
- */
 public class ReviewRequest {
     /**
      * 订单ID
      */
-    private Long orderId;
+    private Integer orderId;
 
     /**
      * 评分（1-5星）
@@ -29,14 +26,14 @@ public class ReviewRequest {
     /**
      * 用户ID
      */
-    private Long userId;
+    private Integer userId;
 
     /**
      * 菜品评分内部类
      */
     public static class DishRating {
-        private Long dishId;
-        private Integer rating;
+        private Long dishId;     // 保持Long（dish_id是bigint）
+        private Integer rating;  // 保持Integer（rating是tinyint）
 
         // Getters and Setters
         public Long getDishId() { return dishId; }
@@ -47,8 +44,8 @@ public class ReviewRequest {
     }
 
     // Getters and Setters
-    public Long getOrderId() { return orderId; }
-    public void setOrderId(Long orderId) { this.orderId = orderId; }
+    public Integer getOrderId() { return orderId; }
+    public void setOrderId(Integer orderId) { this.orderId = orderId; }
 
     public Integer getRating() { return rating; }
     public void setRating(Integer rating) { this.rating = rating; }
@@ -59,6 +56,6 @@ public class ReviewRequest {
     public List<DishRating> getDishRatings() { return dishRatings; }
     public void setDishRatings(List<DishRating> dishRatings) { this.dishRatings = dishRatings; }
 
-    public Long getUserId() { return userId; }
-    public void setUserId(Long userId) { this.userId = userId; }
+    public Integer getUserId() { return userId; }
+    public void setUserId(Integer userId) { this.userId = userId; }
 }

@@ -13,7 +13,6 @@ import java.util.Date;
 /**
  * 支付记录
  */
-// 保持原来的代码，但要修改字段映射
 @Data
 @TableName(value = "payment_records")
 public class PaymentRecord implements Serializable {

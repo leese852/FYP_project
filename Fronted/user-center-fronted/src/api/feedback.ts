@@ -1,4 +1,4 @@
-import myAxios from "@/request";
+import myAxios from "axios";
 import type { FeedbackRequest, FeedbackResponse } from '@/types/feedback'
 
 export const submitFeedback = async(data: FeedbackRequest) => {

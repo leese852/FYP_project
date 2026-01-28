@@ -3,7 +3,7 @@ package com.leese.usercenter.mod4.Order;
 import com.leese.usercenter.command.Command;
 import com.leese.usercenter.service.OrderService;
 
-public abstract class AbstractOrderCommand implements Command {
+public abstract class AbstractOrderCommand extends Command {
     protected final OrderService orderService;
     protected Long orderId;
 

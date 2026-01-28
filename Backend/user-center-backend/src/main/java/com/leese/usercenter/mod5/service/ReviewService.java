@@ -19,12 +19,12 @@ public interface ReviewService {
     /**
      * 根据订单ID查询评价
      */
-    ReviewResponse getReviewByOrderId(Long orderId);
+    ReviewResponse getReviewByOrderId(Integer orderId);
 
     /**
      * 根据用户ID查询评价列表
      */
-    List<ReviewResponse> getReviewsByUserId(Long userId);
+    List<ReviewResponse> getReviewsByUserId(Integer userId);
 
     /**
      * 根据菜品ID查询评价列表

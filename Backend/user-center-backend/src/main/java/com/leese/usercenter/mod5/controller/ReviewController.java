@@ -3,9 +3,12 @@ package com.leese.usercenter.mod5.controller;
 import com.leese.usercenter.mod5.model.dto.ReviewRequest;
 import com.leese.usercenter.mod5.model.dto.ReviewResponse;
 import com.leese.usercenter.mod5.service.ReviewService;
+import com.leese.usercenter.model.entity.User;
+import com.leese.usercenter.utils.AuthUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -22,9 +25,13 @@ public class ReviewController {
      * 提交评价
      */
     @PostMapping("/submit")
-    public ReviewResponse submitReview(@RequestBody ReviewRequest reviewRequest) {
-        // 临时设置用户ID（测试用）
-        reviewRequest.setUserId(1L);
+    public ReviewResponse submitReview(@RequestBody ReviewRequest reviewRequest,
+                                       HttpServletRequest request) {
+        // 获取真实登录用户
+        User currentUser = AuthUtil.checkUserLogin(request);
+
+        // 设置真实用户ID（ReviewRequest.userId是Integer）
+        reviewRequest.setUserId(currentUser.getId());
 
         // 手动验证
         if (reviewRequest.getOrderId() == null) {
@@ -41,7 +48,7 @@ public class ReviewController {
      * 根据订单ID查询评价
      */
     @GetMapping("/order/{orderId}")
-    public ReviewResponse getReviewByOrderId(@PathVariable Long orderId) {
+    public ReviewResponse getReviewByOrderId(@PathVariable Integer orderId) {
         return reviewService.getReviewByOrderId(orderId);
     }
 
@@ -49,7 +56,7 @@ public class ReviewController {
      * 根据用户ID查询评价列表
      */
     @GetMapping("/user/{userId}")
-    public List<ReviewResponse> getReviewsByUserId(@PathVariable Long userId) {
+    public List<ReviewResponse> getReviewsByUserId(@PathVariable Integer userId) {
         return reviewService.getReviewsByUserId(userId);
     }
 

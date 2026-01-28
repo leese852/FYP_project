@@ -3,8 +3,12 @@ package com.leese.usercenter.mod5.controller;
 import com.leese.usercenter.mod5.model.dto.PaymentRequest;
 import com.leese.usercenter.mod5.model.dto.PaymentResponse;
 import com.leese.usercenter.mod5.service.PaymentService;
+import com.leese.usercenter.model.entity.User;
+import com.leese.usercenter.utils.AuthUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * 支付控制器
@@ -20,9 +24,13 @@ public class PaymentController {
      * 处理支付
      */
     @PostMapping("/process")
-    public PaymentResponse processPayment(@RequestBody PaymentRequest paymentRequest) {
-        // 临时设置用户ID（测试用）
-        paymentRequest.setUserId(1L);
+    public PaymentResponse processPayment(@RequestBody PaymentRequest paymentRequest,
+                                          HttpServletRequest request) {
+        // 获取真实登录用户
+        User currentUser = AuthUtil.checkUserLogin(request);
+
+        // 设置真实用户ID（PaymentRequest.userId是Long）
+        paymentRequest.setUserId(Long.valueOf(currentUser.getId()));
 
         // 手动验证
         if (paymentRequest.getOrderId() == null) {

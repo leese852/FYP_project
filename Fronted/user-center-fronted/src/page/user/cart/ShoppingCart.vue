@@ -44,6 +44,29 @@
 
     <a-spin :spinning="loading">
       <div v-if="cartItems.length" class="cart-content">
+        <!-- 收貨地址選擇區塊 -->
+        <div class="address-section">
+          <span class="label">收貨地址：</span>
+          <a-select
+              v-model:value="selectedAddressId"
+              :loading="addressLoading"
+              placeholder="請選擇收貨地址"
+              style="min-width: 260px"
+          >
+            <a-select-option
+                v-for="addr in addressList"
+                :key="addr.id"
+                :value="addr.id"
+            >
+              {{ addr.contactName }}（{{ addr.contactPhone }}）- {{ addr.address }}
+              <span v-if="addr.isDefault === 1">【默認】</span>
+            </a-select-option>
+          </a-select>
+          <a-button type="link" @click="router.push('/user/address')">
+            管理地址
+          </a-button>
+        </div>
+
         <a-table
             :dataSource="cartItems"
             :columns="columns"
@@ -119,10 +142,12 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { Table, Modal, message, Spin, Checkbox } from 'ant-design-vue'
+import { Table, Modal, message } from 'ant-design-vue'
 import { DeleteOutlined, ShoppingCartOutlined } from '@ant-design/icons-vue'
 import type { TableColumnsType } from 'ant-design-vue'
 import { getAllCart, deleteCart, deleteAllCart, addCart } from '@/api/cart'
+import { getAddressList } from '@/api/address'
+import { placeOrderFromCart } from '@/api/order'
 
 const router = useRouter()
 const cartItems = ref<any[]>([])
@@ -130,6 +155,11 @@ const selectedRowKeys = ref<number[]>([])  // 选中的商品ID数组
 const loading = ref(false)
 const selectAll = ref(false)
 const indeterminate = ref(false)
+
+// 地址相關
+const addressList = ref<any[]>([])
+const selectedAddressId = ref<number | null>(null)
+const addressLoading = ref(false)
 
 // 计算选中的商品
 const selectedItems = computed(() => {
@@ -278,6 +308,24 @@ const loadCart = async () => {
   }
 }
 
+// 加載用戶地址列表
+const loadAddressList = async () => {
+  try {
+    addressLoading.value = true
+    const res = await getAddressList()
+    const list = res?.data?.data || []
+    addressList.value = list
+    // 默認選中「默認地址」
+    const defaultAddr = list.find((item: any) => item.isDefault === 1)
+    selectedAddressId.value = defaultAddr ? defaultAddr.id : (list[0]?.id ?? null)
+  } catch (error: any) {
+    console.error('加載地址列表失敗:', error)
+    addressList.value = []
+  } finally {
+    addressLoading.value = false
+  }
+}
+
 // 删除单个商品
 const handleRemoveItem = async (id: number) => {
   Modal.confirm({
@@ -374,33 +422,39 @@ const handleQuantityChange = async (item: any) => {
   }
 }
 
-// 结算选中的商品
-const handleCheckout = () => {
+// 结算选中的商品 => 調用下單接口
+const handleCheckout = async () => {
   if (!selectedItems.value.length) {
     message.warning('请选择要结算的商品')
     return
   }
 
-  // 这里可以跳转到订单确认页面，传递选中的商品
-  const checkoutData = {
-    items: selectedItems.value,
-    totalItems: selectedTotalItems.value,
-    totalAmount: selectedAmount.value
+  if (!selectedAddressId.value) {
+    message.warning('請先選擇收貨地址')
+    return
   }
 
-  console.log('结算的商品数据:', checkoutData)
-  message.info(`准备结算 ${selectedItems.value.length} 件商品，总金额 ¥${selectedAmount.value.toFixed(2)}`)
-
-  // 实际使用时可以跳转到订单页面
-  // router.push({
-  //   path: '/checkout',
-  //   query: { items: JSON.stringify(selectedRowKeys.value) }
-  // })
+  try {
+    const success = await placeOrderFromCart(selectedAddressId.value)
+    if (success) {
+      message.success(`下單成功，已生成訂單！`)
+      // 重新加載購物車（後端已清空）
+      await loadCart()
+      // 跳轉到「我的訂單」頁面
+      router.push('/order/customeorderlist')
+    } else {
+      message.error('下單失敗，請稍後重試')
+    }
+  } catch (error: any) {
+    console.error('下單失敗:', error)
+    message.error(error?.message || '下單失敗')
+  }
 }
 
 // 初始化
 onMounted(() => {
   loadCart()
+  loadAddressList()
 })
 </script>
 
@@ -443,6 +497,17 @@ onMounted(() => {
 
 .cart-content {
   margin-top: 20px;
+}
+
+.address-section {
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.address-section .label {
+  font-weight: 500;
 }
 
 .dish-info {

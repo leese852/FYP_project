@@ -1,4 +1,4 @@
-import request from '@/utils/request'
+import request from 'axios'
 import type { FeedbackRequest, FeedbackResponse } from '@/types/feedback'
 
 export function submitFeedback(data: FeedbackRequest) {

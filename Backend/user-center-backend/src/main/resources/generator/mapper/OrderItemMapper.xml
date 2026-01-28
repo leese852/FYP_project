@@ -25,6 +25,11 @@
         WHERE orderId = #{orderId}
     </select>
 
+    <insert id="insert" parameterType="com.leese.usercenter.model.entity.OrderItemEntity">
+        INSERT INTO order_items (orderId, dishId, dishName, dishFlavor, quantity, price)
+        VALUES (#{orderId}, #{dishId}, #{dishName}, #{dishFlavor}, #{quantity}, #{price})
+    </insert>
+
     <!-- 示例：更新数量和价格 -->
     <update id="updateOrderItem">
         UPDATE order_items

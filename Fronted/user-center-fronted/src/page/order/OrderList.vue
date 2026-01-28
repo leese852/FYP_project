@@ -2,14 +2,14 @@
   <a-card title="我的訂單">
     <a-spin :spinning="loading">
       <a-list bordered itemLayout="horizontal">
-        <a-list-item
-            v-for="item in orders"
-            :key="item.orderId"
-            @click="goToOrder(item.orderId)"
+      <a-list-item
+          v-for="item in orders"
+          :key="item.id"
+          @click="goToOrder(item.id)"
             style="cursor: pointer"
         >
           <a-list-item-meta
-              :title="`訂單編號: ${item.orderId}`"
+            :title="`訂單編號: ${item.orderId}`"
               :description="`狀態: ${statusText(item.status)} | 總金額: $${item.totalAmount}`"
           />
         </a-list-item>
@@ -65,8 +65,8 @@ onMounted(async () => {
   }
 });
 
-function goToOrder(orderId: string) {
-  router.push({ path: "/order/view", query: { orderId } });
+function goToOrder(id: number) {
+  router.push({ path: "/order/view", query: { id } });
 }
 
 function statusText(status: number) {

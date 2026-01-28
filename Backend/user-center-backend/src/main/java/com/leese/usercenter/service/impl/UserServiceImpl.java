@@ -102,10 +102,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             return null;
         }
         //用戶名校驗
-        final String USERNAME_REGEX = "^[a-zA-Z0-9]{3,20}$";
-        if(!userAccount.matches(USERNAME_REGEX)){
-            return null;
-        }
+//        final String USERNAME_REGEX = "^[a-zA-Z0-9]{3,20}$";
+//        if(!userAccount.matches(USERNAME_REGEX)){
+//            return null;
+//        }
         //查詢用戶是否存在
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("userAccount",userAccount);

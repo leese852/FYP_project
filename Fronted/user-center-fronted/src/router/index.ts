@@ -67,7 +67,13 @@ const routes: RouteRecordRaw[] = [
       },
       { path: "order/cancel", // ⭐ 新增路由
         name: "orderCancel",
-        component: OrderCancelPage, }
+        component: OrderCancelPage,
+      },
+      {
+        path: "user/cart",
+        name: "shopping cart",
+        component: ()=>import("@/page/user/cart/ShoppingCart.vue")
+      }
     ]
   },
   {
@@ -96,6 +102,7 @@ const routes: RouteRecordRaw[] = [
         name: "updateDish",
         component: ()=> import("@/page/employee/dish/Update.vue")
       },
+
     ]
   }
 ];

@@ -29,7 +29,7 @@ public class CartController {
         return ResultUtils.success();
     }
 
-    @GetMapping("/getAll")
+    @GetMapping("/list")
     public BaseResponse<List<Cart>> getAllCart(HttpServletRequest request){
         return ResultUtils.success(cartService.getAllCart(request));
     }

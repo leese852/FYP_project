@@ -134,6 +134,11 @@ const items = ref([
     label: "orderlist",
     title: "orderlist",
   },
+  {
+    key: "/user/cart",
+    label: "购物车",
+    title: "购物车",
+  }
 ]);
 </script>
 

@@ -11,6 +11,12 @@ import router from "./router";
 import Antd from "ant-design-vue";
 import "ant-design-vue/dist/reset.css";
 
+window.addEventListener('error', e => {
+    if (e.message && e.message.includes('ResizeObserver')) {
+        e.stopImmediatePropagation();
+        return true;
+    }
+});
 // 7. 创建 Pinia 实例（状态管理容器）
 //    后续可以在组件中通过 `useStore()` 访问全局状态
 const pinia = createPinia();
@@ -22,10 +28,3 @@ createApp(App) // 创建以 App.vue 为根组件的应用实例
   .use(router) // 注册 Vue Router（启用路由功能）
   .mount("#app"); // 将整个应用挂载到 index.html 中 id="app" 的 DOM 元素上
 
-const originalError = console.error
-console.error = (...args) => {
-    if (/ResizeObserver/.test(args[0])) {
-        return // 忽略 ResizeObserver 错误
-    }
-    originalError.apply(console, args)
-}

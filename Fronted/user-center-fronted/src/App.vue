@@ -35,7 +35,8 @@ import {onMounted} from "vue";
 // onMounted(() => checkLogin());
 // //编写脚本默认获取用户信息
 
-// 应用启动时查询一次 避免刷新調用戶信息：》 很絕望
+
+// 应用启动时查询一次 避免刷新調用戶信息：》
 const loginUserStore = useLoginUserStore();
 // loginUserStore.fetchLoginUser();
 onMounted(() => loginUserStore.fetchLoginUser());

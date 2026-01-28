@@ -41,6 +41,25 @@ public class OrderController {
     }
 
     /**
+     * 從當前用戶購物車生成訂單（商品下單），需要前端傳入地址 ID
+     */
+    @PostMapping("/place")
+    public BaseResponse<OrderEntity> placeOrder(@RequestParam Long addressId,
+                                                HttpServletRequest request) {
+        User user = AuthUtil.checkUserLogin(request);
+        if (user == null || user.getId() == null) {
+            log.warn("⚠️ 下單失敗，未登入或 session 無效");
+            throw new BusinessException(ErrorCode.NOT_LOGIN, "未登入或 session 無效");
+        }
+        if (addressId == null || addressId <= 0) {
+            throw new BusinessException(ErrorCode.PARAM_ERROR, "addressId 必須傳");
+        }
+        log.info("🧾 開始為用戶下單，userId = {}, addressId = {}", user.getId(), addressId);
+        OrderEntity order = orderService.createOrderFromCart(user.getId(), addressId);
+        return ResultUtils.success(order);
+    }
+
+    /**
      * 獲取訂單詳情
      */
     @GetMapping("/{orderId}")

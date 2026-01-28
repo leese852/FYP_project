@@ -57,6 +57,11 @@ const routes: RouteRecordRaw[] = [
         component: OrderCustomerView, // ⭐
       },
       {
+        path: "order/view",           // 訂單詳情（客戶查看）
+        name: "orderView",
+        component: OrderCustomerView,
+      },
+      {
         path: "order/rider",          // ⭐
         name: "orderRider",           // ⭐
         component: OrderRiderView,    // ⭐

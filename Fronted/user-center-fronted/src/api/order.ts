@@ -11,10 +11,20 @@ export async function getUserOrders(): Promise<Order[]> {
 }
 
 /**
- * 獲取訂單詳情
+ * 從當前用戶購物車生成訂單（下單），需要傳入地址 ID
  */
-export async function getOrderDetails(orderId: string): Promise<Order | null> {
-    const res = await axios.get(`/api/orders/${orderId}`, { withCredentials: true });
+export async function placeOrderFromCart(addressId: number): Promise<boolean> {
+    const res = await axios.post(`/api/orders/place?addressId=${addressId}`, null, {
+        withCredentials: true,
+    });
+    return res.data?.code === 0;
+}
+
+/**
+ * 獲取訂單詳情（按數據庫主鍵 ID 查詢）
+ */
+export async function getOrderDetails(id: number): Promise<Order | null> {
+    const res = await axios.get(`/api/orders/${id}`, { withCredentials: true });
     return res.data?.data ?? null;
 }
 

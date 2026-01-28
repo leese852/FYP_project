@@ -78,7 +78,17 @@ const routes: RouteRecordRaw[] = [
         path: "user/cart",
         name: "shopping cart",
         component: ()=>import("@/page/user/cart/ShoppingCart.vue")
-      }
+      },
+      {
+        path: "user/feedback",
+        name: "userFeedback",
+        component: () => import("@/page/user/feedback/FeedbackSubmitPage.vue")
+      },
+      {
+        path: "user/feedback/my",
+        name: "myFeedback",
+        component: () => import("@/page/user/feedback/MyFeedbackPage.vue")
+      },
     ]
   },
   {
@@ -106,6 +116,16 @@ const routes: RouteRecordRaw[] = [
         path: "dish/update/:id",
         name: "updateDish",
         component: ()=> import("@/page/employee/dish/Update.vue")
+      },
+      {
+        path: "feedback",
+        name: "feedbackManage",
+        component: () => import("@/page/employee/feedback/FeedbackManagePage.vue")
+      },
+      {
+        path: "feedback/:id",
+        name: "feedbackDetail",
+        component: () => import("@/page/employee/feedback/FeedbackDetailPage.vue")
       },
 
     ]

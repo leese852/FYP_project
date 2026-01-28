@@ -41,22 +41,31 @@ public class OrderController {
     }
 
     /**
-     * 獲取訂單詳情
+     * 獲取訂單詳情（用主鍵 id 查詢）
      */
-    @GetMapping("/{orderId}")
-    public BaseResponse<OrderVO> getOrderDetails(@PathVariable Long orderId) {
-        log.info("📦 查詢訂單詳情，orderId = {}", orderId);
-        OrderVO order = orderService.getOrderDetails(orderId);
+    /**
+     * 獲取訂單詳情（用主鍵 id 查詢，包含菜品列表）
+     */
+    @GetMapping("/{id}")
+    public BaseResponse<OrderVO> getOrderDetails(@PathVariable Long id) {
+        log.info("📦 查詢訂單詳情，id = {}", id);
+        OrderVO order = orderService.getOrderDetails(id);
+        if (order == null) {
+            throw new BusinessException(ErrorCode.ORDER_NOT_FOUND, "訂單不存在");
+        }
         return ResultUtils.success(order);
     }
+
+
+
 
     /**
      * 更新訂單狀態
      */
-    @PutMapping("/{orderId}/status")
-    public BaseResponse<Void> updateOrderStatus(@PathVariable Long orderId, @RequestParam Integer status) {
-        log.info("✏️ 更新訂單狀態，orderId = {}, status = {}", orderId, status);
-        orderService.updateOrderStatus(orderId, status);
+    @PutMapping("/{id}/status")
+    public BaseResponse<Void> updateOrderStatus(@PathVariable Long id, @RequestParam Integer status) {
+        log.info("✏️ 更新訂單狀態，id = {}, status = {}", id, status);
+        orderService.updateOrderStatus(id, status);
         return ResultUtils.success();
     }
 

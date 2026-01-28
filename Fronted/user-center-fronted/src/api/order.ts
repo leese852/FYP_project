@@ -13,10 +13,12 @@ export async function getUserOrders(): Promise<Order[]> {
 /**
  * 獲取訂單詳情
  */
-export async function getOrderDetails(orderId: string): Promise<Order | null> {
-    const res = await axios.get(`/api/orders/${orderId}`, { withCredentials: true });
+// src/api/order.ts
+export async function getOrderDetails(id: number): Promise<Order | null> {
+    const res = await axios.get(`/api/orders/${id}`, { withCredentials: true });
     return res.data?.data ?? null;
 }
+
 
 /**
  * 更新訂單狀態

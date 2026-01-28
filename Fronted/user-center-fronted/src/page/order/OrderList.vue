@@ -4,15 +4,17 @@
       <a-list bordered itemLayout="horizontal">
         <a-list-item
             v-for="item in orders"
-            :key="item.orderId"
-            @click="goToOrder(item.orderId)"
+            :key="item.id"
+            @click="goToOrder(item.id)"
             style="cursor: pointer"
         >
+          <!-- 顯示用還是用 orderId -->
           <a-list-item-meta
               :title="`訂單編號: ${item.orderId}`"
               :description="`狀態: ${statusText(item.status)} | 總金額: $${item.totalAmount}`"
           />
         </a-list-item>
+
       </a-list>
 
       <!-- 空列表提示 -->
@@ -27,7 +29,7 @@
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { getUserOrders } from "@/api/order";
-import { Order } from "@/types/order";
+import type { Order } from "@/types/order";
 import { useLoginUserStore } from "@/store/useLoginUserStore";
 
 const router = useRouter();
@@ -37,7 +39,7 @@ const loading = ref(false);
 const loginUserStore = useLoginUserStore();
 
 onMounted(async () => {
-  await loginUserStore.fetchLoginUser(); // 確保有用戶信息
+  await loginUserStore.fetchLoginUser();
 
   if (!loginUserStore.loginUser?.id) {
     console.warn("未登入，跳轉到登入頁");
@@ -48,25 +50,18 @@ onMounted(async () => {
   loading.value = true;
   try {
     const res = await getUserOrders();
-    orders.value = res; // ✅ res 已經是陣列
-
+    orders.value = res;
     console.log("✅ 訂單接口返回原始數據:", res);
-
-    // ⚠️ 後端返回 BaseResponse 格式，需要取 data.data
-
   } catch (err: any) {
     console.error("❌ 載入訂單失敗:", err);
-    if (err.response) {
-      console.error("❌ 錯誤響應內容:", err.response.data);
-    }
     orders.value = [];
   } finally {
     loading.value = false;
   }
 });
 
-function goToOrder(orderId: string) {
-  router.push({ path: "/order/view", query: { orderId } });
+function goToOrder(id: number) {
+  router.push({ name: "orderCustomer", params: { orderId: id } });
 }
 
 function statusText(status: number) {

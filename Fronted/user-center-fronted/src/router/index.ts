@@ -52,9 +52,10 @@ const routes: RouteRecordRaw[] = [
       },
 
       {
-        path: "order/customer",       // ⭐
-        name: "orderCustomer",        // ⭐
-        component: OrderCustomerView, // ⭐
+        path: "order/customer/:orderId",   // 加上 :orderId
+        name: "orderCustomer",
+        component: OrderCustomerView,
+        props: true,
       },
       {
         path: "order/rider",          // ⭐

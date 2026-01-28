@@ -7,23 +7,27 @@
 
     <!-- 映射数据库字段到 RiderEntity -->
     <resultMap id="BaseResultMap" type="com.leese.usercenter.model.entity.RiderEntity">
-        <id property="employeeId" column="employee_id"/>
+        <id property="employeeId" column="employeeId"/>
         <result property="name" column="name"/>
         <result property="role" column="role"/>
-        <result property="loginCredentials" column="login_credentials"/>
-        <result property="restaurantId" column="restaurant_id"/>
+        <result property="loginCredentials" column="loginCredentials"/>
+        <result property="restaurantId" column="restaurantId"/>
+        <result property="phone" column="phone"/>
+        <result property="createTime" column="createTime"/>
+        <result property="updateTime" column="updateTime"/>
+        <result property="isDelete" column="isDelete"/>
     </resultMap>
 
     <!-- 可复用的列清单 -->
     <sql id="Base_Column_List">
-        employee_id, name, role, login_credentials, restaurant_id
+        employeeId, name, role, loginCredentials, restaurantId, phone, createTime, updateTime, isDelete
     </sql>
 
     <!-- 查询骑手信息 -->
     <select id="findById" resultMap="BaseResultMap">
         SELECT <include refid="Base_Column_List"/>
-        FROM riders
-        WHERE employee_id = #{employeeId}
+        FROM rider
+        WHERE employeeId = #{employeeId}
     </select>
 
 </mapper>

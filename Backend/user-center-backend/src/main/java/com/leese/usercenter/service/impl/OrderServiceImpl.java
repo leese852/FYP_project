@@ -114,6 +114,10 @@ public class OrderServiceImpl implements OrderService {
 
         return vo;
     }
+    @Override
+    public OrderEntity findById(Long id) {
+        return orderMapper.findById(id);
+    }
 
     private String mapStatus(Integer status) {
         if (status == null) {

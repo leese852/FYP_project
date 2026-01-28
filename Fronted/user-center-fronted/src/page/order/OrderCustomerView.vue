@@ -1,70 +1,82 @@
 <template>
   <a-card title="訂單詳情" class="order-card">
-    <!-- 訂單基本資訊 -->
-    <p>訂單編號：{{ order.orderId }}</p>
-    <p>
-      狀態：
-      <a-tag :color="statusColor(order.status)">
-        {{ statusText(order.status) }}
-      </a-tag>
-    </p>
+    <a-spin :spinning="loading">
+      <template v-if="order">
+        <!-- 訂單基本資訊 -->
+        <p>訂單編號：{{ order.orderId }}</p>
+        <p>狀態：
+          <a-tag :color="statusColor(order.status)">
+            {{ statusText(order.status) }}
+          </a-tag>
+        </p>
+        <p>總金額：${{ order.totalAmount }}</p>
+        <p>打包費：${{ order.packAmount }}</p>
+        <p>支付方式：{{ order.payMethod }}</p>
+        <p>下單時間：{{ order.createTime }}</p>
 
-    <!-- 🥘 顯示訂單菜品列表 -->
-    <a-table
-        :dataSource="order.items"
-        :columns="itemColumns"
-        rowKey="id"
-        size="small"
-        bordered
-        style="margin-top: 20px"
-        :pagination="false"
-    />
+        <!-- 🥘 顯示訂單菜品列表 -->
+        <a-table
+            :dataSource="order.items"
+            :columns="itemColumns"
+            rowKey="id"
+            size="small"
+            bordered
+            style="margin-top: 20px"
+            :pagination="false"
+        />
 
-    <!-- 🚚 派送中顯示騎手資訊 -->
-    <div v-if="order.status === 4" style="margin-top: 20px">
-      <p>騎手姓名：{{ order.rider?.name }}</p>
-      <p>騎手電話：{{ order.rider?.phone }}</p>
-      <p>派送位置：{{ order.rider?.location }}</p>
-    </div>
+        <!-- 💰 價格區塊 -->
+        <div class="price-summary">
+          <div v-for="item in order.items" :key="item.id">
+            - {{ item.dishName }} x{{ item.quantity }} ${{ (item.quantity || 0) * (item.price || 0) }}
+          </div>
+          <div>打包費: ${{ order.packAmount }}</div>
+          <div>支付方式: {{ order.payMethod }}</div>
+          <div class="total">Total amount: ${{ order.totalAmount }}</div>
+        </div>
 
-    <!-- 💰 價格區塊 -->
-    <!-- 💰 價格區塊 -->
-    <div class="price-summary">
-      <div v-for="item in order.items" :key="item.id">
-        - {{ item.dishName }} x{{ item.quantity }} ${{ item.quantity * item.price }}
-      </div>
-      <div>打包費: ${{ order.packAmount }}</div>
-      <div>支付方式: {{ order.payMethod }}</div>
-      <div class="total">Total amount: ${{ order.totalAmount }}</div>
-    </div>
+        <!-- ❌ 取消訂單按鈕 -->
+        <div class="cancel-btn">
+          <a-button type="primary" danger @click="confirmCancel">取消訂單</a-button>
+        </div>
+      </template>
 
-
-    <!-- ❌ 取消訂單按鈕 -->
-    <div class="cancel-btn">
-      <a-button type="primary" danger @click="confirmCancel">取消訂單</a-button>
-    </div>
+      <template v-else>
+        <a-empty description="未找到該訂單" />
+      </template>
+    </a-spin>
   </a-card>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
-import { Modal } from "ant-design-vue";
-import { useRouter } from "vue-router";
+import { ref, onMounted } from "vue";
+import { Modal, message } from "ant-design-vue";
+import { useRoute, useRouter } from "vue-router";
+import { getOrderDetails } from "@/api/order";
 
+const route = useRoute();
 const router = useRouter();
 
-const order = ref({
-  orderId: "ORD001",
-  totalAmount: 120.5,
-  status: 4,
-  rider: { name: "王小明", phone: "98765432", location: "九龍城區" },
-  packAmount: 10,
-  payMethod: "信用卡",
-  items: [
-    { id: 1, dishName: "宮保雞丁", dishFlavor: "微辣", quantity: 2, price: 40 },
-    { id: 2, dishName: "酸辣湯", dishFlavor: "正常", quantity: 1, price: 30 },
-  ],
-});
+interface OrderItem {
+  id: number;
+  dishName: string;
+  dishFlavor?: string;
+  quantity: number;
+  price: number;
+}
+
+interface OrderDetail {
+  orderId: string;
+  totalAmount: number;
+  status: number;
+  packAmount: number;
+  payMethod: string;
+  createTime?: string;
+  items: OrderItem[];
+}
+
+const order = ref<OrderDetail | null>(null);
+const loading = ref(false);
 
 const itemColumns = [
   { title: "菜品名稱", dataIndex: "dishName", key: "dishName" },
@@ -73,30 +85,74 @@ const itemColumns = [
   { title: "單價", dataIndex: "price", key: "price" },
 ];
 
+onMounted(async () => {
+  const idParam = route.query.id as string | undefined;
+  const id = idParam ? Number(idParam) : NaN;
+  if (!id || Number.isNaN(id)) {
+    message.error("缺少訂單 ID");
+    router.push("/order/customeorderlist");
+    return;
+  }
+
+  loading.value = true;
+  try {
+    const data = await getOrderDetails(id);
+    if (!data) {
+      message.error("未找到訂單信息");
+      order.value = null;
+    } else {
+      // 後端返回的是 OrderVO，字段名與這裡定義基本一致
+      order.value = {
+        orderId: data.orderId,
+        totalAmount: data.totalAmount,
+        status: data.status,
+        packAmount: data.packAmount,
+        payMethod: data.payMethod,
+        createTime: data.createTime,
+        // @ts-ignore
+        items: data.items || [],
+      };
+    }
+  } catch (e: any) {
+    console.error("載入訂單詳情失敗:", e);
+    message.error(e?.message || "載入訂單詳情失敗");
+    order.value = null;
+  } finally {
+    loading.value = false;
+  }
+});
+
 function statusText(status: number) {
   switch (status) {
+    case 1: return "待付款";
     case 2: return "待接單";
     case 3: return "已接單";
     case 4: return "派送中";
     case 5: return "已完成";
     case 6: return "已取消";
+    case 7: return "退款";
     default: return "未知";
   }
 }
 
 function statusColor(status: number) {
   switch (status) {
+    case 1: return "gold";
     case 2: return "blue";
     case 3: return "green";
     case 4: return "orange";
     case 5: return "cyan";
     case 6: return "red";
+    case 7: return "purple";
     default: return "default";
   }
 }
 
-// 🚨 取消訂單確認
+// 🚨 取消訂單確認（目前只跳轉到取消頁面，後端狀態更新另行實現）
 function confirmCancel() {
+  if (!order.value) {
+    return;
+  }
   Modal.confirm({
     title: "確認取消訂單",
     content: "您確定要取消這個訂單嗎？",
@@ -104,8 +160,7 @@ function confirmCancel() {
     cancelText: "否",
     okType: "danger",
     async onOk() {
-      // 跳轉到取消原因頁面
-      router.push({ path: "/order/cancel", query: { orderId: order.value.orderId } });
+      router.push({ path: "/order/cancel", query: { orderId: order.value?.orderId } });
     },
   });
 }

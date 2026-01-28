@@ -4,7 +4,7 @@ const { defineConfig } = require("@vue/cli-service");
 // 使用 defineConfig 包裹配置对象并导出
 module.exports = defineConfig({
   transpileDependencies: true,
-  // lintOnSave: false,
+  lintOnSave: false,
 
   // 配置開發伺服器代理
   devServer: {

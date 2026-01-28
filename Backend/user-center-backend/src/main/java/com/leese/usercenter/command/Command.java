@@ -1,2 +1,5 @@
 package com.leese.usercenter.command;
-public interface Command { void execute(); }
+
+public class Command {
+    public void execute() {}
+}

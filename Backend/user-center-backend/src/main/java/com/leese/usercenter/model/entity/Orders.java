@@ -52,5 +52,7 @@ public class Orders {
 
     private Date updateTime;
 
+    private Integer riderId;
+
     private Integer isDelete;
 }

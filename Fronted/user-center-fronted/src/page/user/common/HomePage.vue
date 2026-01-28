@@ -53,9 +53,9 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
-import { dishItem } from "@/types/dish";
-import { getDishList } from "@/api/dish";
+import {onMounted, ref} from 'vue';
+import {dishItem} from "@/types/dish";
+import {getDishList} from "@/api/dish";
 import router from "@/router";
 
 const dishes = ref<dishItem[]>([]);
@@ -113,8 +113,12 @@ onMounted(() => {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .loading-container p {
@@ -134,7 +138,7 @@ onMounted(() => {
   padding: 40px;
   background: white;
   border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
 }
 
 .empty-icon {

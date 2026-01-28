@@ -15,7 +15,11 @@ public interface OrderMapper {
 
     List<OrderEntity> findAll(); // ✅ 新增
 
-    void save(@Param("order") OrderEntity order);
+    /**
+     * 保存訂單主表
+     * 這裡不使用 @Param，直接讓 MyBatis 以實體屬性名綁定（對應 XML 中的 #{orderId}, #{userId} 等）
+     */
+    void save(OrderEntity order);
 
     void updateStatus(@Param("id") Long id, @Param("status") Integer status);
 

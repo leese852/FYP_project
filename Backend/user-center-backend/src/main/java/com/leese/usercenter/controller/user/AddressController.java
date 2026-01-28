@@ -19,26 +19,7 @@ import java.util.*;
 public class AddressController {
     @Autowired
     AddressService addressService;
-    @GetMapping("/debug")
-    public BaseResponse<Map<String, Object>> debugSession(HttpServletRequest request) {
-        Map<String, Object> result = new HashMap<>();
-        HttpSession session = request.getSession(false);
-        result.put("sessionId", session != null ? session.getId() : "no session");
-        result.put("sessionCreated", session != null ? new Date(session.getCreationTime()) : null);
-        result.put("sessionLastAccessed", session != null ? new Date(session.getLastAccessedTime()) : null);
 
-        if (session != null) {
-            Enumeration<String> attributeNames = session.getAttributeNames();
-            Map<String, Object> attributes = new HashMap<>();
-            while (attributeNames.hasMoreElements()) {
-                String name = attributeNames.nextElement();
-                attributes.put(name, session.getAttribute(name));
-            }
-            result.put("attributes", attributes);
-        }
-
-        return ResultUtils.success(result);
-    }
     @PostMapping("/add")
     public BaseResponse<String> addAddress(@RequestBody AddressDTO dto, HttpServletRequest request){
         log.info("要添加的地址信息：{}",dto);
@@ -72,4 +53,5 @@ public class AddressController {
         List<AddressDTO>addList = addressService.getUserAddresses(request);
         return ResultUtils.success(addList);
     }
+
 }

@@ -129,11 +129,16 @@ const items = ref([
     title: "地址管理",
   },
   {
-    key: "/user/register",
+    key: "/order/customeorderlist",
     icon: () => h(AppstoreOutlined),
-    label: "用户注册",
-    title: "用户注册",
+    label: "orderlist",
+    title: "orderlist",
   },
+  {
+    key: "/user/cart",
+    label: "购物车",
+    title: "购物车",
+  }
 ]);
 </script>
 

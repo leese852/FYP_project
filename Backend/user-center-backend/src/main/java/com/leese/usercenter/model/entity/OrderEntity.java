@@ -14,7 +14,7 @@ import java.sql.Timestamp;
 public class OrderEntity {
     private Long id;                   // 表主键 id
     private String orderId;            // 訂單編號 (VARCHAR)
-    private Long userId;               // 用户 id
+    private Integer userId;               // 用户 id
     private Long addressId;            // 地址 id
     private Integer status;            // 状态 (TINYINT: 1待付款 2待接單 3已接單 4派送中 5已完成 6已取消 7退款)
     private Double totalAmount;        // 总价钱
@@ -36,6 +36,5 @@ public class OrderEntity {
     private Long riderId;              // 配送騎手ID，關聯 rider 表
 
     // 其他快照欄位
-    private String rideAddress;        // 地址快照
-    private String orderComment;       // 订单备注
+     // 订单备注
 }

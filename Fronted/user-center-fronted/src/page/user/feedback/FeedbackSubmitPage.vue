@@ -1,4 +1,3 @@
-<!-- src/page/user/feedback/FeedbackSubmitPage.vue -->
 <template>
   <div style="padding: 50px; max-width: 600px; margin: 0 auto;">
     <h1 style="color: #333; border-bottom: 2px solid #4CAF50; padding-bottom: 10px;">
@@ -45,14 +44,14 @@
       <div style="display: flex; gap: 10px; margin-top: 30px;">
         <button
             @click="submitFeedback"
-            :disabled="!feedbackContent.trim()"
+            :disabled="!feedbackContent.trim() || submitting"
             :style="{
             padding: '12px 30px',
-            backgroundColor: feedbackContent.trim() ? '#4CAF50' : '#cccccc',
+            backgroundColor: (feedbackContent.trim() && !submitting) ? '#4CAF50' : '#cccccc',
             color: 'white',
             border: 'none',
             borderRadius: '4px',
-            cursor: feedbackContent.trim() ? 'pointer' : 'not-allowed',
+            cursor: (feedbackContent.trim() && !submitting) ? 'pointer' : 'not-allowed',
             fontSize: '16px',
             flex: 1
           }"
@@ -73,10 +72,17 @@
     <div v-if="showSuccess" style="margin-top: 20px; padding: 15px; background: #D4EDDA; color: #155724; border-radius: 4px;">
       反馈提交成功！感谢您的反馈。
     </div>
+
+    <!-- 错误提示 -->
+    <div v-if="errorMessage" style="margin-top: 20px; padding: 15px; background: #F8D7DA; color: #721C24; border-radius: 4px;">
+      {{ errorMessage }}
+    </div>
   </div>
 </template>
 
 <script>
+import { feedbackAPI } from '@/api/feedback'
+
 export default {
   name: 'FeedbackSubmitPage',
   data() {
@@ -84,26 +90,28 @@ export default {
       feedbackContent: '',
       feedbackType: 'SUGGESTION',
       submitting: false,
-      showSuccess: false
+      showSuccess: false,
+      errorMessage: ''
     }
   },
   methods: {
     async submitFeedback() {
       if (!this.feedbackContent.trim()) {
-        alert('请输入反馈内容')
+        this.errorMessage = '请输入反馈内容'
         return
       }
 
       this.submitting = true
+      this.errorMessage = ''
 
       try {
-        // 模拟API调用
-        await new Promise(resolve => setTimeout(resolve, 1000))
-
-        console.log('提交反馈:', {
-          type: this.feedbackType,
-          content: this.feedbackContent
+        // 调用真实API
+        const response = await feedbackAPI.submitFeedback({
+          content: this.feedbackContent,
+          type: this.feedbackType
         })
+
+        console.log('提交成功:', response)
 
         this.showSuccess = true
         this.feedbackContent = ''
@@ -114,8 +122,8 @@ export default {
         }, 3000)
 
       } catch (error) {
-        alert('提交失败，请重试')
-        console.error('提交错误:', error)
+        console.error('提交失败:', error)
+        this.errorMessage = error.response?.data?.message || '提交失败，请稍后重试'
       } finally {
         this.submitting = false
       }

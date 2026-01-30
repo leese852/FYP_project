@@ -9,12 +9,15 @@ import com.leese.usercenter.model.vo.OrderVO;
 import com.leese.usercenter.model.entity.User;
 import com.leese.usercenter.service.OrderService;
 import com.leese.usercenter.utils.AuthUtil;
+import com.leese.usercenter.mapper.OrderItemMapper;
+import com.leese.usercenter.model.entity.OrderItemEntity;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -24,6 +27,35 @@ public class OrderController {
 
     @Autowired
     private OrderService orderService;
+
+    @Autowired
+    private OrderItemMapper orderItemMapper;  // 添加這行
+
+    /**
+     * 獲取所有訂單（包含菜品詳情）- 用於後台管理
+     */
+    @GetMapping("/all")
+    public BaseResponse<List<OrderVO>> getAllOrdersWithDetails() {  // 修改方法名
+        log.info("📋 獲取所有訂單列表（包含詳情）");
+        try {
+            List<OrderEntity> orders = orderService.findAll();
+
+            // Convert to VO list
+            List<OrderVO> orderVOs = orders.stream()
+                    .map(order -> {
+                        // Get order items
+                        List<OrderItemEntity> items = orderItemMapper.findByOrderId(order.getId());
+                        // Convert to VO
+                        return orderService.getOrderDetails(order.getId());  // 使用已有的方法
+                    })
+                    .collect(Collectors.toList());
+
+            return ResultUtils.success(orderVOs);
+        } catch (Exception e) {
+            log.error("❌ 獲取所有訂單失敗", e);
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "系統異常");
+        }
+    }
 
     /**
      * 獲取當前用戶的訂單列表
@@ -41,9 +73,6 @@ public class OrderController {
     }
 
     /**
-     * 獲取訂單詳情（用主鍵 id 查詢）
-     */
-    /**
      * 獲取訂單詳情（用主鍵 id 查詢，包含菜品列表）
      */
     @GetMapping("/{id}")
@@ -56,9 +85,6 @@ public class OrderController {
         return ResultUtils.success(order);
     }
 
-
-
-
     /**
      * 更新訂單狀態
      */
@@ -70,10 +96,10 @@ public class OrderController {
     }
 
     /**
-     * 測試用：查詢所有訂單
+     * 測試用：查詢所有訂單（簡化版）
      */
     @GetMapping("/test/all")
-    public BaseResponse<List<OrderEntity>> getAllOrders() {
+    public BaseResponse<List<OrderEntity>> getAllOrdersTest() {  // 修改方法名
         log.info("🧪 測試查詢所有訂單");
         List<OrderEntity> orders = orderService.findAll();
         return ResultUtils.success(orders);

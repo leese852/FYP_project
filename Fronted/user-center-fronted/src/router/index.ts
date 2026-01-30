@@ -1,25 +1,25 @@
 import HomePage from "@/page/user/common/HomePage.vue";
 import UserLoginPage from "@/page/user/common/UserLoginPage.vue";
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
-
 import UserRegisterPage from "@/page/user/common/UserRegisterPage.vue";
 import DishDetailPage from "@/page/user/dish/DishDetailPage.vue";
 import AddressPage from "@/page/user/address/AddressPage.vue";
 import UserInfoPage from "@/page/user/common/UserInfoPage.vue";
-// import * as path from "node:path";
 import AdminLayout from "@/layout/AdminLayout.vue";
 import BasicLayout from "@/layout/BasicLayout.vue";
-import OrderStaffView from "@/page/order/OrderStaffView.vue";      // ⭐
-import OrderCustomerView from "@/page/order/OrderCustomerView.vue"; // ⭐
-import OrderRiderView from "@/page/order/OrderRiderView.vue";       // ⭐
+import OrderStaffView from "@/page/order/OrderStaffView.vue";
+import OrderCustomerView from "@/page/order/OrderCustomerView.vue";
+import OrderRiderView from "@/page/order/OrderRiderView.vue";
+import OrderDashboard from '@/page/order/OrderStaffmang.vue'
+import StaffOrderManagement from '@/page/order/StaffOrderManagement.vue'
 import OrderCancelPage from "@/page/order/OrderCancelPage.vue";
-import  OrderList from  "@/page/order/OrderList.vue";// ⭐ 新增 import
-// const routes: Array<RouteRecordRawOrderList
+import OrderList from "@/page/order/OrderList.vue";
+
 const routes: RouteRecordRaw[] = [
   {
     path: "/",
     component: BasicLayout,
-    children:[
+    children: [
       {
         path: "",
         name: "home",
@@ -47,38 +47,39 @@ const routes: RouteRecordRaw[] = [
       },
       {
         path: "user/info",
-        name:"userInfo",
+        name: "userInfo",
         component: UserInfoPage,
       },
-
       {
-        path: "order/customer/:orderId",   // 加上 :orderId
+        path: "order/customer/:orderId",
         name: "orderCustomer",
         component: OrderCustomerView,
         props: true,
       },
       {
-        path: "order/view",           // 訂單詳情（客戶查看）
+        path: "order/view",
         name: "orderView",
         component: OrderCustomerView,
       },
       {
-        path: "order/rider",          // ⭐
-        name: "orderRider",           // ⭐
-        component: OrderRiderView,    // ⭐
-      }, {
-        path: "order/customeorderlist",          // ⭐
-        name: "orderCustomerlist",           // ⭐
-        component: OrderList,    // ⭐
+        path: "order/rider",
+        name: "orderRider",
+        component: OrderRiderView,
       },
-      { path: "order/cancel", // ⭐ 新增路由
+      {
+        path: "order/customeorderlist",
+        name: "orderCustomerlist",
+        component: OrderList,
+      },
+      {
+        path: "order/cancel",
         name: "orderCancel",
         component: OrderCancelPage,
       },
       {
         path: "user/cart",
         name: "shopping cart",
-        component: ()=>import("@/page/user/cart/ShoppingCart.vue")
+        component: () => import("@/page/user/cart/ShoppingCart.vue")
       },
       {
         path: "user/feedback",
@@ -93,17 +94,29 @@ const routes: RouteRecordRaw[] = [
     ]
   },
   {
-    path:"/admin",
+    path: "/admin",
     component: AdminLayout,
     children: [
-
       {
-        path: "order/staff",          // ⭐
-        name: "orderStaff",           // ⭐
-        component: OrderStaffView,    // ⭐
+        path: "orders",
+        name: "OrderDashboard",
+        component: OrderDashboard,
+        meta: { requiresAuth: true, requiresAdmin: true }
       },
       {
-
+        path: "orders/staff",
+        name: "StaffOrderManagement",
+        component: StaffOrderManagement,
+        meta: { requiresAuth: true, requiresStaff: true }
+      },
+      {
+        path: "orders/:orderId",
+        name: "AdminOrderDetail",  // 修改名稱避免重複
+        component: () => import("@/page/order/OrderCustomerView.vue"),  // 使用動態導入
+        meta: { requiresAuth: true, requiresAdmin: true},
+        props: true
+      },
+      {
         path: "dish/list",
         name: "dishList",
         component: () => import("@/page/employee/dish/Index.vue")
@@ -111,12 +124,12 @@ const routes: RouteRecordRaw[] = [
       {
         path: "dish/add",
         name: "addDish",
-        component: ()=> import("@/page/employee/dish/AddDish.vue")
+        component: () => import("@/page/employee/dish/AddDish.vue")
       },
       {
         path: "dish/update/:id",
         name: "updateDish",
-        component: ()=> import("@/page/employee/dish/Update.vue")
+        component: () => import("@/page/employee/dish/Update.vue")
       },
       {
         path: "feedback",
@@ -128,7 +141,6 @@ const routes: RouteRecordRaw[] = [
         name: "feedbackDetail",
         component: () => import("@/page/employee/feedback/FeedbackDetailPage.vue")
       },
-
     ]
   }
 ];

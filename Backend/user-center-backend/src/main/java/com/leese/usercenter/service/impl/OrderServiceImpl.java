@@ -15,9 +15,13 @@ import com.leese.usercenter.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.leese.usercenter.common.ErrorCode;
+import com.leese.usercenter.exception.BusinessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import com.leese.usercenter.mod4.Order.AbstractOrderCommand;
+import com.leese.usercenter.mod4.Order.OrderCommandFactory;
+import com.leese.usercenter.Invoker.OrderInvoker;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -31,7 +35,11 @@ public class OrderServiceImpl implements OrderService {
     private final RiderMapper riderMapper;
     private final CartMapper cartMapper;
     private static final Logger log = LoggerFactory.getLogger(OrderServiceImpl.class);
+    @Autowired
+    private OrderCommandFactory orderCommandFactory;
 
+    @Autowired
+    private OrderInvoker orderInvoker;
     @Autowired
     public OrderServiceImpl(OrderMapper orderMapper,
                             OrderItemMapper orderItemMapper,
@@ -56,9 +64,54 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void updateOrderStatus(Long orderId, Integer status) {
-        orderMapper.updateStatus(orderId, status);
+    @Transactional
+    public void updateOrderStatus(Long orderId, Integer newStatus) {
+        log.info("🔄 使用命令模式更新订单状态，orderId={}, newStatus={}", orderId, newStatus);
+
+        // 验证状态范围
+        if (newStatus < 1 || newStatus > 8) {
+            throw new BusinessException(ErrorCode.PARAM_ERROR, "无效的状态码");
+        }
+
+        // 获取当前订单状态
+        OrderEntity order = findById(orderId);
+        if (order == null) {
+            throw new BusinessException(ErrorCode.ORDER_NOT_FOUND, "订单不存在");
+        }
+
+        Integer currentStatus = order.getStatus();
+        log.info("📊 当前订单状态: {} -> 目标状态: {}", currentStatus, newStatus);
+
+        // 如果状态相同，直接返回（无需转换）
+        if (currentStatus.equals(newStatus)) {
+            log.info("ℹ️ 订单状态未变化，无需更新");
+            return;
+        }
+
+        try {
+            // 获取对应的命令
+            AbstractOrderCommand command = orderCommandFactory.getCommand(newStatus);
+
+            // 设置命令参数
+            command.setOrderId(orderId);
+            command.setCurrentStatus(currentStatus);
+            command.setNewStatus(newStatus);
+
+            // 执行命令
+            command.execute();
+
+            log.info("✅ 订单状态更新成功: {} -> {}", getStatusText(currentStatus), getStatusText(newStatus));
+
+        } catch (IllegalArgumentException e) {
+            log.error("❌ 状态转换失败: {}", e.getMessage());
+            throw new BusinessException(ErrorCode.ORDER_STATUS_ERROR, e.getMessage());
+        } catch (Exception e) {
+            log.error("❌ 更新订单状态系统异常", e);
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "系统异常，请稍后重试");
+        }
     }
+
+
 
     /**
      * 從購物車生成訂單，必須指定收貨地址
@@ -132,7 +185,8 @@ public class OrderServiceImpl implements OrderService {
 
     private OrderVO convertToVO(OrderEntity order, List<OrderItemEntity> items, RiderEntity rider) {
         OrderVO vo = new OrderVO();
-        vo.setOrderId(order.getOrderId());
+        vo.setId(order.getId());          // ✅ 主鍵 id
+        vo.setOrderId(order.getOrderId()); // 訂單編號（字串）
         vo.setUserId(order.getUserId());
         vo.setAddressId(order.getAddressId());
 
@@ -146,12 +200,6 @@ public class OrderServiceImpl implements OrderService {
         vo.setTotalAmount(order.getTotalAmount());
         vo.setPackAmount(order.getPackAmount());
 
-//        // 備註與原因
-//        vo.setRemark(order.getRemark());
-//        vo.setCancelReason(order.getCancelReason());
-//        vo.setRejectionReason(order.getRejectionReason());
-//        vo.setOrderComment(order.getOrderComment());
-
         // 時間欄位格式化
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         vo.setFormattedTime(order.getCreateTime() != null ? sdf.format(order.getCreateTime()) : null);
@@ -161,14 +209,7 @@ public class OrderServiceImpl implements OrderService {
         vo.setCreateTime(order.getCreateTime() != null ? sdf.format(order.getCreateTime()) : null);
         vo.setUpdateTime(order.getUpdateTime() != null ? sdf.format(order.getUpdateTime()) : null);
 
-        // 配送資訊
-//        vo.setDeliveryStatus(order.getDeliveryStatus());
-//        vo.setRideAddress(order.getRideAddress());
-//        vo.setRiderName(rider != null ? rider.getName() : null);
-//        vo.setRiderPhone(rider != null ? rider.getPhone() : null);
-
-
-        // 顧客資訊 (可從 user 表 join 出來，這裡先留空)
+        // 顧客資訊
         vo.setCustomerName("顧客姓名");
 
         // 菜品明細
@@ -183,7 +224,6 @@ public class OrderServiceImpl implements OrderService {
             itemVO.setQuantity(item.getQuantity());
             itemVO.setPrice(item.getPrice());
 
-            // 小計用 BigDecimal 計算，避免浮點誤差
             BigDecimal subtotal = BigDecimal.valueOf(item.getPrice())
                     .multiply(BigDecimal.valueOf(item.getQuantity()));
             itemVO.setSubtotal(subtotal.doubleValue());
@@ -194,11 +234,32 @@ public class OrderServiceImpl implements OrderService {
 
         return vo;
     }
+
     @Override
     public OrderEntity findById(Long id) {
         return orderMapper.findById(id);
     }
 
+    private String getStatusText(Integer status) {
+        if (status == null) {
+            return "未知";
+        }
+        switch (status) {
+            case 1: return "待付款";
+            case 2: return "待接单";
+            case 3: return "已接单";
+            case 4: return "制作中";
+            case 5: return "派送中";
+            case 6: return "已完成";
+            case 7: return "已取消";
+            case 8: return "退款";
+            default: return "未知";
+        }
+    }
+
+    /**
+     * 映射状态为标签 - 原有的 mapStatus 方法
+     */
     private String mapStatus(Integer status) {
         if (status == null) {
             return "未知狀態";
@@ -207,13 +268,15 @@ public class OrderServiceImpl implements OrderService {
             case 1: return "待付款";
             case 2: return "待接單";
             case 3: return "已接單";
-            case 4: return "派送中";
-            case 5: return "已完成";
-            case 6: return "已取消";
-            case 7: return "退款";
+            case 4: return "制作中";
+            case 5: return "派送中";
+            case 6: return "已完成";
+            case 7: return "已取消";
+            case 8: return "退款";
             default: return "待處理";
         }
     }
+
 
     @Override
 

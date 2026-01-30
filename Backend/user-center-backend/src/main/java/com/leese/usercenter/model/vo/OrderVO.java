@@ -11,6 +11,7 @@ import java.util.List;
 @Setter
 @ToString
 public class OrderVO {
+    private Long id;
     // 基本資訊 (對應 orders 表)
     private String orderId;          // 訂單編號
     private Integer userId;          // 用户ID

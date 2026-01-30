@@ -1,4 +1,4 @@
-<template>
+I WANT TO update my state now i add one state 制作中 to4 another state will follow the table to chnge please update the code to follow new update <template>
   <a-card title="訂單詳情" class="order-card">
     <!-- 訂單基本資訊 -->
     <p>訂單編號：{{ order?.orderId }}</p>
@@ -41,7 +41,7 @@
     </div>
 
     <!-- 🚚 確認送達按鈕 -->
-    <div class="confirm-btn" v-if="order?.status === 4">
+    <div class="confirm-btn" v-if="order?.status === 5">
       <a-button type="primary" @click="confirmDelivered">確認送達</a-button>
     </div>
   </a-card>
@@ -87,10 +87,11 @@ function statusText(status?: number) {
     case 1: return "待付款";
     case 2: return "待接單";
     case 3: return "已接單";
-    case 4: return "派送中";
-    case 5: return "已完成";
-    case 6: return "已取消";
-    case 7: return "退款";
+    case 4: return "制作中";
+    case 5: return "派送中";
+    case 6: return "已完成";
+    case 7: return "已取消";
+    case 8: return "退款";
     default: return "未知";
   }
 }
@@ -104,6 +105,7 @@ function statusColor(status?: number) {
     case 5: return "cyan";
     case 6: return "red";
     case 7: return "magenta";
+    case 8: return "magenta";
     default: return "default";
   }
 }
@@ -127,9 +129,9 @@ function confirmCancel() {
 async function confirmDelivered() {
   if (!order.value) return;
   try {
-    const success = await updateOrderStatus(order.value.id, 5); // 更新為已完成
+    const success = await updateOrderStatus(order.value.id, 6); // 更新為已完成
     if (success) {
-      order.value.status = 5; // 前端同步更新狀態
+      order.value.status = 6; // 前端同步更新狀態
       Modal.success({
         title: "確認成功",
         content: "訂單已確認送達！",

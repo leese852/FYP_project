@@ -7,22 +7,21 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-public class CancelOrderCommand extends AbstractOrderCommand {
+public class RefundOrderCommand extends AbstractOrderCommand {
 
     @Autowired
-    public CancelOrderCommand(OrderCommandService orderCommandService) {
+    public RefundOrderCommand(OrderCommandService orderCommandService) {
         super(orderCommandService);
     }
 
     @Override
     protected boolean canExecute(Integer currentStatus, Integer newStatus) {
-        // 已取消(7)可以从多个状态转换
-        // 待付款(1)、待接单(2)、已接单(3)、制作中(4)都可以取消
-        return (currentStatus >= 1 && currentStatus <= 4) && newStatus == 7;
+        // 退款(8)可以从已取消(7)转换
+        return currentStatus == 7 && newStatus == 8;
     }
 
     @Override
     protected void executeSpecificLogic(Long orderId) {
-        log.info("❌ 订单 {} 已取消", orderId);
+        log.info("💸 订单 {} 退款处理", orderId);
     }
 }

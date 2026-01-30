@@ -35,9 +35,6 @@
     riderId
     </sql>
 
-
-
-
     <select id="findByUserId" resultMap="BaseResultMap">
         SELECT <include refid="Base_Column_List"/>
         FROM orders
@@ -52,8 +49,19 @@
     </select>
 
     <select id="findById" resultType="com.leese.usercenter.model.entity.OrderEntity">
-SELECT * FROM orders WHERE id = #{id}
-</select>
+        SELECT * FROM orders WHERE id = #{id}
+    </select>
+
+    <!-- 新增：查询订单状态 -->
+    <select id="findStatusById" resultType="java.lang.Integer">
+        SELECT status FROM orders WHERE id = #{id} AND isDelete = 0
+    </select>
+
+    <!-- 新增：检查订单是否存在 -->
+    <select id="existsById" resultType="boolean">
+        SELECT COUNT(*) > 0 FROM orders WHERE id = #{id} AND isDelete = 0
+    </select>
+
     <insert id="save" parameterType="com.leese.usercenter.model.entity.OrderEntity">
         INSERT INTO orders (orderId, userId, addressId, status, totalAmount, payMethod, payStatus,
                             remark, cancelReason, cancelTime, rejectionReason, estimatedDeliveryTime,
@@ -62,7 +70,6 @@ SELECT * FROM orders WHERE id = #{id}
                 #{remark}, #{cancelReason}, #{cancelTime}, #{rejectionReason}, #{estimatedDeliveryTime},
                 #{deliveryStatus}, #{deliveryTime}, #{packAmount}, #{riderId})
     </insert>
-
 
     <update id="updateStatus">
         UPDATE orders

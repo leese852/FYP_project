@@ -1,162 +1,334 @@
 <template>
-  <div style="padding: 50px; max-width: 800px; margin: 0 auto;">
-    <h1 style="color: #333; border-bottom: 2px solid #4CAF50; padding-bottom: 10px;">
-      📋 我的反馈
-    </h1>
-
-    <!-- 测试按钮 -->
-    <div v-if="!loading" style="margin-bottom: 20px; padding: 15px; background: #f5f5f5; border-radius: 8px;">
-      <button @click="runTests" style="padding: 8px 16px; margin-right: 10px; background: #2196F3; color: white; border: none; border-radius: 4px;">
-        运行API测试
-      </button>
-      <button @click="refreshPage" style="padding: 8px 16px; margin-right: 10px; background: #4CAF50; color: white; border: none; border-radius: 4px;">
-        刷新页面
-      </button>
-      <button @click="checkLoginStatus" style="padding: 8px 16px; background: #FF9800; color: white; border: none; border-radius: 4px;">
-        检查登录状态
-      </button>
-    </div>
-
-    <!-- 状态信息 -->
-    <div v-if="statusMessage" style="margin-bottom: 20px; padding: 10px; background: #e3f2fd; border-radius: 4px;">
-      {{ statusMessage }}
+  <div style="padding: 30px; max-width: 1000px; margin: 0 auto; background: #f5f7fa; min-height: 100vh;">
+    <!-- 页面标题 -->
+    <div style="background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+                padding: 20px 30px;
+                border-radius: 12px;
+                margin-bottom: 30px;
+                box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);">
+      <h1 style="color: white; margin: 0; font-size: 24px; display: flex; align-items: center;">
+        <span style="background: white; color: #4CAF50; width: 36px; height: 36px; border-radius: 8px;
+                    display: inline-flex; align-items: center; justify-content: center; margin-right: 12px;">
+          📋
+        </span>
+        我的反馈
+      </h1>
+      <p style="color: rgba(255,255,255,0.85); margin: 8px 0 0 48px; font-size: 14px;">
+        查看您提交的所有反馈记录
+      </p>
     </div>
 
     <!-- 加载状态 -->
-    <div v-if="loading" style="text-align: center; padding: 40px;">
-      <div style="display: inline-block; padding: 20px; background: #f5f5f5; border-radius: 8px;">
-        <p style="margin-bottom: 10px;">加载中...</p>
-        <div style="width: 100%; height: 4px; background: #e0e0e0; border-radius: 2px;">
-          <div style="width: 60%; height: 100%; background: #4CAF50; border-radius: 2px; animation: loading 1.5s infinite;"></div>
-        </div>
+    <div v-if="loading"
+         style="background: white;
+                border-radius: 12px;
+                padding: 60px;
+                text-align: center;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+      <div style="display: inline-block; padding: 30px; background: #fafafa; border-radius: 12px;">
+        <div style="width: 60px; height: 60px; border: 4px solid #f0f0f0;
+                    border-top: 4px solid #4CAF50;
+                    border-radius: 50%;
+                    animation: spin 1s linear infinite;
+                    margin: 0 auto 20px;"></div>
+        <p style="color: #595959; font-size: 16px; margin: 0;">正在加载您的反馈...</p>
       </div>
     </div>
 
     <!-- 未登录状态 -->
-    <div v-else-if="!isLoggedIn && !error" style="text-align: center; padding: 40px;">
-      <div style="display: inline-block; padding: 30px; background: #FFF3CD; border-radius: 8px; max-width: 400px;">
-        <p style="color: #856404; font-size: 18px; margin-bottom: 15px;">
-          🔐 请先登录
+    <div v-else-if="!isLoggedIn && !error"
+         style="background: white;
+                border-radius: 12px;
+                padding: 60px;
+                text-align: center;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+      <div style="display: inline-block; padding: 40px; max-width: 400px;">
+        <div style="font-size: 64px; margin-bottom: 20px; color: #4CAF50;">🔒</div>
+        <h3 style="color: #262626; font-size: 20px; margin-bottom: 12px; font-weight: 600;">
+          请先登录
+        </h3>
+        <p style="color: #595959; margin-bottom: 30px; line-height: 1.6;">
+          登录后即可查看您的反馈记录和提交新的反馈
         </p>
-        <p style="color: #666; margin-bottom: 20px;">
-          您需要登录后才能查看反馈记录
-        </p>
-        <div style="display: flex; gap: 10px; justify-content: center;">
-          <router-link to="/login" style="padding: 10px 20px; background: #4CAF50; color: white; text-decoration: none; border-radius: 4px;">
-            去登录 →
+        <div style="display: flex; gap: 12px; justify-content: center;">
+          <router-link to="/login"
+                       style="padding: 12px 24px;
+                              background: #4CAF50;
+                              color: white;
+                              text-decoration: none;
+                              border-radius: 8px;
+                              font-weight: 500;
+                              transition: all 0.3s;
+                              display: inline-flex;
+                              align-items: center;
+                              gap: 6px;">
+            <span>→</span> 前往登录
           </router-link>
-          <button @click="checkLoginStatus" style="padding: 10px 20px; background: #2196F3; color: white; border: none; border-radius: 4px;">
-            重新检查
-          </button>
+          <router-link to="/"
+                       style="padding: 12px 24px;
+                              background: #f0f0f0;
+                              color: #595959;
+                              text-decoration: none;
+                              border-radius: 8px;
+                              font-weight: 500;
+                              transition: all 0.3s;">
+            返回首页
+          </router-link>
         </div>
       </div>
     </div>
 
     <!-- 错误状态 -->
-    <div v-else-if="error" style="text-align: center; padding: 40px;">
-      <div style="display: inline-block; padding: 30px; background: #F8D7DA; border-radius: 8px; max-width: 500px;">
-        <p style="color: #721C24; font-size: 18px; margin-bottom: 15px;">
-          ⚠️ 加载失败
+    <div v-else-if="error"
+         style="background: white;
+                border-radius: 12px;
+                padding: 60px;
+                text-align: center;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+      <div style="display: inline-block; padding: 40px; max-width: 500px;">
+        <div style="font-size: 64px; margin-bottom: 20px; color: #ff4d4f;">⚠️</div>
+        <h3 style="color: #262626; font-size: 20px; margin-bottom: 12px; font-weight: 600;">
+          加载失败
+        </h3>
+        <p style="color: #ff4d4f; margin-bottom: 20px; background: #fff2f0; padding: 12px; border-radius: 6px;">
+          {{ error }}
         </p>
-        <p style="color: #721C24; margin-bottom: 20px;">{{ error }}</p>
-        <div style="display: flex; gap: 10px; justify-content: center;">
-          <button @click="loadFeedbacks" style="padding: 10px 20px; background: #DC3545; color: white; border: none; border-radius: 4px;">
-            重试
+        <div style="display: flex; gap: 12px; justify-content: center;">
+          <button @click="loadUserFeedbacks"
+                  style="padding: 12px 24px;
+                        background: #ff4d4f;
+                        color: white;
+                        border: none;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-weight: 500;
+                        transition: all 0.3s;">
+            重新加载
           </button>
-          <button @click="checkLoginStatus" style="padding: 10px 20px; background: #6c757d; color: white; border: none; border-radius: 4px;">
-            检查登录状态
-          </button>
+          <router-link to="/"
+                       style="padding: 12px 24px;
+                              background: #f0f0f0;
+                              color: #595959;
+                              text-decoration: none;
+                              border-radius: 8px;
+                              font-weight: 500;
+                              transition: all 0.3s;">
+            返回首页
+          </router-link>
         </div>
       </div>
     </div>
 
     <!-- 空状态 -->
-    <div v-else-if="feedbacks.length === 0" style="text-align: center; padding: 40px;">
-      <div style="display: inline-block; padding: 30px; background: #f8f9fa; border-radius: 8px; max-width: 400px;">
-        <p style="color: #666; font-size: 18px; margin-bottom: 15px;">
-          📭 暂无反馈记录
+    <div v-else-if="feedbacks.length === 0"
+         style="background: white;
+                border-radius: 12px;
+                padding: 80px 40px;
+                text-align: center;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+      <div style="display: inline-block; max-width: 400px;">
+        <div style="font-size: 80px; margin-bottom: 20px; color: #bfbfbf;">📭</div>
+        <h3 style="color: #262626; font-size: 20px; margin-bottom: 12px; font-weight: 600;">
+          暂无反馈记录
+        </h3>
+        <p style="color: #595959; margin-bottom: 30px; line-height: 1.6;">
+          您还没有提交过任何反馈<br>
+          分享您的建议和意见，帮助我们做得更好
         </p>
-        <p style="color: #666; margin-bottom: 20px;">
-          您还没有提交过任何反馈
-        </p>
-        <router-link to="/user/feedback" style="padding: 10px 20px; background: #4CAF50; color: white; text-decoration: none; border-radius: 4px;">
-          去提交反馈 →
-        </router-link>
+        <div style="display: flex; gap: 12px; justify-content: center;">
+          <router-link to="/user/feedback"
+                       style="padding: 12px 24px;
+                              background: #4CAF50;
+                              color: white;
+                              text-decoration: none;
+                              border-radius: 8px;
+                              font-weight: 500;
+                              transition: all 0.3s;
+                              display: inline-flex;
+                              align-items: center;
+                              gap: 6px;">
+            <span>+</span> 提交反馈
+          </router-link>
+          <router-link to="/"
+                       style="padding: 12px 24px;
+                              background: #f0f0f0;
+                              color: #595959;
+                              text-decoration: none;
+                              border-radius: 8px;
+                              font-weight: 500;
+                              transition: all 0.3s;">
+            返回首页
+          </router-link>
+        </div>
       </div>
     </div>
 
     <!-- 有数据 -->
     <div v-else>
-      <!-- 用户信息 -->
-      <div style="margin-bottom: 25px; padding: 15px; background: #e8f5e8; border-radius: 8px;">
+      <!-- 用户信息卡片 -->
+      <div style="background: white;
+                  padding: 24px;
+                  border-radius: 12px;
+                  margin-bottom: 24px;
+                  box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
         <div style="display: flex; justify-content: space-between; align-items: center;">
-          <div>
-            <p style="margin: 0 0 5px 0; color: #2E7D32;">
-              <strong>👤 用户信息</strong>
-            </p>
-            <p style="margin: 0; color: #555;">
-              用户ID: <strong>{{ currentUserId }}</strong> |
-              用户名: <strong>{{ currentUsername }}</strong> |
-              共 <strong>{{ feedbacks.length }}</strong> 条反馈
-            </p>
+          <div style="display: flex; align-items: center; gap: 16px;">
+            <div style="width: 50px; height: 50px; background: #e8f5e8; border-radius: 50%;
+                       display: flex; align-items: center; justify-content: center; color: #4CAF50; font-weight: 600; font-size: 18px;">
+              {{ currentUsername?.charAt(0) || 'U' }}
+            </div>
+            <div>
+              <div style="font-size: 16px; font-weight: 600; color: #262626;">{{ currentUsername || '用户' }}</div>
+              <div style="display: flex; gap: 20px; margin-top: 6px;">
+                <span style="font-size: 13px; color: #8c8c8c;">
+                  <span style="font-weight: 500; color: #4CAF50;">{{ feedbacks.length }}</span> 条反馈
+                </span>
+                <span style="font-size: 13px; color: #8c8c8c;">
+                  <span style="font-weight: 500; color: #fa8c16;">{{ pendingCount }}</span> 条待处理
+                </span>
+                <span style="font-size: 13px; color: #8c8c8c;">
+                  <span style="font-weight: 500; color: #52c41a;">{{ processedCount }}</span> 条已处理
+                </span>
+              </div>
+            </div>
           </div>
-          <button @click="loadFeedbacks" style="padding: 6px 12px; background: #4CAF50; color: white; border: none; border-radius: 4px;">
-            刷新列表
-          </button>
+          <div style="display: flex; gap: 12px;">
+            <router-link to="/user/feedback"
+                         style="padding: 10px 20px;
+                                background: #4CAF50;
+                                color: white;
+                                text-decoration: none;
+                                border-radius: 8px;
+                                font-size: 14px;
+                                font-weight: 500;
+                                transition: all 0.3s;
+                                display: inline-flex;
+                                align-items: center;
+                                gap: 6px;">
+              <span>+</span> 提交反馈
+            </router-link>
+            <button @click="loadUserFeedbacks"
+                    style="padding: 10px 20px;
+                           background: #1890ff;
+                           color: white;
+                           border: none;
+                           border-radius: 8px;
+                           cursor: pointer;
+                           font-size: 14px;
+                           font-weight: 500;
+                           transition: all 0.3s;
+                           display: inline-flex;
+                           align-items: center;
+                           gap: 6px;">
+              <span>🔄</span> 刷新
+            </button>
+          </div>
         </div>
       </div>
 
       <!-- 反馈列表 -->
-      <div v-for="feedback in feedbacks" :key="feedback.id"
-           style="border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; margin-bottom: 20px; background: white; transition: all 0.3s;">
+      <div style="display: grid; gap: 16px;">
+        <div v-for="feedback in feedbacks" :key="feedback.id"
+             style="background: white;
+                    border-radius: 12px;
+                    padding: 24px;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+                    transition: all 0.3s;
+                    border-left: 4px solid;
+                    border-left-color: feedback.type === 'COMPLAINT' ? '#ff4d4f' :
+                                     feedback.type === 'PRAISE' ? '#52c41a' : '#1890ff';"
+             @mouseenter="$event.currentTarget.style.transform = 'translateY(-2px)'; $event.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.1)'"
+             @mouseleave="$event.currentTarget.style.transform = 'none'; $event.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.06)'">
 
-        <!-- 反馈头部 -->
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
-          <div>
-            <span style="font-weight: bold; font-size: 16px; color: #2196F3; margin-right: 10px;">
-              {{ getTypeText(feedback.type) }}
-            </span>
-            <span :style="{
-              padding: '4px 12px',
-              borderRadius: '12px',
-              fontSize: '12px',
-              fontWeight: 'bold',
-              backgroundColor: feedback.status === 'PENDING' ? '#FFF3CD' : '#D4EDDA',
-              color: feedback.status === 'PENDING' ? '#856404' : '#155724'
-            }">
-              {{ feedback.status === 'PENDING' ? '待处理' : '已处理' }}
+          <!-- 反馈头部 -->
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <!-- 类型标签 -->
+              <span :style="{
+                padding: '6px 12px',
+                borderRadius: '6px',
+                fontSize: '13px',
+                fontWeight: '600',
+                color: feedback.type === 'COMPLAINT' ? '#ff4d4f' :
+                       feedback.type === 'PRAISE' ? '#52c41a' : '#1890ff',
+                backgroundColor: feedback.type === 'COMPLAINT' ? '#fff2f0' :
+                                feedback.type === 'PRAISE' ? '#f6ffed' : '#e6f7ff',
+                border: '1px solid',
+                borderColor: feedback.type === 'COMPLAINT' ? '#ffccc7' :
+                            feedback.type === 'PRAISE' ? '#b7eb8f' : '#91d5ff'
+              }">
+                {{ getTypeText(feedback.type) }}
+              </span>
+
+              <!-- 状态标签 -->
+              <span :style="{
+                padding: '6px 12px',
+                borderRadius: '12px',
+                fontSize: '12px',
+                fontWeight: '600',
+                backgroundColor: feedback.status === 'PENDING' ? '#fff7e6' : '#f6ffed',
+                color: feedback.status === 'PENDING' ? '#fa8c16' : '#52c41a',
+                border: '1px solid',
+                borderColor: feedback.status === 'PENDING' ? '#ffd591' : '#b7eb8f',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px'
+              }">
+                <span v-if="feedback.status === 'PENDING'">⏳</span>
+                <span v-else>✅</span>
+                {{ feedback.status === 'PENDING' ? '待处理' : '已处理' }}
+              </span>
+            </div>
+
+            <span style="font-size: 12px; color: #8c8c8c; font-weight: 500;">
+              #{{ feedback.id }}
             </span>
           </div>
-          <span style="font-size: 12px; color: #888;">
-            #{{ feedback.id }}
-          </span>
-        </div>
 
-        <!-- 反馈内容 -->
-        <p style="color: #333; line-height: 1.6; margin: 10px 0; padding: 10px; background: #f9f9f9; border-radius: 4px;">
-          {{ feedback.content }}
-        </p>
-
-        <!-- 反馈信息 -->
-        <div style="font-size: 12px; color: #666; margin: 10px 0;">
-          <div style="display: flex; gap: 15px; margin-bottom: 5px;">
-            <span>用户ID: {{ feedback.userId }}</span>
-            <span>类型: {{ feedback.type }}</span>
-          </div>
-        </div>
-
-        <!-- 时间信息 -->
-        <div style="display: flex; justify-content: space-between; margin-top: 15px; font-size: 12px; color: #888; border-top: 1px solid #eee; padding-top: 10px;">
-          <div>
-            <div>提交时间: {{ formatTime(feedback.createdAt) }}</div>
-            <div v-if="feedback.updatedAt !== feedback.createdAt" style="margin-top: 5px;">
-              更新时间: {{ formatTime(feedback.updatedAt) }}
+          <!-- 反馈内容 -->
+          <div style="margin-bottom: 16px;">
+            <div style="color: #434343;
+                        font-size: 14px;
+                        line-height: 1.6;
+                        background: #fafafa;
+                        padding: 16px;
+                        border-radius: 8px;
+                        max-height: 120px;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        display: -webkit-box;
+                        -webkit-line-clamp: 3;
+                        -webkit-box-orient: vertical;">
+              {{ feedback.content }}
             </div>
           </div>
-          <div>
-            <button @click="viewFeedbackDetail(feedback.id)" style="padding: 4px 8px; background: #2196F3; color: white; border: none; border-radius: 3px; font-size: 11px;">
-              查看详情
-            </button>
+
+          <!-- 底部信息 -->
+          <div style="display: flex; justify-content: space-between; align-items: center;
+                     padding-top: 16px; border-top: 1px solid #f0f0f0; font-size: 12px;">
+            <div style="color: #8c8c8c;">
+              <div>提交时间: {{ formatTime(feedback.createdAt) }}</div>
+              <div v-if="feedback.updatedAt !== feedback.createdAt" style="margin-top: 4px;">
+                更新时间: {{ formatTime(feedback.updatedAt) }}
+              </div>
+            </div>
+            <div>
+              <button @click="viewFeedbackDetail(feedback.id)"
+                      style="padding: 6px 12px;
+                            background: #f0f0f0;
+                            color: #595959;
+                            border: none;
+                            border-radius: 6px;
+                            cursor: pointer;
+                            font-size: 12px;
+                            font-weight: 500;
+                            transition: all 0.3s;
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 4px;">
+                <span>👁️</span> 查看详情
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -165,7 +337,7 @@
 </template>
 
 <script>
-import { feedbackAPI, userUtils, testAPI } from '@/api/feedback'
+import { feedbackAPI, userUtils } from '@/api/feedback'
 
 export default {
   name: 'MyFeedbackPage',
@@ -174,15 +346,19 @@ export default {
       feedbacks: [],
       loading: true,
       error: '',
-      statusMessage: '',
       currentUserId: null,
-      currentUsername: '',
-      testResults: null
+      currentUsername: ''
     }
   },
   computed: {
     isLoggedIn() {
       return userUtils.isLoggedIn()
+    },
+    pendingCount() {
+      return this.feedbacks.filter(f => f.status === 'PENDING').length
+    },
+    processedCount() {
+      return this.feedbacks.filter(f => f.status === 'PROCESSED').length
     }
   },
   async mounted() {
@@ -193,26 +369,19 @@ export default {
     async initializePage() {
       this.loading = true
       this.error = ''
-      this.statusMessage = '正在初始化...'
 
       try {
         // 1. 检查登录状态
-        this.statusMessage = '检查登录状态...'
-        const loginStatus = await userUtils.checkLoginStatus()
-        console.log('登录状态检查结果:', loginStatus)
-
-        if (!loginStatus.loggedIn) {
-          this.error = `请先登录 (${loginStatus.reason})`
+        const user = userUtils.getCurrentUser()
+        if (!user) {
+          this.error = '请先登录'
           this.loading = false
-          this.statusMessage = ''
           return
         }
 
         // 2. 获取用户信息
-        const user = userUtils.getCurrentUser()
         this.currentUserId = user?.id || null
-        this.currentUsername = user?.username || user?.userAccount || '未知用户'
-        this.statusMessage = `欢迎 ${this.currentUsername}，正在加载反馈...`
+        this.currentUsername = user?.username || user?.userAccount || '用户'
 
         // 3. 加载反馈
         await this.loadUserFeedbacks()
@@ -222,14 +391,12 @@ export default {
         this.error = `初始化失败: ${error.message}`
       } finally {
         this.loading = false
-        this.statusMessage = ''
       }
     },
 
     async loadUserFeedbacks() {
       try {
         console.log('开始加载用户反馈...')
-        this.statusMessage = '正在加载反馈数据...'
 
         // 使用 /feedback/my 接口
         const response = await feedbackAPI.getMyFeedbacks()
@@ -237,12 +404,6 @@ export default {
 
         if (Array.isArray(response)) {
           this.feedbacks = response
-          this.statusMessage = `成功加载 ${response.length} 条反馈`
-
-          // 2秒后清除状态消息
-          setTimeout(() => {
-            this.statusMessage = ''
-          }, 2000)
         } else {
           console.warn('响应不是数组:', response)
           this.feedbacks = []
@@ -254,86 +415,17 @@ export default {
         this.error = error.message || '加载失败'
 
         // 如果是未登录错误，清除本地存储
-        if (error.message.includes('登录') || error.message.includes('未授权')) {
+        if (error.message.includes('登录') || error.message.includes('未授权') || error.response?.status === 401) {
           userUtils.clearUser()
           this.error = '登录已过期，请重新登录'
         }
       }
     },
 
-    async checkLoginStatus() {
-      this.statusMessage = '正在检查登录状态...'
-      try {
-        const status = await userUtils.checkLoginStatus()
-        console.log('登录状态:', status)
-
-        if (status.loggedIn) {
-          this.statusMessage = '登录状态正常'
-          // 重新加载数据
-          await this.loadUserFeedbacks()
-        } else {
-          this.statusMessage = `未登录: ${status.reason}`
-          this.error = `请先登录 (${status.reason})`
-        }
-
-        // 3秒后清除状态消息
-        setTimeout(() => {
-          this.statusMessage = ''
-        }, 3000)
-
-      } catch (error) {
-        console.error('检查登录状态失败:', error)
-        this.statusMessage = `检查失败: ${error.message}`
-      }
-    },
-
-    async runTests() {
-      this.statusMessage = '正在运行API测试...'
-      try {
-        const results = await testAPI.testAll()
-        console.log('测试结果:', results)
-
-        if (results.success) {
-          this.statusMessage = 'API测试成功！'
-          // 如果测试成功，重新加载数据
-          if (results.currentUser) {
-            userUtils.saveUser(results.currentUser)
-            this.currentUserId = results.currentUser.id
-            this.currentUsername = results.currentUser.username || results.currentUser.userAccount
-          }
-          if (results.myFeedbacks) {
-            this.feedbacks = results.myFeedbacks
-          }
-        } else {
-          this.statusMessage = `测试失败: ${results.reason || results.error}`
-        }
-
-        setTimeout(() => {
-          this.statusMessage = ''
-        }, 3000)
-
-      } catch (error) {
-        console.error('运行测试失败:', error)
-        this.statusMessage = `测试失败: ${error.message}`
-      }
-    },
-
     viewFeedbackDetail(id) {
       console.log('查看反馈详情:', id)
-      // 这里可以跳转到详情页，或者显示模态框
-      alert(`查看反馈 #${id} 的详情\n开发中...`)
-    },
-
-    refreshPage() {
-      console.log('刷新页面')
-      this.loading = true
-      this.error = ''
-      this.statusMessage = '正在刷新...'
-
-      // 重新初始化
-      setTimeout(async () => {
-        await this.initializePage()
-      }, 500)
+      // 跳转到详情页
+      this.$router.push(`/user/feedback/${id}`)
     },
 
     getTypeText(type) {
@@ -352,13 +444,12 @@ export default {
         if (isNaN(date.getTime())) {
           return '无效时间'
         }
-        return date.toLocaleString('zh-CN', {
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-          hour: '2-digit',
-          minute: '2-digit'
-        })
+        return date.toLocaleDateString('zh-CN') + ' ' +
+            date.toLocaleTimeString('zh-CN', {
+              hour: '2-digit',
+              minute: '2-digit',
+              hour12: false
+            })
       } catch (e) {
         console.error('格式化时间失败:', e, time)
         return '时间格式错误'
@@ -369,8 +460,27 @@ export default {
 </script>
 
 <style>
-@keyframes loading {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(300%); }
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 悬停效果 */
+button:hover:not(:disabled),
+a:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+}
+
+button[style*="background: #4CAF50"]:hover {
+  background: #6fbf73 !important;
+}
+
+button[style*="background: #1890ff"]:hover {
+  background: #40a9ff !important;
+}
+
+button[style*="background: #f0f0f0"]:hover {
+  background: #e0e0e0 !important;
 }
 </style>

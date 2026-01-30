@@ -9,7 +9,7 @@
       <h1 style="color: white; margin: 0; font-size: 24px; display: flex; align-items: center;">
         <span style="background: white; color: #1890ff; width: 36px; height: 36px; border-radius: 8px;
                     display: inline-flex; align-items: center; justify-content: center; margin-right: 12px;">
-          👨‍💼
+          <>
         </span>
         反馈管理系统
       </h1>
@@ -284,7 +284,7 @@
                                   display: flex;
                                   align-items: center;
                                   gap: 4px;">
-                    <span>👁️</span> 查看
+                    <span>-</span> 查看
                   </button>
 
                   <!-- 标记处理按钮 -->

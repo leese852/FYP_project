@@ -15,7 +15,7 @@ public class OrderEntity {
     private Long id;                   // 表主键 id
     private String orderId;            // 訂單編號 (VARCHAR)
     private Integer userId;               // 用户 id
-    private Long addressId;            // 地址 id
+    private Integer addressId;            // 地址 id
     private Integer status;            // 状态 (TINYINT: 1待付款 2待接單 3已接單 4派送中 5已完成 6已取消 7退款)
     private Double totalAmount;        // 总价钱
     private String payMethod;          // 支付方法

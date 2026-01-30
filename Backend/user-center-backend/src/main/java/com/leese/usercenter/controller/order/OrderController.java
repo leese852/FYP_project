@@ -1,9 +1,13 @@
 package com.leese.usercenter.controller.order;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.leese.usercenter.common.BaseResponse;
 import com.leese.usercenter.common.ResultUtils;
 import com.leese.usercenter.common.ErrorCode;
 import com.leese.usercenter.exception.BusinessException;
+import com.leese.usercenter.mapper.CartMapper;
+import com.leese.usercenter.model.dto.PlaceOrderDTO;
+import com.leese.usercenter.model.entity.Cart;
 import com.leese.usercenter.model.entity.OrderEntity;
 import com.leese.usercenter.model.vo.OrderVO;
 import com.leese.usercenter.model.entity.User;
@@ -24,6 +28,8 @@ public class OrderController {
 
     @Autowired
     private OrderService orderService;
+    @Autowired
+    private CartMapper cartMapper;
 
     /**
      * 獲取當前用戶的訂單列表
@@ -56,7 +62,12 @@ public class OrderController {
         return ResultUtils.success(order);
     }
 
-
+    @PostMapping("/place")
+    public BaseResponse<OrderEntity> placeOrdr(@RequestBody PlaceOrderDTO dto,HttpServletRequest request ){
+        User user = AuthUtil.checkUserLogin(request);
+        OrderEntity order = orderService.createOrderFromCart(dto,user.getId());
+        return ResultUtils.success(order);
+    }
 
 
     /**

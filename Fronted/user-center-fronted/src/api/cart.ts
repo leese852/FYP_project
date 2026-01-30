@@ -31,3 +31,11 @@ export const deleteAllCart = async () => {
         method: 'delete',
     })
 }
+
+export const placeOrderFromCart =async (data:any) =>{
+    return await myAxios.request({
+        url: '/api/orders/place',
+        method: 'post',
+        data: data,
+    })
+}

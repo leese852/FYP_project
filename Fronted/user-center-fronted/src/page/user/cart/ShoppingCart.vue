@@ -147,11 +147,11 @@ import { DeleteOutlined, ShoppingCartOutlined } from '@ant-design/icons-vue'
 import type { TableColumnsType } from 'ant-design-vue'
 import { getAllCart, deleteCart, deleteAllCart, addCart } from '@/api/cart'
 import { getAddressList } from '@/api/address'
-import { placeOrderFromCart } from '@/api/order'
+import { placeOrderFromCart } from '@/api/cart' // 确保引入正确的方法
 
 const router = useRouter()
 const cartItems = ref<any[]>([])
-const selectedRowKeys = ref<number[]>([])  // 选中的商品ID数组
+const selectedRowKeys = ref<number[]>([])  // 选中的购物车项ID数组
 const loading = ref(false)
 const selectAll = ref(false)
 const indeterminate = ref(false)
@@ -231,7 +231,7 @@ const columns: TableColumnsType = [
   }
 ]
 
-// 表格行选择配置
+// 表格行选择配置（不变）
 const rowSelection = computed(() => ({
   selectedRowKeys: selectedRowKeys.value,
   onChange: (selectedKeys: number[]) => {
@@ -268,7 +268,7 @@ watch(cartItems, () => {
   updateSelectionState()
 })
 
-// 加载购物车
+// 加载购物车（不变）
 const loadCart = async () => {
   try {
     loading.value = true
@@ -308,7 +308,7 @@ const loadCart = async () => {
   }
 }
 
-// 加載用戶地址列表
+// 加載用戶地址列表（不变）
 const loadAddressList = async () => {
   try {
     addressLoading.value = true
@@ -326,7 +326,7 @@ const loadAddressList = async () => {
   }
 }
 
-// 删除单个商品
+// 删除单个商品（不变）
 const handleRemoveItem = async (id: number) => {
   Modal.confirm({
     title: '确认删除',
@@ -345,7 +345,7 @@ const handleRemoveItem = async (id: number) => {
   })
 }
 
-// 删除选中的商品
+// 删除选中的商品（不变）
 const handleDeleteSelected = async () => {
   if (!selectedItems.value.length) {
     message.warning('请先选择要删除的商品')
@@ -370,7 +370,7 @@ const handleDeleteSelected = async () => {
   })
 }
 
-// 清空购物车
+// 清空购物车（不变）
 const handleClearCart = async () => {
   Modal.confirm({
     title: '确认清空',
@@ -390,7 +390,7 @@ const handleClearCart = async () => {
   })
 }
 
-// 修改数量
+// 修改数量（不变）
 const handleQuantityChange = async (item: any) => {
   try {
     const newNumber = Number(item.number) || 1
@@ -422,32 +422,64 @@ const handleQuantityChange = async (item: any) => {
   }
 }
 
-// 结算选中的商品 => 調用下單接口
+// ============ 修改的关键部分：结算选中的商品 ============
 const handleCheckout = async () => {
-  if (!selectedItems.value.length) {
+  if (!selectedRowKeys.value.length) {
     message.warning('请选择要结算的商品')
     return
   }
 
   if (!selectedAddressId.value) {
-    message.warning('請先選擇收貨地址')
+    message.warning('请先选择收货地址')
     return
   }
 
   try {
-    const success = await placeOrderFromCart(selectedAddressId.value)
-    if (success) {
-      message.success(`下單成功，已生成訂單！`)
-      // 重新加載購物車（後端已清空）
+    // 构建请求参数，符合后端 PlaceOrderDTO 格式
+    const requestData = {
+      addressId: selectedAddressId.value,
+      cartIds: selectedRowKeys.value  // 传递选中的购物车项ID数组
+    }
+
+    console.log('下单请求参数:', requestData)
+
+    // 调用下单接口
+    const response = await placeOrderFromCart(requestData)
+
+    if (response && response.data) {
+      // 根据后端返回的实际数据结构调整
+      const orderData = response.data.data || response.data
+      const orderId = orderData.orderId || orderData.id
+
+      message.success(`下单成功，订单号: ${orderId}`)
+
+      // 重新加载购物车（后端会删除已下单的购物车项）
       await loadCart()
-      // 跳轉到「我的訂單」頁面
+
+      // 清空选择状态
+      selectedRowKeys.value = []
+      selectAll.value = false
+
+      // 跳转到"我的订单"页面
       router.push('/order/customeorderlist')
     } else {
-      message.error('下單失敗，請稍後重試')
+      message.error('下单失败，请稍后重试')
     }
   } catch (error: any) {
-    console.error('下單失敗:', error)
-    message.error(error?.message || '下單失敗')
+    console.error('下单失败:', error)
+
+    // 更详细的错误处理
+    let errorMsg = '下单失败'
+    if (error.response) {
+      // 后端返回的错误信息
+      errorMsg = error.response.data?.message || error.response.data?.msg || errorMsg
+    } else if (error.request) {
+      errorMsg = '网络请求失败，请检查网络连接'
+    } else {
+      errorMsg = error.message || errorMsg
+    }
+
+    message.error(errorMsg)
   }
 }
 

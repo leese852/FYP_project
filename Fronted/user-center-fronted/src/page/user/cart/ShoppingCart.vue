@@ -116,9 +116,9 @@
           <div class="summary-info">
             <div>共 {{ totalItems }} 件商品</div>
             <div>已选 {{ selectedTotalItems }} 件商品</div>
-            <div class="total-amount">
-              合计：<span class="amount-large">¥{{ totalAmount.toFixed(2) }}</span>
-            </div>
+<!--            <div class="total-amount">-->
+<!--              合计：<span class="amount-large">¥{{ totalAmount.toFixed(2) }}</span>-->
+<!--            </div>-->
             <div class="selected-amount" v-if="selectedItems.length">
               选中商品：<span class="amount-large">¥{{ selectedAmount.toFixed(2) }}</span>
             </div>
@@ -145,19 +145,13 @@ import { useRouter } from 'vue-router'
 import { Table, Modal, message } from 'ant-design-vue'
 import { DeleteOutlined, ShoppingCartOutlined } from '@ant-design/icons-vue'
 import type { TableColumnsType } from 'ant-design-vue'
-import {
-  getAllCart,
-  deleteCart,
-  deleteAllCart,
-  updateCartQuantity,  // 添加专门的更新数量接口
-  getDishInfoById      // 添加获取菜品信息的接口
-} from '@/api/cart'
+import { getAllCart, deleteCart, deleteAllCart, addCart } from '@/api/cart'
 import { getAddressList } from '@/api/address'
 import { placeOrderFromCart } from '@/api/cart'
 
 const router = useRouter()
 const cartItems = ref<any[]>([])
-const selectedRowKeys = ref<number[]>([])  // 选中的购物车项ID数组
+const selectedRowKeys = ref<number[]>([])
 const loading = ref(false)
 const selectAll = ref(false)
 const indeterminate = ref(false)
@@ -167,29 +161,21 @@ const addressList = ref<any[]>([])
 const selectedAddressId = ref<number | null>(null)
 const addressLoading = ref(false)
 
-// 存储菜品原始价格信息
-const dishPriceCache = ref<Record<number, number>>({})
-
 // 计算选中的商品
 const selectedItems = computed(() => {
   return cartItems.value.filter(item => selectedRowKeys.value.includes(item.id))
 })
 
-// 安全计算单价 - 修复：优先使用缓存价格
+// 计算单价 - amount 就是单价
 const getUnitPrice = (item: any) => {
-  // 首先尝试从缓存获取菜品原始价格
-  if (dishPriceCache.value[item.dishId]) {
-    return dishPriceCache.value[item.dishId]
-  }
+  return Number(item.amount) || 0
+}
 
-  // 其次使用item中存储的单价（如果有）
-  if (item.unitPrice) {
-    return item.unitPrice
-  }
-
-  // 最后才使用金额/数量的方式计算
-  if (!item.number || !item.amount) return 0
-  return item.amount / item.number
+// 计算小计 - 单价 × 数量
+const getSubtotal = (item: any) => {
+  const unitPrice = Number(item.amount) || 0
+  const quantity = Number(item.number) || 0
+  return unitPrice * quantity
 }
 
 // 计算属性
@@ -201,7 +187,7 @@ const totalItems = computed(() => {
 
 const totalAmount = computed(() => {
   return cartItems.value.reduce((sum, item) => {
-    return sum + (Number(item.amount) || 0)
+    return sum + getSubtotal(item)
   }, 0)
 })
 
@@ -213,11 +199,11 @@ const selectedTotalItems = computed(() => {
 
 const selectedAmount = computed(() => {
   return selectedItems.value.reduce((sum, item) => {
-    return sum + (Number(item.amount) || 0)
+    return sum + getSubtotal(item)
   }, 0)
 })
 
-// 表格列定义 - 修复单价显示
+// 表格列定义
 const columns: TableColumnsType = [
   {
     title: '商品信息',
@@ -229,21 +215,13 @@ const columns: TableColumnsType = [
     title: '单价',
     key: 'unitPrice',
     align: 'center',
-    width: '15%',
-    customRender: ({ record }) => `¥${getUnitPrice(record).toFixed(2)}`
+    width: '15%'
   },
   {
     title: '数量',
     key: 'quantity',
     align: 'center',
     width: '15%'
-  },
-  {
-    title: '小计',
-    key: 'subtotal',
-    align: 'center',
-    width: '15%',
-    customRender: ({ record }) => `¥${(record.amount || 0).toFixed(2)}`
   },
   {
     title: '操作',
@@ -290,34 +268,43 @@ watch(cartItems, () => {
   updateSelectionState()
 })
 
-// 加载购物车 - 修复：加载菜品价格信息
+// 加载购物车
 const loadCart = async () => {
   try {
     loading.value = true
     const response = await getAllCart()
     console.log('完整的API响应:', response)
 
-    let cartData = []
     // 根据控制台输出，数据结构是：response.data.data
     if (response && response.data && response.data.data) {
-      cartData = response.data.data
+      const cartData = response.data.data
+      if (Array.isArray(cartData)) {
+        cartItems.value = cartData.map(item => ({
+          ...item,
+          id: Number(item.id) || 0,
+          number: Number(item.number) || 1,
+          amount: Number(item.amount) || 0, // 注意：这里是单价
+          dishId: Number(item.dishId) || 0,
+        }))
+        console.log('解析后的购物车数据:', cartItems.value)
+
+        // 调试：查看第一个商品的数据结构
+        if (cartItems.value.length > 0) {
+          const firstItem = cartItems.value[0]
+          console.log('第一个商品详细信息:', {
+            id: firstItem.id,
+            name: firstItem.name,
+            amount: firstItem.amount, // 应该是单价
+            number: firstItem.number, // 数量
+            subtotal: firstItem.amount * firstItem.number // 小计
+          })
+        }
+      }
     } else if (response && response.data) {
-      cartData = Array.isArray(response.data) ? response.data : []
+      if (Array.isArray(response.data)) {
+        cartItems.value = response.data
+      }
     }
-
-    cartItems.value = cartData.map(item => ({
-      ...item,
-      id: Number(item.id) || 0,
-      number: Number(item.number) || 1,
-      amount: Number(item.amount) || 0,
-      dishId: Number(item.dishId) || 0,
-      unitPrice: item.unitPrice || (item.amount / item.number) || 0 // 保存单价
-    }))
-
-    console.log('解析后的购物车数据:', cartItems.value)
-
-    // 预加载菜品价格信息
-    await preloadDishPrices(cartItems.value)
 
     // 清空选择状态
     selectedRowKeys.value = []
@@ -333,23 +320,7 @@ const loadCart = async () => {
   }
 }
 
-// 预加载菜品价格
-const preloadDishPrices = async (cartItems: any[]) => {
-  const dishIds = [...new Set(cartItems.map(item => item.dishId))]
-
-  for (const dishId of dishIds) {
-    try {
-      const dishInfo = await getDishInfoById(dishId)
-      if (dishInfo && dishInfo.data) {
-        dishPriceCache.value[dishId] = dishInfo.data.price || 0
-      }
-    } catch (error) {
-      console.warn(`获取菜品${dishId}价格失败:`, error)
-    }
-  }
-}
-
-// 加载用户地址列表
+// 加載用戶地址列表
 const loadAddressList = async () => {
   try {
     addressLoading.value = true
@@ -378,7 +349,7 @@ const handleRemoveItem = async (id: number) => {
         message.success('删除成功')
         // 从选中列表中移除
         selectedRowKeys.value = selectedRowKeys.value.filter(key => key !== id)
-        await loadCart() // 重新加载
+        loadCart()
       } catch (error: any) {
         message.error(error.message || '删除失败')
       }
@@ -403,7 +374,7 @@ const handleDeleteSelected = async () => {
         message.success(`成功删除 ${selectedItems.value.length} 件商品`)
         // 清空选中状态
         selectedRowKeys.value = []
-        await loadCart() // 重新加载
+        loadCart()
       } catch (error: any) {
         message.error(error.message || '删除失败')
       }
@@ -431,68 +402,46 @@ const handleClearCart = async () => {
   })
 }
 
-// 修复：修改数量逻辑
-const handleQuantityChange = async (item: any, newNumber: number) => {
-  if (newNumber < 1 || newNumber > 99) {
-    message.warning('数量必须在1-99之间')
-    return
-  }
-
+// 修改数量 - 修复版本
+const handleQuantityChange = async (item: any) => {
   try {
-    // 获取正确的菜品单价
-    let unitPrice = 0
-
-    // 1. 从缓存获取
-    if (dishPriceCache.value[item.dishId]) {
-      unitPrice = dishPriceCache.value[item.dishId]
-    }
-    // 2. 从item本身获取
-    else if (item.unitPrice) {
-      unitPrice = item.unitPrice
-    }
-    // 3. 重新查询菜品信息
-    else {
-      const dishInfo = await getDishInfoById(item.dishId)
-      if (dishInfo && dishInfo.data) {
-        unitPrice = dishInfo.data.price || 0
-        dishPriceCache.value[item.dishId] = unitPrice
-      } else {
-        // 保底方案：使用原金额/原数量
-        unitPrice = item.amount / item.number
-      }
+    const newNumber = Number(item.number) || 1
+    if (newNumber < 1 || newNumber > 99) {
+      message.warning('数量必须在1-99之间')
+      loadCart() // 恢复原值
+      return
     }
 
-    // 计算新金额
-    const newAmount = unitPrice * newNumber
+    // amount 是单价，保持不变
+    const unitPrice = Number(item.amount) || 0
 
-    // 调用专门的更新数量接口
-    await updateCartQuantity({
-      cartId: item.id,
-      quantity: newNumber
+    console.log('修改数量:', {
+      商品: item.name,
+      原数量: item.number,
+      新数量: newNumber,
+      单价: unitPrice,
+      小计: unitPrice * newNumber
+    })
+
+    // 删除原记录，添加新记录
+    await deleteCart(item.id)
+    await addCart({
+      dishId: item.dishId,
+      name: item.name,
+      dishFlavor: item.dishFlavor,
+      number: newNumber,
+      amount: unitPrice  // 传入单价
     })
 
     // 更新本地数据
-    const index = cartItems.value.findIndex(c => c.id === item.id)
-    if (index !== -1) {
-      cartItems.value[index].number = newNumber
-      cartItems.value[index].amount = newAmount
-      cartItems.value[index].unitPrice = unitPrice // 保存单价
-    }
+    item.number = newNumber
+    // amount（单价）保持不变
 
     message.success('数量更新成功')
   } catch (error: any) {
     console.error('更新失败:', error)
     message.error(error.message || '更新失败')
-    // 恢复原值
-    await loadCart()
-  }
-}
-
-// 修改模板中的数量输入
-// 在模板中修改 <a-input-number> 的绑定方式
-const onQuantityChange = (value: number, record: any) => {
-  if (value !== record.number) {
-    handleQuantityChange(record, value)
+    loadCart() // 失败后重新加载
   }
 }
 
@@ -517,13 +466,8 @@ const handleCheckout = async () => {
 
     console.log('下单请求参数:', requestData)
 
-    // 显示加载状态
-    const hideLoading = message.loading('正在下单...', 0)
-
     // 调用下单接口
     const response = await placeOrderFromCart(requestData)
-
-    hideLoading()
 
     if (response && response.data) {
       const orderData = response.data.data || response.data

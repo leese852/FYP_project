@@ -37,10 +37,9 @@ public class DishController {
         return ResultUtils.success(result);
     }
 
-    @GetMapping("/{id}")
-    public BaseResponse<List<DishVO>> getDishListById(@RequestParam(required = false) String name){
-
-        List<DishVO> result= dishService.getDishById(name,null);
+    @GetMapping("/get")
+    public BaseResponse<DishVO> getDishListById(@RequestParam(required = false)int id){
+        DishVO result= dishService.getDishById(id);
         return ResultUtils.success(result);
     }
 

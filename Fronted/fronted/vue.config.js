@@ -12,7 +12,7 @@ module.exports = defineConfig({
       "/api": {
         target: "http://localhost:8080", // 後端 Spring Boot 地址
         changeOrigin: true,              // 避免 CORS 問題
-        pathRewrite: { "^/api": "/api" } // 保持路徑一致
+        pathRewrite: { "^/api": "" } // 保持路徑一致
       }
     }
   }

@@ -3,7 +3,7 @@ import axios from 'axios'
 
 // 创建axios实例
 const api = axios.create({
-    baseURL: '/api', // 确保vue.config.js有代理配置
+    baseURL: 'http://localhost:8080', // 确保vue.config.js有代理配置
     timeout: 10000,
     withCredentials: true // 关键：允许携带cookie/session
 })
@@ -86,6 +86,19 @@ export interface UserInfo {
     [key: string]: any
 }
 
+interface LoginStatus {
+    loggedIn: boolean
+    reason?: string
+    user?: any
+}
+
+interface TestResult {
+    success: boolean
+    error?: string
+    currentUser?: any
+    myFeedbacks?: FeedbackResponse[]
+}
+
 // API函数 - 直接返回数据，不返回包装对象
 export const feedbackAPI = {
     // 提交反馈
@@ -131,10 +144,18 @@ export const feedbackAPI = {
     },
 
     // 标记为已处理
+    // async markAsProcessed(id: number) {
+    //     const response = await api.put<FeedbackResponse>(`/feedback/mark-processed/${id}`)
+    //     return response
+    // }
+
     async markAsProcessed(id: number) {
-        const response = await api.put<FeedbackResponse>(`/feedback/mark-processed/${id}`)
+        const response = await api.put<FeedbackResponse>(`/feedback/update/${id}`, {
+            status: 'PROCESSED'  // 只更新状态
+        })
         return response
     }
+
 }
 
 // 用户相关工具函数
@@ -174,9 +195,25 @@ export const userUtils = {
             const response = await api.get('/user/current')
             console.log('当前用户API返回:', response)
             return response
-        } catch (error) {
+        } catch (error: any) {
             console.error('获取当前用户失败:', error)
             return null
+        }
+    },
+
+    // 检查登录状态
+    async checkLoginStatus(): Promise<LoginStatus> {
+        try {
+            const user = this.getCurrentUser()
+            if (!user) {
+                return { loggedIn: false, reason: 'localStorage中无用户信息' }
+            }
+
+            // 调用后端验证API
+            const response = await api.get('/user/current')  // 需要确认这个API是否存在
+            return { loggedIn: true, user: response }
+        } catch (error: any) {
+            return { loggedIn: false, reason: 'API验证失败: ' + error.message }
         }
     },
 
@@ -188,6 +225,30 @@ export const userUtils = {
     // 清除用户信息
     clearUser() {
         localStorage.removeItem('user')
+    }
+}
+
+// 测试API
+export const testAPI = {
+    async testAll(): Promise<TestResult> {
+        try {
+            // 测试当前用户
+            const currentUser = await api.get('/user/current')
+
+            // 测试反馈API
+            const myFeedbacks = await feedbackAPI.getMyFeedbacks()
+
+            return {
+                success: true,
+                currentUser,
+                myFeedbacks
+            }
+        } catch (error: any) {
+            return {
+                success: false,
+                error: error.message
+            }
+        }
     }
 }
 

@@ -144,10 +144,18 @@ export const feedbackAPI = {
     },
 
     // 标记为已处理
+    // async markAsProcessed(id: number) {
+    //     const response = await api.put<FeedbackResponse>(`/feedback/mark-processed/${id}`)
+    //     return response
+    // }
+
     async markAsProcessed(id: number) {
-        const response = await api.put<FeedbackResponse>(`/feedback/mark-processed/${id}`)
+        const response = await api.put<FeedbackResponse>(`/feedback/update/${id}`, {
+            status: 'PROCESSED'  // 只更新状态
+        })
         return response
     }
+
 }
 
 // 用户相关工具函数

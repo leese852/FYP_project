@@ -54,6 +54,11 @@ public class FeedbackServiceImpl extends ServiceImpl<FeedbackMapper, Feedback>
             feedback.setType(request.getType());
         }
 
+        // 新增：支持更新状态
+        if (request.getStatus() != null) {
+            feedback.setStatus(request.getStatus());
+        }
+
         feedback.setUpdatedAt(new Date());
         this.updateById(feedback);
         return convertToResponse(feedback);
@@ -98,4 +103,6 @@ public class FeedbackServiceImpl extends ServiceImpl<FeedbackMapper, Feedback>
         BeanUtils.copyProperties(feedback, response);
         return response;
     }
+
+
 }

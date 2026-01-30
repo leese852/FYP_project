@@ -1,14 +1,9 @@
 package com.leese.usercenter.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.leese.usercenter.mapper.CartMapper;
-import com.leese.usercenter.mapper.OrderItemMapper;
-import com.leese.usercenter.mapper.OrderMapper;
-import com.leese.usercenter.mapper.RiderMapper;
-import com.leese.usercenter.model.entity.Cart;
-import com.leese.usercenter.model.entity.OrderEntity;
-import com.leese.usercenter.model.entity.OrderItemEntity;
-import com.leese.usercenter.model.entity.RiderEntity;
+import com.leese.usercenter.mapper.*;
+import com.leese.usercenter.model.dto.PlaceOrderDTO;
+import com.leese.usercenter.model.entity.*;
 import com.leese.usercenter.model.vo.OrderItemVO;
 import com.leese.usercenter.model.vo.OrderVO;
 import com.leese.usercenter.service.OrderService;
@@ -41,6 +36,9 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private OrderInvoker orderInvoker;
     @Autowired
+    private DishMapper dishMapper;
+
+    @Autowired
     public OrderServiceImpl(OrderMapper orderMapper,
                             OrderItemMapper orderItemMapper,
                             RiderMapper riderMapper,
@@ -49,6 +47,55 @@ public class OrderServiceImpl implements OrderService {
         this.orderItemMapper = orderItemMapper;
         this.riderMapper = riderMapper;
         this.cartMapper = cartMapper;
+    }
+
+    @Override
+    public OrderEntity createOrderFromCart(PlaceOrderDTO dto, Integer userId) {
+        QueryWrapper<Cart> cartQuery = new QueryWrapper<>();
+        cartQuery.in("id",dto.getCartIds())
+                .eq("userId",userId);
+        List<Cart> cartItems = cartMapper.selectList(cartQuery);
+
+        if (cartItems == null || cartItems.isEmpty()) {
+            throw new RuntimeException("購物車為空，無法下單");
+        }
+        double totalAmount = cartItems.stream()
+                .mapToDouble(cart -> cart.getAmount().doubleValue())
+                .sum();
+
+        String orderNo = "ORD"+System.currentTimeMillis()+ "-" + UUID.randomUUID().toString().substring(0, 6);
+
+        OrderEntity order = OrderEntity.builder()
+                .orderId(orderNo)
+                .userId(userId)
+                .addressId(dto.getAddressId())      // 使用前端選中的地址
+                .status(2)            // 默認狀態：待接單
+                .totalAmount(totalAmount)
+                .payMethod("線上支付")
+                .payStatus(0)         // 未支付
+                .deliveryStatus(1)    // 立即送出
+                .packAmount(0)
+                .isDelete(0)
+                .build();
+
+        orderMapper.save(order);
+
+        for(Cart cart : cartItems){
+            Dish dish = dishMapper.selectById(cart.getDishId());
+            orderItemMapper.insert(
+                    OrderItemEntity.builder()
+                            .orderId(order.getId())
+                            .dishId(cart.getDishId().longValue())
+                            .dishName(dish.getDishName())
+                            .quantity(cart.getNumber())
+                            .price(dish.getPrice().doubleValue())
+                            .build()
+            );
+        }
+        cartMapper.delete(new QueryWrapper<Cart>()
+                .in("id",dto.getCartIds())
+                .eq("userId",userId));
+        return order;
     }
 
     @Override
@@ -112,83 +159,12 @@ public class OrderServiceImpl implements OrderService {
     }
 
 
-
-    /**
-     * 從購物車生成訂單，必須指定收貨地址
-     */
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public OrderEntity createOrderFromCart(Integer userId, Long addressId) {
-        // 1. 查詢當前用戶購物車
-        List<Cart> cartItems = cartMapper.selectList(
-                new QueryWrapper<Cart>().eq("userId", userId)
-        );
-        if (cartItems == null || cartItems.isEmpty()) {
-            throw new RuntimeException("購物車為空，無法下單");
-        }
-
-        // 2. 計算總金額
-        double totalAmount = cartItems.stream()
-                .map(cart -> cart.getAmount() == null ? BigDecimal.ZERO : cart.getAmount())
-                .mapToDouble(BigDecimal::doubleValue)
-                .sum();
-
-        // 3. 構建訂單主表數據
-        String orderNo = "ORD-" + System.currentTimeMillis() + "-" + UUID.randomUUID().toString().substring(0, 6);
-
-        OrderEntity order = OrderEntity.builder()
-                .orderId(orderNo)
-                .userId(userId)
-                .addressId(addressId)      // 使用前端選中的地址
-                .status(2)            // 默認狀態：待接單
-                .totalAmount(totalAmount)
-                .payMethod("線上支付")
-                .payStatus(0)         // 未支付
-                .deliveryStatus(1)    // 立即送出
-                .packAmount(0)
-                .isDelete(0)
-                .build();
-
-        // 4. 保存訂單主表，並獲取自增主鍵 id
-        orderMapper.save(order);
-        Long orderPrimaryId = order.getId();
-        log.info("✅ 生成訂單成功，orderId = {}, dbId = {}", order.getOrderId(), orderPrimaryId);
-
-        // 5. 生成訂單項
-        for (Cart cart : cartItems) {
-            if (cart.getNumber() == null || cart.getNumber() <= 0) {
-                continue;
-            }
-            BigDecimal amount = cart.getAmount() == null ? BigDecimal.ZERO : cart.getAmount();
-            BigDecimal quantity = BigDecimal.valueOf(cart.getNumber());
-            BigDecimal unitPrice = quantity.compareTo(BigDecimal.ZERO) == 0
-                    ? BigDecimal.ZERO
-                    : amount.divide(quantity, 2, BigDecimal.ROUND_HALF_UP);
-
-            OrderItemEntity item = OrderItemEntity.builder()
-                    .orderId(orderPrimaryId)
-                    .dishId(cart.getDishId() == null ? null : cart.getDishId().longValue())
-                    .dishName(cart.getName())
-                    .dishFlavor(cart.getDishFlavor())
-                    .quantity(cart.getNumber())
-                    .price(unitPrice.doubleValue())
-                    .build();
-
-            orderItemMapper.insert(item);
-        }
-
-        // 6. 清空該用戶購物車
-        cartMapper.delete(new QueryWrapper<Cart>().eq("userId", userId));
-
-        return order;
-    }
-
     private OrderVO convertToVO(OrderEntity order, List<OrderItemEntity> items, RiderEntity rider) {
         OrderVO vo = new OrderVO();
         vo.setId(order.getId());          // ✅ 主鍵 id
         vo.setOrderId(order.getOrderId()); // 訂單編號（字串）
         vo.setUserId(order.getUserId());
-        vo.setAddressId(order.getAddressId());
+        vo.setAddressId(Long.valueOf(order.getAddressId()));
 
         // 狀態
         vo.setStatus(order.getStatus());

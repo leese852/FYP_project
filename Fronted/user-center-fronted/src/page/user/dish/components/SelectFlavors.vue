@@ -118,7 +118,7 @@ const handleConfirm = async () => {
       name: props.dish.dishName,       // 对应Cart的name
       dishFlavor: selectedFlavors,     // 对应Cart的dishFlavor
       number: formState.quantity,      // 对应Cart的number
-      amount: totalPrice.value         // 对应Cart的amount
+      amount: props.dish.price,         // 对应Cart的amount
       // userId会自动从session获取，不需要前端传
       // create_time会在后端自动生成
     }

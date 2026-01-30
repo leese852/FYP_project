@@ -1,5 +1,6 @@
 package com.leese.usercenter.service;
 
+import com.leese.usercenter.model.dto.PlaceOrderDTO;
 import com.leese.usercenter.model.vo.OrderVO;
 import com.leese.usercenter.model.entity.OrderEntity;
 
@@ -29,5 +30,5 @@ public interface OrderService {
     /**
      * 從當前用戶購物車生成訂單，必須指定收貨地址
      */
-    OrderEntity createOrderFromCart(Integer userId, Long addressId);
+    OrderEntity createOrderFromCart(PlaceOrderDTO dto, Integer userId);
 }

@@ -116,9 +116,9 @@
           <div class="summary-info">
             <div>共 {{ totalItems }} 件商品</div>
             <div>已选 {{ selectedTotalItems }} 件商品</div>
-            <div class="total-amount">
-              合计：<span class="amount-large">¥{{ totalAmount.toFixed(2) }}</span>
-            </div>
+<!--            <div class="total-amount">-->
+<!--              合计：<span class="amount-large">¥{{ totalAmount.toFixed(2) }}</span>-->
+<!--            </div>-->
             <div class="selected-amount" v-if="selectedItems.length">
               选中商品：<span class="amount-large">¥{{ selectedAmount.toFixed(2) }}</span>
             </div>
@@ -147,11 +147,11 @@ import { DeleteOutlined, ShoppingCartOutlined } from '@ant-design/icons-vue'
 import type { TableColumnsType } from 'ant-design-vue'
 import { getAllCart, deleteCart, deleteAllCart, addCart } from '@/api/cart'
 import { getAddressList } from '@/api/address'
-import { placeOrderFromCart } from '@/api/order'
+import { placeOrderFromCart } from '@/api/cart'
 
 const router = useRouter()
 const cartItems = ref<any[]>([])
-const selectedRowKeys = ref<number[]>([])  // 选中的商品ID数组
+const selectedRowKeys = ref<number[]>([])
 const loading = ref(false)
 const selectAll = ref(false)
 const indeterminate = ref(false)
@@ -166,10 +166,16 @@ const selectedItems = computed(() => {
   return cartItems.value.filter(item => selectedRowKeys.value.includes(item.id))
 })
 
-// 安全计算单价
+// 计算单价 - amount 就是单价
 const getUnitPrice = (item: any) => {
-  if (!item.number || !item.amount) return 0
-  return item.amount / item.number
+  return Number(item.amount) || 0
+}
+
+// 计算小计 - 单价 × 数量
+const getSubtotal = (item: any) => {
+  const unitPrice = Number(item.amount) || 0
+  const quantity = Number(item.number) || 0
+  return unitPrice * quantity
 }
 
 // 计算属性
@@ -181,7 +187,7 @@ const totalItems = computed(() => {
 
 const totalAmount = computed(() => {
   return cartItems.value.reduce((sum, item) => {
-    return sum + (Number(item.amount) || 0)
+    return sum + getSubtotal(item)
   }, 0)
 })
 
@@ -193,7 +199,7 @@ const selectedTotalItems = computed(() => {
 
 const selectedAmount = computed(() => {
   return selectedItems.value.reduce((sum, item) => {
-    return sum + (Number(item.amount) || 0)
+    return sum + getSubtotal(item)
   }, 0)
 })
 
@@ -214,12 +220,6 @@ const columns: TableColumnsType = [
   {
     title: '数量',
     key: 'quantity',
-    align: 'center',
-    width: '15%'
-  },
-  {
-    title: '小计',
-    key: 'subtotal',
     align: 'center',
     width: '15%'
   },
@@ -283,10 +283,22 @@ const loadCart = async () => {
           ...item,
           id: Number(item.id) || 0,
           number: Number(item.number) || 1,
-          amount: Number(item.amount) || 0,
+          amount: Number(item.amount) || 0, // 注意：这里是单价
           dishId: Number(item.dishId) || 0,
         }))
         console.log('解析后的购物车数据:', cartItems.value)
+
+        // 调试：查看第一个商品的数据结构
+        if (cartItems.value.length > 0) {
+          const firstItem = cartItems.value[0]
+          console.log('第一个商品详细信息:', {
+            id: firstItem.id,
+            name: firstItem.name,
+            amount: firstItem.amount, // 应该是单价
+            number: firstItem.number, // 数量
+            subtotal: firstItem.amount * firstItem.number // 小计
+          })
+        }
       }
     } else if (response && response.data) {
       if (Array.isArray(response.data)) {
@@ -390,64 +402,104 @@ const handleClearCart = async () => {
   })
 }
 
-// 修改数量
+// 修改数量 - 修复版本
 const handleQuantityChange = async (item: any) => {
   try {
     const newNumber = Number(item.number) || 1
     if (newNumber < 1 || newNumber > 99) {
       message.warning('数量必须在1-99之间')
-      loadCart()
+      loadCart() // 恢复原值
       return
     }
 
-    const unitPrice = getUnitPrice(item)
-    const newAmount = unitPrice * newNumber
+    // amount 是单价，保持不变
+    const unitPrice = Number(item.amount) || 0
 
+    console.log('修改数量:', {
+      商品: item.name,
+      原数量: item.number,
+      新数量: newNumber,
+      单价: unitPrice,
+      小计: unitPrice * newNumber
+    })
+
+    // 删除原记录，添加新记录
     await deleteCart(item.id)
     await addCart({
       dishId: item.dishId,
       name: item.name,
       dishFlavor: item.dishFlavor,
       number: newNumber,
-      amount: newAmount
+      amount: unitPrice  // 传入单价
     })
 
     // 更新本地数据
-    item.amount = newAmount
+    item.number = newNumber
+    // amount（单价）保持不变
+
     message.success('数量更新成功')
   } catch (error: any) {
     console.error('更新失败:', error)
     message.error(error.message || '更新失败')
-    loadCart()
+    loadCart() // 失败后重新加载
   }
 }
 
-// 结算选中的商品 => 調用下單接口
+// 结算选中的商品
 const handleCheckout = async () => {
-  if (!selectedItems.value.length) {
+  if (!selectedRowKeys.value.length) {
     message.warning('请选择要结算的商品')
     return
   }
 
   if (!selectedAddressId.value) {
-    message.warning('請先選擇收貨地址')
+    message.warning('请先选择收货地址')
     return
   }
 
   try {
-    const success = await placeOrderFromCart(selectedAddressId.value)
-    if (success) {
-      message.success(`下單成功，已生成訂單！`)
-      // 重新加載購物車（後端已清空）
+    // 构建请求参数
+    const requestData = {
+      addressId: selectedAddressId.value,
+      cartIds: selectedRowKeys.value
+    }
+
+    console.log('下单请求参数:', requestData)
+
+    // 调用下单接口
+    const response = await placeOrderFromCart(requestData)
+
+    if (response && response.data) {
+      const orderData = response.data.data || response.data
+      const orderId = orderData.orderId || orderData.id
+
+      message.success(`下单成功，订单号: ${orderId}`)
+
+      // 重新加载购物车
       await loadCart()
-      // 跳轉到「我的訂單」頁面
+
+      // 清空选择状态
+      selectedRowKeys.value = []
+      selectAll.value = false
+
+      // 跳转到"我的订单"页面
       router.push('/order/customeorderlist')
     } else {
-      message.error('下單失敗，請稍後重試')
+      message.error('下单失败，请稍后重试')
     }
   } catch (error: any) {
-    console.error('下單失敗:', error)
-    message.error(error?.message || '下單失敗')
+    console.error('下单失败:', error)
+
+    let errorMsg = '下单失败'
+    if (error.response) {
+      errorMsg = error.response.data?.message || error.response.data?.msg || errorMsg
+    } else if (error.request) {
+      errorMsg = '网络请求失败，请检查网络连接'
+    } else {
+      errorMsg = error.message || errorMsg
+    }
+
+    message.error(errorMsg)
   }
 }
 

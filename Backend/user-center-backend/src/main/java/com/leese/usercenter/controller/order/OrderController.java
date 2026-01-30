@@ -1,9 +1,13 @@
 package com.leese.usercenter.controller.order;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.leese.usercenter.common.BaseResponse;
 import com.leese.usercenter.common.ResultUtils;
 import com.leese.usercenter.common.ErrorCode;
 import com.leese.usercenter.exception.BusinessException;
+import com.leese.usercenter.mapper.CartMapper;
+import com.leese.usercenter.model.dto.PlaceOrderDTO;
+import com.leese.usercenter.model.entity.Cart;
 import com.leese.usercenter.model.entity.OrderEntity;
 import com.leese.usercenter.model.vo.OrderVO;
 import com.leese.usercenter.model.entity.User;
@@ -27,6 +31,8 @@ public class OrderController {
 
     @Autowired
     private OrderService orderService;
+    @Autowired
+    private CartMapper cartMapper;
 
     @Autowired
     private OrderItemMapper orderItemMapper;  // 添加這行
@@ -73,6 +79,9 @@ public class OrderController {
     }
 
     /**
+     * 獲取訂單詳情（用主鍵 id 查詢）
+     */
+    /**
      * 獲取訂單詳情（用主鍵 id 查詢，包含菜品列表）
      */
     @GetMapping("/{id}")
@@ -85,6 +94,9 @@ public class OrderController {
         return ResultUtils.success(order);
     }
 
+
+
+
     /**
      * 更新訂單狀態
      */
@@ -96,10 +108,10 @@ public class OrderController {
     }
 
     /**
-     * 測試用：查詢所有訂單（簡化版）
+     * 測試用：查詢所有訂單
      */
     @GetMapping("/test/all")
-    public BaseResponse<List<OrderEntity>> getAllOrdersTest() {  // 修改方法名
+    public BaseResponse<List<OrderEntity>> getAllOrders() {
         log.info("🧪 測試查詢所有訂單");
         List<OrderEntity> orders = orderService.findAll();
         return ResultUtils.success(orders);

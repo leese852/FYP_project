@@ -69,10 +69,11 @@ function statusText(status: number) {
     case 1: return "待付款";
     case 2: return "待接單";
     case 3: return "已接單";
-    case 4: return "派送中";
-    case 5: return "已完成";
-    case 6: return "已取消";
-    case 7: return "退款";
+    case 4: return "制作中";
+    case 5: return "派送中";
+    case 6: return "已完成";
+    case 7: return "已取消";
+    case 8: return "退款";
     default: return "未知";
   }
 }

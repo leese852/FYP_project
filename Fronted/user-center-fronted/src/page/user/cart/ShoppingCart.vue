@@ -145,9 +145,15 @@ import { useRouter } from 'vue-router'
 import { Table, Modal, message } from 'ant-design-vue'
 import { DeleteOutlined, ShoppingCartOutlined } from '@ant-design/icons-vue'
 import type { TableColumnsType } from 'ant-design-vue'
-import { getAllCart, deleteCart, deleteAllCart, addCart } from '@/api/cart'
+import {
+  getAllCart,
+  deleteCart,
+  deleteAllCart,
+  updateCartQuantity,  // 添加专门的更新数量接口
+  getDishInfoById      // 添加获取菜品信息的接口
+} from '@/api/cart'
 import { getAddressList } from '@/api/address'
-import { placeOrderFromCart } from '@/api/cart' // 确保引入正确的方法
+import { placeOrderFromCart } from '@/api/cart'
 
 const router = useRouter()
 const cartItems = ref<any[]>([])
@@ -161,13 +167,27 @@ const addressList = ref<any[]>([])
 const selectedAddressId = ref<number | null>(null)
 const addressLoading = ref(false)
 
+// 存储菜品原始价格信息
+const dishPriceCache = ref<Record<number, number>>({})
+
 // 计算选中的商品
 const selectedItems = computed(() => {
   return cartItems.value.filter(item => selectedRowKeys.value.includes(item.id))
 })
 
-// 安全计算单价
+// 安全计算单价 - 修复：优先使用缓存价格
 const getUnitPrice = (item: any) => {
+  // 首先尝试从缓存获取菜品原始价格
+  if (dishPriceCache.value[item.dishId]) {
+    return dishPriceCache.value[item.dishId]
+  }
+
+  // 其次使用item中存储的单价（如果有）
+  if (item.unitPrice) {
+    return item.unitPrice
+  }
+
+  // 最后才使用金额/数量的方式计算
   if (!item.number || !item.amount) return 0
   return item.amount / item.number
 }
@@ -197,7 +217,7 @@ const selectedAmount = computed(() => {
   }, 0)
 })
 
-// 表格列定义
+// 表格列定义 - 修复单价显示
 const columns: TableColumnsType = [
   {
     title: '商品信息',
@@ -209,7 +229,8 @@ const columns: TableColumnsType = [
     title: '单价',
     key: 'unitPrice',
     align: 'center',
-    width: '15%'
+    width: '15%',
+    customRender: ({ record }) => `¥${getUnitPrice(record).toFixed(2)}`
   },
   {
     title: '数量',
@@ -221,7 +242,8 @@ const columns: TableColumnsType = [
     title: '小计',
     key: 'subtotal',
     align: 'center',
-    width: '15%'
+    width: '15%',
+    customRender: ({ record }) => `¥${(record.amount || 0).toFixed(2)}`
   },
   {
     title: '操作',
@@ -231,7 +253,7 @@ const columns: TableColumnsType = [
   }
 ]
 
-// 表格行选择配置（不变）
+// 表格行选择配置
 const rowSelection = computed(() => ({
   selectedRowKeys: selectedRowKeys.value,
   onChange: (selectedKeys: number[]) => {
@@ -268,31 +290,34 @@ watch(cartItems, () => {
   updateSelectionState()
 })
 
-// 加载购物车（不变）
+// 加载购物车 - 修复：加载菜品价格信息
 const loadCart = async () => {
   try {
     loading.value = true
     const response = await getAllCart()
     console.log('完整的API响应:', response)
 
+    let cartData = []
     // 根据控制台输出，数据结构是：response.data.data
     if (response && response.data && response.data.data) {
-      const cartData = response.data.data
-      if (Array.isArray(cartData)) {
-        cartItems.value = cartData.map(item => ({
-          ...item,
-          id: Number(item.id) || 0,
-          number: Number(item.number) || 1,
-          amount: Number(item.amount) || 0,
-          dishId: Number(item.dishId) || 0,
-        }))
-        console.log('解析后的购物车数据:', cartItems.value)
-      }
+      cartData = response.data.data
     } else if (response && response.data) {
-      if (Array.isArray(response.data)) {
-        cartItems.value = response.data
-      }
+      cartData = Array.isArray(response.data) ? response.data : []
     }
+
+    cartItems.value = cartData.map(item => ({
+      ...item,
+      id: Number(item.id) || 0,
+      number: Number(item.number) || 1,
+      amount: Number(item.amount) || 0,
+      dishId: Number(item.dishId) || 0,
+      unitPrice: item.unitPrice || (item.amount / item.number) || 0 // 保存单价
+    }))
+
+    console.log('解析后的购物车数据:', cartItems.value)
+
+    // 预加载菜品价格信息
+    await preloadDishPrices(cartItems.value)
 
     // 清空选择状态
     selectedRowKeys.value = []
@@ -308,7 +333,23 @@ const loadCart = async () => {
   }
 }
 
-// 加載用戶地址列表（不变）
+// 预加载菜品价格
+const preloadDishPrices = async (cartItems: any[]) => {
+  const dishIds = [...new Set(cartItems.map(item => item.dishId))]
+
+  for (const dishId of dishIds) {
+    try {
+      const dishInfo = await getDishInfoById(dishId)
+      if (dishInfo && dishInfo.data) {
+        dishPriceCache.value[dishId] = dishInfo.data.price || 0
+      }
+    } catch (error) {
+      console.warn(`获取菜品${dishId}价格失败:`, error)
+    }
+  }
+}
+
+// 加载用户地址列表
 const loadAddressList = async () => {
   try {
     addressLoading.value = true
@@ -326,7 +367,7 @@ const loadAddressList = async () => {
   }
 }
 
-// 删除单个商品（不变）
+// 删除单个商品
 const handleRemoveItem = async (id: number) => {
   Modal.confirm({
     title: '确认删除',
@@ -337,7 +378,7 @@ const handleRemoveItem = async (id: number) => {
         message.success('删除成功')
         // 从选中列表中移除
         selectedRowKeys.value = selectedRowKeys.value.filter(key => key !== id)
-        loadCart()
+        await loadCart() // 重新加载
       } catch (error: any) {
         message.error(error.message || '删除失败')
       }
@@ -345,7 +386,7 @@ const handleRemoveItem = async (id: number) => {
   })
 }
 
-// 删除选中的商品（不变）
+// 删除选中的商品
 const handleDeleteSelected = async () => {
   if (!selectedItems.value.length) {
     message.warning('请先选择要删除的商品')
@@ -362,7 +403,7 @@ const handleDeleteSelected = async () => {
         message.success(`成功删除 ${selectedItems.value.length} 件商品`)
         // 清空选中状态
         selectedRowKeys.value = []
-        loadCart()
+        await loadCart() // 重新加载
       } catch (error: any) {
         message.error(error.message || '删除失败')
       }
@@ -370,7 +411,7 @@ const handleDeleteSelected = async () => {
   })
 }
 
-// 清空购物车（不变）
+// 清空购物车
 const handleClearCart = async () => {
   Modal.confirm({
     title: '确认清空',
@@ -390,39 +431,72 @@ const handleClearCart = async () => {
   })
 }
 
-// 修改数量（不变）
-const handleQuantityChange = async (item: any) => {
+// 修复：修改数量逻辑
+const handleQuantityChange = async (item: any, newNumber: number) => {
+  if (newNumber < 1 || newNumber > 99) {
+    message.warning('数量必须在1-99之间')
+    return
+  }
+
   try {
-    const newNumber = Number(item.number) || 1
-    if (newNumber < 1 || newNumber > 99) {
-      message.warning('数量必须在1-99之间')
-      loadCart()
-      return
+    // 获取正确的菜品单价
+    let unitPrice = 0
+
+    // 1. 从缓存获取
+    if (dishPriceCache.value[item.dishId]) {
+      unitPrice = dishPriceCache.value[item.dishId]
+    }
+    // 2. 从item本身获取
+    else if (item.unitPrice) {
+      unitPrice = item.unitPrice
+    }
+    // 3. 重新查询菜品信息
+    else {
+      const dishInfo = await getDishInfoById(item.dishId)
+      if (dishInfo && dishInfo.data) {
+        unitPrice = dishInfo.data.price || 0
+        dishPriceCache.value[item.dishId] = unitPrice
+      } else {
+        // 保底方案：使用原金额/原数量
+        unitPrice = item.amount / item.number
+      }
     }
 
-    const unitPrice = getUnitPrice(item)
+    // 计算新金额
     const newAmount = unitPrice * newNumber
 
-    await deleteCart(item.id)
-    await addCart({
-      dishId: item.dishId,
-      name: item.name,
-      dishFlavor: item.dishFlavor,
-      number: newNumber,
-      amount: newAmount
+    // 调用专门的更新数量接口
+    await updateCartQuantity({
+      cartId: item.id,
+      quantity: newNumber
     })
 
     // 更新本地数据
-    item.amount = newAmount
+    const index = cartItems.value.findIndex(c => c.id === item.id)
+    if (index !== -1) {
+      cartItems.value[index].number = newNumber
+      cartItems.value[index].amount = newAmount
+      cartItems.value[index].unitPrice = unitPrice // 保存单价
+    }
+
     message.success('数量更新成功')
   } catch (error: any) {
     console.error('更新失败:', error)
     message.error(error.message || '更新失败')
-    loadCart()
+    // 恢复原值
+    await loadCart()
   }
 }
 
-// ============ 修改的关键部分：结算选中的商品 ============
+// 修改模板中的数量输入
+// 在模板中修改 <a-input-number> 的绑定方式
+const onQuantityChange = (value: number, record: any) => {
+  if (value !== record.number) {
+    handleQuantityChange(record, value)
+  }
+}
+
+// 结算选中的商品
 const handleCheckout = async () => {
   if (!selectedRowKeys.value.length) {
     message.warning('请选择要结算的商品')
@@ -435,25 +509,29 @@ const handleCheckout = async () => {
   }
 
   try {
-    // 构建请求参数，符合后端 PlaceOrderDTO 格式
+    // 构建请求参数
     const requestData = {
       addressId: selectedAddressId.value,
-      cartIds: selectedRowKeys.value  // 传递选中的购物车项ID数组
+      cartIds: selectedRowKeys.value
     }
 
     console.log('下单请求参数:', requestData)
 
+    // 显示加载状态
+    const hideLoading = message.loading('正在下单...', 0)
+
     // 调用下单接口
     const response = await placeOrderFromCart(requestData)
 
+    hideLoading()
+
     if (response && response.data) {
-      // 根据后端返回的实际数据结构调整
       const orderData = response.data.data || response.data
       const orderId = orderData.orderId || orderData.id
 
       message.success(`下单成功，订单号: ${orderId}`)
 
-      // 重新加载购物车（后端会删除已下单的购物车项）
+      // 重新加载购物车
       await loadCart()
 
       // 清空选择状态
@@ -468,10 +546,8 @@ const handleCheckout = async () => {
   } catch (error: any) {
     console.error('下单失败:', error)
 
-    // 更详细的错误处理
     let errorMsg = '下单失败'
     if (error.response) {
-      // 后端返回的错误信息
       errorMsg = error.response.data?.message || error.response.data?.msg || errorMsg
     } else if (error.request) {
       errorMsg = '网络请求失败，请检查网络连接'

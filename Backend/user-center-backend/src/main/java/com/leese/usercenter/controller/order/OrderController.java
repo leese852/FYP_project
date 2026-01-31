@@ -37,6 +37,14 @@ public class OrderController {
     @Autowired
     private OrderItemMapper orderItemMapper;  // 添加這行
 
+
+    @PostMapping("/place")
+    public BaseResponse<OrderEntity> placeOrder(@RequestBody PlaceOrderDTO dto,HttpServletRequest request ){
+        User user = AuthUtil.checkUserLogin(request);
+        OrderEntity order = orderService.createOrderFromCart(dto,user.getId());
+        return ResultUtils.success(order);
+    }
+
     /**
      * 獲取所有訂單（包含菜品詳情）- 用於後台管理
      */

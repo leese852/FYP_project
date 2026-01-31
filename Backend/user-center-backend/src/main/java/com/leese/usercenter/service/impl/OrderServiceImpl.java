@@ -22,6 +22,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -50,6 +51,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public OrderEntity createOrderFromCart(PlaceOrderDTO dto, Integer userId) {
         QueryWrapper<Cart> cartQuery = new QueryWrapper<>();
         cartQuery.in("id",dto.getCartIds())
@@ -60,11 +62,11 @@ public class OrderServiceImpl implements OrderService {
             throw new RuntimeException("購物車為空，無法下單");
         }
         double totalAmount = cartItems.stream()
-                .mapToDouble(cart -> cart.getAmount().doubleValue())
+                .mapToDouble(cart -> cart.getAmount().doubleValue() * cart.getNumber())
                 .sum();
 
         String orderNo = "ORD"+System.currentTimeMillis()+ "-" + UUID.randomUUID().toString().substring(0, 6);
-
+        log.info("地址id:{}",dto.getAddressId());
         OrderEntity order = OrderEntity.builder()
                 .orderId(orderNo)
                 .userId(userId)
@@ -78,13 +80,16 @@ public class OrderServiceImpl implements OrderService {
                 .isDelete(0)
                 .build();
 
-        orderMapper.save(order);
+        orderMapper.insert(order);
+        Long orderPrimaryId = order.getId();
+        log.info("✅ 生成訂單成功，orderId = {}, dbId = {}", order.getOrderId(), orderPrimaryId);
 
+        System.out.println(order.getId());
         for(Cart cart : cartItems){
             Dish dish = dishMapper.selectById(cart.getDishId());
             orderItemMapper.insert(
                     OrderItemEntity.builder()
-                            .orderId(order.getId())
+                            .orderId(orderPrimaryId)
                             .dishId(cart.getDishId().longValue())
                             .dishName(dish.getDishName())
                             .quantity(cart.getNumber())
@@ -92,6 +97,15 @@ public class OrderServiceImpl implements OrderService {
                             .build()
             );
         }
+
+        System.out.println("=== 開始刪除購物車 ===");
+        System.out.println("用戶ID: " + userId);
+        System.out.println("購物車IDs: " + dto.getCartIds());
+
+//        QueryWrapper<Cart> deleteWrapper = new QueryWrapper<>();
+//        deleteWrapper.in("id", dto.getCartIds())
+//                .eq("userId", userId);  // 這裡也要用數據庫字段名！
+//        cartMapper.delete(deleteWrapper);
         cartMapper.delete(new QueryWrapper<Cart>()
                 .in("id",dto.getCartIds())
                 .eq("userId",userId));

@@ -1,8 +1,11 @@
 package com.leese.usercenter.common;
 
+import lombok.Getter;
+
 /**
  * 錯誤碼
  */
+@Getter
 public enum ErrorCode {
     // 基础错误 (40000-49999)
     SUCCESS(0,"ok",""),
@@ -40,15 +43,4 @@ public enum ErrorCode {
         this.description = description;
     }
 
-    public int getCode() {
-        return code;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public String getDescription() {
-        return description;
-    }
 }

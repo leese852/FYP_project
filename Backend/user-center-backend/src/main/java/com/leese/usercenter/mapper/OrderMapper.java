@@ -1,5 +1,7 @@
 package com.leese.usercenter.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.leese.usercenter.model.entity.Dish;
 import com.leese.usercenter.model.entity.OrderEntity;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -7,7 +9,7 @@ import org.apache.ibatis.annotations.Param;
 import java.util.List;
 
 @Mapper
-public interface OrderMapper {
+public interface OrderMapper extends BaseMapper<OrderEntity> {
     OrderEntity findById(@Param("id") Long id);
 
     List<OrderEntity> findByUserId(@Param("userId") Integer userId);

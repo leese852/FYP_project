@@ -17,6 +17,8 @@ public class CartController {
     @Autowired
     CartService cartService;
 
+
+
     @PostMapping("/add")
     public BaseResponse<String> addCart(@RequestBody Cart cart, HttpServletRequest request){
         cartService.addCart(cart,request);
@@ -26,6 +28,12 @@ public class CartController {
     @DeleteMapping("/delete")
     public BaseResponse<String> deleteCart(int id, HttpServletRequest request){
         cartService.deleteCart(id,request);
+        return ResultUtils.success();
+    }
+
+    @PutMapping("/update")
+    public BaseResponse<String> updateCart(@RequestBody Cart cart){
+        cartService.updateCart(cart);
         return ResultUtils.success();
     }
 

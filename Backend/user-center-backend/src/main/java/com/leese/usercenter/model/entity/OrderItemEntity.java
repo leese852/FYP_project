@@ -1,5 +1,6 @@
 package com.leese.usercenter.model.entity;
 
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,6 +10,7 @@ import lombok.ToString;
 @Setter
 @ToString
 @Builder
+@TableName("order_items")
 public class OrderItemEntity {
     private Long id;            // 对应表的主键 id
     private Long orderId;       // 对应表的 orderId

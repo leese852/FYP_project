@@ -145,7 +145,7 @@ import { useRouter } from 'vue-router'
 import { Table, Modal, message } from 'ant-design-vue'
 import { DeleteOutlined, ShoppingCartOutlined } from '@ant-design/icons-vue'
 import type { TableColumnsType } from 'ant-design-vue'
-import { getAllCart, deleteCart, deleteAllCart, addCart } from '@/api/cart'
+import {getAllCart, deleteCart, deleteAllCart, addCart, updateQty} from '@/api/cart'
 import { getAddressList } from '@/api/address'
 import { placeOrderFromCart } from '@/api/cart'
 
@@ -412,32 +412,16 @@ const handleQuantityChange = async (item: any) => {
       return
     }
 
-    // amount 是单价，保持不变
-    const unitPrice = Number(item.amount) || 0
-
-    console.log('修改数量:', {
-      商品: item.name,
-      原数量: item.number,
-      新数量: newNumber,
-      单价: unitPrice,
-      小计: unitPrice * newNumber
-    })
-
-    // 删除原记录，添加新记录
-    await deleteCart(item.id)
-    await addCart({
-      dishId: item.dishId,
-      name: item.name,
-      dishFlavor: item.dishFlavor,
+    await updateQty({
+      id: item.id,
       number: newNumber,
-      amount: unitPrice  // 传入单价
+
     })
 
     // 更新本地数据
     item.number = newNumber
     // amount（单价）保持不变
 
-    message.success('数量更新成功')
   } catch (error: any) {
     console.error('更新失败:', error)
     message.error(error.message || '更新失败')

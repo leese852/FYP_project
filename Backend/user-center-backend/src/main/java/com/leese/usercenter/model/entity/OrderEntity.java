@@ -1,5 +1,8 @@
 package com.leese.usercenter.model.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,7 +14,9 @@ import java.sql.Timestamp;
 @Setter
 @ToString
 @Builder
+@TableName("orders")
 public class OrderEntity {
+    @TableId(type = IdType.AUTO)
     private Long id;                   // 表主键 id
     private String orderId;            // 訂單編號 (VARCHAR)
     private Integer userId;               // 用户 id

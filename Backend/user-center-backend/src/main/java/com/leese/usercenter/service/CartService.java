@@ -16,4 +16,5 @@ public interface CartService extends IService<Cart> {
     void deleteCart(int id,HttpServletRequest request);
     List<Cart> getAllCart(HttpServletRequest request);
     void deleteAllCart(HttpServletRequest request);
+    void updateCart(Cart cart);
 }

@@ -16,6 +16,14 @@ export const getAllCart = async () => {
     })
 }
 
+export const updateQty = async (data:any) => {
+    return await myAxios.request({
+        url: '/user/cart/update',
+        method: 'put',
+        data: data,
+    })
+}
+
 export const deleteCart = async (id:any) => {
     return await myAxios.request({
         url: '/user/cart/delete',

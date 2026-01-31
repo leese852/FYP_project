@@ -2,6 +2,10 @@ package com.leese.usercenter.mapper;
 
 import com.leese.usercenter.model.entity.Cart;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Delete;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
 * @author wuhao

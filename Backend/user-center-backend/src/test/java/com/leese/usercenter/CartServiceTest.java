@@ -21,6 +21,7 @@ class SimpleCartServiceTest {
     @Autowired
     private CartServiceImpl cartService;
 
+
     @Test
     void testCartServiceBasic() {
         System.out.println("=== 简单测试购物车功能 ===");

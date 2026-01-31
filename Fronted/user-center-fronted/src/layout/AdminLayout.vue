@@ -299,6 +299,10 @@ const menuList = ref([
     title: '反馈管理',
     path: '/admin/feedback',
     iconComponent: CoffeeOutlined,
+  },{
+    title: 'order msng',
+    path: '/admin/orders',
+    iconComponent: CoffeeOutlined,
   }
 ])
 

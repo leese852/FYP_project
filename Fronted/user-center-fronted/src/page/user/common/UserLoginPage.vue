@@ -46,6 +46,16 @@
         <a-button type="primary" html-type="submit">Submit</a-button>
       </a-form-item>
     </a-form>
+
+    <!-- 在表单外添加注册链接 -->
+    <div style="max-width: 400px; margin: 20px auto; text-align: center">
+      <a-typography-text type="secondary">
+        还没有账号？
+      </a-typography-text>
+      <a-typography-link @click="toRegister" style="margin-left: 8px">
+        立即注册
+      </a-typography-link>
+    </div>
   </div>
 </template>
 <script lang="ts" setup>
@@ -66,6 +76,11 @@ const formState = reactive<FormState>({
   userPassword: "",
   remember: true,
 });
+
+// 跳转到注册页面
+const toRegister = () => {
+  router.push("/user/register");
+};
 
 const loginUserStore = useLoginUserStore();
 //提交表单

@@ -140,15 +140,9 @@ const imageFile = ref(null)
 // 硬编码分类
 const categoryOptions = [
   { label: '主食', value: 1 },
-  { label: '热菜', value: 2 },
-  { label: '凉菜', value: 3 },
-  { label: '汤类', value: 4 },
-  { label: '饮品', value: 5 },
-  { label: '甜点', value: 6 },
-  { label: '套餐', value: 7 },
-  { label: '招牌菜', value: 8 },
-  { label: '特色菜', value: 9 },
-  { label: '其他', value: 10 }
+  { label: '汤类', value: 2 },
+  { label: '饮品', value: 3 },
+  { label: '甜点', value: 4 },
 ]
 
 // 表单数据 - 根据后端实体类调整

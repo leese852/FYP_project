@@ -75,10 +75,10 @@
         </div>
 
         <div class="dish-meta">
-          <div class="meta-item" v-if="dish.categoryId">
-            <span class="meta-label">分类</span>
-            <span class="meta-value">{{ dish.categoryName || `分类 ${dish.categoryId}` }}</span>
-          </div>
+<!--          <div class="meta-item" v-if="dish.categoryId">-->
+<!--            <span class="meta-label">分类</span>-->
+<!--            <span class="meta-value">{{ dish.categoryName || `分类 ${dish.categoryId}` }}</span>-->
+<!--          </div>-->
           <div class="meta-item" v-if="dish.status">
             <span class="meta-label">状态</span>
             <span :class="['status-badge', dish.status === 1 ? 'active' : 'inactive']">

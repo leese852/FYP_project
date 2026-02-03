@@ -128,13 +128,32 @@ function confirmCancel() {
 // 🚚 確認送達
 async function confirmDelivered() {
   if (!order.value) return;
+
   try {
     const success = await updateOrderStatus(order.value.id, 6); // 更新為已完成
+
     if (success) {
       order.value.status = 6; // 前端同步更新狀態
+
       Modal.success({
         title: "確認成功",
         content: "訂單已確認送達！",
+        okText: "前往評價",
+        cancelText: "稍後評價",
+        onOk() {
+          // 跳转到用户反馈页面，携带订单ID作为参数
+          router.push({
+            path: '/user/feedback',
+            query: {
+              orderId: order.value.id,
+              type: 'delivery',
+              redirectFrom: 'order-completion'
+            }
+          });
+        },
+        onCancel() {
+          console.log('用戶選擇稍後評價');
+        }
       });
     } else {
       Modal.error({

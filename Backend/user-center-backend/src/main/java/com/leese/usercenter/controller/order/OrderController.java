@@ -86,9 +86,7 @@ public class OrderController {
         return ResultUtils.success(orders);
     }
 
-    /**
-     * 獲取訂單詳情（用主鍵 id 查詢）
-     */
+
     /**
      * 獲取訂單詳情（用主鍵 id 查詢，包含菜品列表）
      */

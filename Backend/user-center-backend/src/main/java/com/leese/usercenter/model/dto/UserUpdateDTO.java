@@ -11,8 +11,9 @@ import java.io.Serializable;
 @AllArgsConstructor //有参构造
 @Data
 public class UserUpdateDTO implements Serializable{
+    
     private String username;
-    private String avatar;
+    private MultipartFile avatar;
     private Byte gender;
     private String email;
     private String tel;

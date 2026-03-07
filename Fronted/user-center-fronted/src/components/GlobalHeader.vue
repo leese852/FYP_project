@@ -32,13 +32,23 @@
     <a-col flex="100px">
       <div class="user-login-status">
         <div v-if="isLoggedIn">
-          <a-dropdown size="5" >
+          <a-dropdown
+              size="5"
+              arrow="true">
             <a class="ant-dropdown-link" @click.prevent>
-              {{ displayName }}
-              <DownOutlined />
+              <a-avatar
+                v-if="avatarUrl"
+                :src="avatarUrl"
+              />
+              <a-avatar v-else>
+                {{ displayName.charAt(0).toUpperCase() }}
+              </a-avatar>
+<!--              {{ displayName }}-->
+<!--              <DownOutlined />-->
             </a>
             <template #overlay>
               <a-menu @click="onClick">
+                <a-menu-item key=""> {{ displayName }}</a-menu-item>
                 <a-menu-item key="1"><UserOutlined /> 个人信息</a-menu-item>
                 <a-menu-item key="2"><LogoutOutlined /> 退出登录</a-menu-item>
               </a-menu>
@@ -85,10 +95,16 @@ const isLoggedIn = computed(() => {
 const displayName = computed(() => {
   const user = loginUserStore.loginUser;
   if (!user) return "用户";
-
-  // 优先显示username，如果为null则显示userAccount
   return user.username || user.userAccount || "用户";
 });
+
+// 计算属性：头像 URL
+const avatarUrl = computed(()=>{
+  return loginUserStore.loginUser?.avatarUrl || "";
+})
+
+
+
 
 const onClick = ({ key }: { key: string }) => {
   if (key === "2") {

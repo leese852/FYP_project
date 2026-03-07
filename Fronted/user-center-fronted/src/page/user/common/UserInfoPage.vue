@@ -21,7 +21,7 @@
             <a-col :span="8">
               <div class="avatar-section">
                 <div class="avatar-display">
-                  <a-avatar :size="120" :src="userInfo.avatar" class="main-avatar">
+                  <a-avatar :size="120" :src="userInfo.avatarUrl" class="main-avatar">
                     {{ userInfo.username?.charAt(0) || 'U' }}
                   </a-avatar>
                 </div>
@@ -192,20 +192,25 @@ import {
   UserOutlined,
   MailOutlined,
   PhoneOutlined,
-  LinkOutlined,
+  UploadOutlined,
   ManOutlined,
   WomanOutlined
 } from '@ant-design/icons-vue'
-import { getCurrentUser, userUpdate } from '@/api/user'
+import { getCurrentUser, userUpdate, uploadAvatar } from '@/api/user'
 
 // 响应式数据
 const loading = ref(true)
 const saving = ref(false)
 const editing = ref(false)
+const uploading = ref(false)
 const userInfo = ref({})
 const formRef = ref()
 
-// 编辑表单数据 - 注意字段名要和后端 DTO 完全一致！
+// 头像上传相关
+const avatarFile = ref(null)
+const avatarPreview = ref('')
+
+// 编辑表单数据
 const editForm = reactive({
   username: '',
   avatar: '',
@@ -214,24 +219,12 @@ const editForm = reactive({
   tel: ''
 })
 
-// 表单验证规则
+// 表单验证规则（移除了 avatar 的 URL 校验，改为上传方式）
 const formRules = {
   username: [
     { required: true, message: '请输入用户名' },
     { min: 2, max: 16, message: '用户名长度为2-16个字符' },
     { pattern: /^[a-zA-Z0-9_\u4e00-\u9fa5]+$/, message: '用户名只能包含中文、英文、数字和下划线' }
-  ],
-  avatar: [
-    {
-      validator: (_, value) => {
-        if (!value) return Promise.resolve()
-        const urlPattern = /^(https?:\/\/.*\.(?:png|jpg|jpeg|gif|webp))$/i
-        if (urlPattern.test(value)) {
-          return Promise.resolve()
-        }
-        return Promise.reject('请输入有效的图片URL地址（支持png/jpg/jpeg/gif/webp）')
-      }
-    }
   ],
   gender: [
     { required: true, message: '请选择性别' }
@@ -256,16 +249,12 @@ async function fetchUserInfo() {
   try {
     loading.value = true
     const res = await getCurrentUser()
-    console.log('用户信息响应:', res)
-
     if (res?.data?.code === 0) {
       userInfo.value = res.data.data || {}
-      console.log('用户信息数据:', userInfo.value)
     } else {
       message.error('获取用户信息失败: ' + (res?.data?.message || '未知错误'))
     }
   } catch (error) {
-    console.error('获取用户信息失败:', error)
     message.error('网络错误，请稍后重试')
   } finally {
     loading.value = false
@@ -281,36 +270,80 @@ function formatGender(gender) {
 // 开始编辑
 function startEditing() {
   editing.value = true
-
-  // 填充表单数据 - 注意字段名映射
   editForm.username = userInfo.value.username || ''
-  editForm.avatar = userInfo.value.avatar || ''
-  editForm.gender = userInfo.value.gender || 0
+  editForm.avatar = userInfo.value.avatarUrl || ''
+  editForm.gender = userInfo.value.gender ?? 0
   editForm.email = userInfo.value.email || ''
   editForm.tel = userInfo.value.tel || ''
+  // 进入编辑时用当前头像作为预览
+  avatarPreview.value = userInfo.value.avatarUrl || ''
+  avatarFile.value = null
 }
+
 // 取消编辑
 function cancelEditing() {
   editing.value = false
+  avatarFile.value = null
+  avatarPreview.value = ''
   formRef.value?.clearValidate()
 }
 
-// 验证头像URL
-function validateAvatarUrl() {
-  if (editForm.avatar && !editForm.avatar.startsWith('http')) {
-    editForm.avatar = 'https://' + editForm.avatar
+// 上传前校验（返回 false 阻止 ant-design 自动上传，由 custom-request 接管）
+function beforeUpload(file) {
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+  if (!allowedTypes.includes(file.type)) {
+    message.error('只支持 JPG、PNG、GIF、WebP 格式')
+    return false
   }
+  const isLt2M = file.size / 1024 / 1024 < 2
+  if (!isLt2M) {
+    message.error('图片大小不能超过 2MB')
+    return false
+  }
+  return true
+}
+
+// 自定义上传：调用 /common/upload，拿到 URL 后存入 editForm.avatar
+async function handleUpload({ file }) {
+  uploading.value = true
+  try {
+    // 本地预览 可以立刻预览（不用等网络）
+    avatarPreview.value = URL.createObjectURL(file)
+    avatarFile.value = file
+
+    // 调用后端上传接口
+    const res = await uploadAvatar(file)
+    if (res?.data?.code === 0) {
+      editForm.avatar = res.data.data  // 将返回的 URL 存入表单
+      message.success('图片上传成功')
+    } else {
+      message.error('上传失败: ' + (res?.data?.message || '未知错误'))
+      // 上传失败时回滚预览
+      avatarPreview.value = userInfo.value.avatarUrl || ''
+      avatarFile.value = null
+    }
+  } catch (error) {
+    message.error('上传失败，请检查网络连接')
+    avatarPreview.value = userInfo.value.avatarUrl || ''
+    avatarFile.value = null
+  } finally {
+    uploading.value = false
+  }
+}
+
+// 清除已选图片
+function clearFile() {
+  avatarFile.value = null
+  avatarPreview.value = userInfo.value.avatarUrl || ''
+  editForm.avatar = userInfo.value.avatarUrl || ''
 }
 
 // 保存用户信息
 async function handleSave() {
   try {
-    // 表单验证
     await formRef.value.validate()
-
     saving.value = true
 
-    // 准备请求参数 - 注意字段名要和后端DTO一致
     const params = {
       username: editForm.username,
       avatar: editForm.avatar,
@@ -319,63 +352,30 @@ async function handleSave() {
       tel: editForm.tel
     }
 
-    console.log('更新参数:', params)
-
-    // 调用更新接口
     const res = await userUpdate(params)
-    console.log('更新响应:', res)
 
     if (res?.data?.code === 0) {
       message.success('个人信息更新成功')
-
-      // 重新获取最新用户信息
       await fetchUserInfo()
-
-      // 退出编辑模式
       editing.value = false
+      avatarFile.value = null
+      avatarPreview.value = ''
     } else {
       message.error('更新失败: ' + (res?.data?.message || '未知错误'))
     }
 
   } catch (error) {
-    console.error('保存失败:', error)
-
     if (error.errorFields) {
-      // 表单验证失败
       message.warning('请检查表单填写是否正确')
       return
     }
-
-    // API错误
     if (error.response) {
-      const errorMsg = error.response.data?.message || '更新失败，请稍后重试'
-      message.error(errorMsg)
+      message.error(error.response.data?.message || '更新失败，请稍后重试')
     } else {
       message.error('网络错误，请检查网络连接')
     }
-
   } finally {
     saving.value = false
-  }
-}
-
-// 格式化时间
-function formatTime(timestamp) {
-  if (!timestamp) return '-'
-
-  try {
-    const date = new Date(timestamp)
-    if (isNaN(date.getTime())) return '-'
-
-    return date.toLocaleString('zh-CN', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
-    })
-  } catch (e) {
-    return '-'
   }
 }
 </script>

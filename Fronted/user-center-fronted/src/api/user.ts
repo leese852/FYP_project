@@ -51,6 +51,20 @@ export const logout = async () => {
   });
 };
 
+// 上传头像接口
+export const uploadAvatar = async (file: File) => {
+  const formData = new FormData();
+  formData.append("file", file);
+  return await myAxios.request({
+    url: "/common/upload",
+    method: "post",
+    data: formData,
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+};
+
 // 删除用户接口
 export const deleteUser = async (id: string) => {
   return await myAxios.request({

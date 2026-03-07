@@ -13,7 +13,7 @@ import java.io.Serializable;
 public class UserUpdateDTO implements Serializable{
     
     private String username;
-    private MultipartFile avatar;
+    private String avatar;
     private Byte gender;
     private String email;
     private String tel;

@@ -45,7 +45,7 @@
         <div class="image-wrapper">
           <img
               v-if="dish.imgUrl"
-              :src="`data:image/jpeg;base64,${dish.imgUrl}`"
+              :src="dish.imgUrl"
               :alt="dish.dishName"
               class="main-image"
               @click="zoomImage"
@@ -58,9 +58,9 @@
             </svg>
             <p>暂无图片</p>
           </div>
-          <div v-if="dish.imgUrl" class="image-zoom-hint">
-            点击图片查看大图
-          </div>
+<!--          <div v-if="dish.imgUrl" class="image-zoom-hint">-->
+<!--            点击图片查看大图-->
+<!--          </div>-->
         </div>
       </div>
 
@@ -192,7 +192,7 @@
           <div class="recommendations-list">
             <div v-for="(rec, index) in recommendations" :key="index" class="recommendation-item">
               <div class="rec-image">
-                <img v-if="rec.imgUrl" :src="`data:image/jpeg;base64,${rec.imgUrl}`" :alt="rec.dishName">
+                <img v-if="rec.imgUrl" :src="rec.imgUrl" :alt="rec.dishName">
                 <div v-else class="rec-placeholder">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
                     <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>

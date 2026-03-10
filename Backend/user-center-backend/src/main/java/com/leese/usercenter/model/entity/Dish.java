@@ -26,7 +26,7 @@ public class Dish {
     private BigDecimal price;
     private Integer categoryId;
     private String description;
-    private byte[] imgUrl;
+    private String imgUrl;
     private Integer isAvailable;
     private Date createTime;
     private Date updateTime;

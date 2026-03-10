@@ -55,7 +55,8 @@
                 <div class="image-upload">
                   <div v-if="imagePreview" class="image-preview">
                     <img :src="imagePreview" alt="菜品图片预览" />
-                    <a-button type="link" @click="removeImage">删除</a-button>
+                    <a-spin v-if="uploading" size="small" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)" />
+                    <a-button type="link" danger @click="removeImage" :disabled="uploading">删除</a-button>
                   </div>
                   <div v-else class="upload-area" @click="triggerUpload">
                     <PictureOutlined style="font-size: 32px; color: #999;" />
@@ -128,12 +129,13 @@ import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { ArrowLeftOutlined, PlusOutlined, PictureOutlined } from '@ant-design/icons-vue'
-import { addDish } from '@/api/dish'
+import { addDish, uploadDishImage } from '@/api/dish'
 
 const router = useRouter()
 const formRef = ref()
 const fileInputRef = ref()
 const submitting = ref(false)
+const uploading = ref(false)
 const imagePreview = ref('')
 const imageFile = ref(null)
 
@@ -151,6 +153,7 @@ const formState = reactive({
   price: undefined,
   categoryId: undefined,
   description: '',
+  imgUrl: '',
   flavors: [{
     tag: '',      // 对应 DishFlavor 的 tag 字段
     list: ''      // 对应 DishFlavor 的 list 字段
@@ -160,20 +163,56 @@ const formState = reactive({
 // 图片上传
 const triggerUpload = () => fileInputRef.value?.click()
 
-const handleImageChange = (event) => {
+const handleImageChange = async (event) => {
   const file = event.target.files[0]
   if (!file) return
 
-  const reader = new FileReader()
-  reader.onload = (e) => imagePreview.value = e.target.result
-  reader.readAsDataURL(file)
+  // 文件类型校验
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+  if (!allowedTypes.includes(file.type)) {
+    message.error('只支持 JPG、PNG、GIF、WebP 格式')
+    event.target.value = ''
+    return
+  }
+  // 文件大小校验（2MB）
+  if (file.size / 1024 / 1024 >= 2) {
+    message.error('图片大小不能超过 2MB')
+    event.target.value = ''
+    return
+  }
+
+  // 本地即时预览
+  imagePreview.value = URL.createObjectURL(file)
   imageFile.value = file
   event.target.value = ''
+
+  // 上传至服务器获取 URL
+  uploading.value = true
+  try {
+    const res = await uploadDishImage(file)
+    if (res?.data?.code === 0) {
+      formState.imgUrl = res.data.data
+      message.success('图片上传成功')
+    } else {
+      message.error(res?.data?.message || '图片上传失败')
+      imagePreview.value = ''
+      imageFile.value = null
+      formState.imgUrl = ''
+    }
+  } catch (e) {
+    message.error('图片上传失败，请重试')
+    imagePreview.value = ''
+    imageFile.value = null
+    formState.imgUrl = ''
+  } finally {
+    uploading.value = false
+  }
 }
 
 const removeImage = () => {
   imagePreview.value = ''
   imageFile.value = null
+  formState.imgUrl = ''
 }
 
 // 口味管理
@@ -188,6 +227,7 @@ const removeFlavor = (index) => formState.flavors.splice(index, 1)
 const resetForm = () => {
   formRef.value?.resetFields()
   removeImage()
+  formState.imgUrl = ''
   formState.flavors = [{
     tag: '',
     list: ''
@@ -213,23 +253,13 @@ const handleSubmit = async () => {
 
     submitting.value = true
 
-    // 转换图片为base64
-    let imgUrlBase64 = null
-    if (imageFile.value) {
-      const reader = new FileReader()
-      imgUrlBase64 = await new Promise((resolve) => {
-        reader.onload = (e) => resolve(e.target.result)
-        reader.readAsDataURL(imageFile.value)
-      })
-    }
-
     // 准备数据 - 根据 DishFlavor 实体类调整
     const submitData = {
       dishName: formState.dishName,
       price: formState.price,
       categoryId: formState.categoryId,
       description: formState.description,
-      imgUrl: imgUrlBase64 ? imgUrlBase64.split(',')[1] : null,
+      imgUrl: formState.imgUrl || null,
       flavors: formState.flavors
           .filter(flavor => flavor.tag || flavor.list) // 过滤完全为空的口味
           .map(flavor => ({

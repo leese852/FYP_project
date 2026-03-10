@@ -23,7 +23,7 @@ public class DishVO implements Serializable {
     private String dishName;
     private BigDecimal price;
     private String description;
-    private byte[] imgUrl;
+    private String imgUrl;
     private Integer isAvailable;
     private Integer categoryId;
     // 修改了数据，要返回更新时间的字段

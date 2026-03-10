@@ -4,7 +4,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { ArrowLeftOutlined, PlusOutlined, PictureOutlined } from '@ant-design/icons-vue'
-import { getDishById, updateDish } from '@/api/dish'
+import { getDishById, updateDish, uploadDishImage } from '@/api/dish'
 
 const route = useRoute()
 const router = useRouter()
@@ -66,20 +66,10 @@ const formState = reactive({
 // 图片处理
 const fileInputRef = ref()
 const imageFile = ref(null)
+const uploading = ref(false)
 
 // 提交状态
 const submitting = ref(false)
-
-// 获取图片URL
-const getImageUrl = (imgData) => {
-  if (!imgData) return ''
-  // 如果已经是完整的data URL，直接返回
-  if (typeof imgData === 'string' && imgData.startsWith('data:')) {
-    return imgData
-  }
-  // 如果是base64字符串，添加前缀
-  return `data:image/jpeg;base64,${imgData}`
-}
 
 // 加载菜品数据
 const loadDishData = async () => {
@@ -106,12 +96,8 @@ const loadDishData = async () => {
       formState.description = dishData.description || ''
       formState.isAvailable = dishData.isAvailable || 0
 
-      // 处理图片
-      if (dishData.imgUrl) {
-        formState.imgUrl = getImageUrl(dishData.imgUrl)
-      } else {
-        formState.imgUrl = ''
-      }
+      // 处理图片 - 直接使用 URL 字符串
+      formState.imgUrl = dishData.imgUrl || ''
 
       // 处理口味数据
       if (dishData.flavors && Array.isArray(dishData.flavors) && dishData.flavors.length > 0) {
@@ -142,7 +128,7 @@ const triggerUpload = () => {
   fileInputRef.value?.click()
 }
 
-const handleImageChange = (event) => {
+const handleImageChange = async (event) => {
   const file = event.target.files[0]
   if (!file) return
 
@@ -150,6 +136,7 @@ const handleImageChange = (event) => {
   const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/webp']
   if (!validTypes.includes(file.type)) {
     message.error('只能上传 JPG、PNG、GIF、WEBP 格式的图片')
+    event.target.value = ''
     return
   }
 
@@ -157,18 +144,36 @@ const handleImageChange = (event) => {
   const maxSize = 2 * 1024 * 1024
   if (file.size > maxSize) {
     message.error('图片大小不能超过 2MB')
+    event.target.value = ''
     return
   }
 
-  // 读取文件
-  const reader = new FileReader()
-  reader.onload = (e) => {
-    formState.imgUrl = e.target.result
-  }
-  reader.readAsDataURL(file)
-
+  // 本地即时预览
+  const previewUrl = URL.createObjectURL(file)
+  const prevImgUrl = formState.imgUrl
+  formState.imgUrl = previewUrl
   imageFile.value = file
   event.target.value = ''
+
+  // 上传至服务器获取 URL
+  uploading.value = true
+  try {
+    const res = await uploadDishImage(file)
+    if (res?.data?.code === 0) {
+      formState.imgUrl = res.data.data
+      message.success('图片上传成功')
+    } else {
+      message.error(res?.data?.message || '图片上传失败')
+      formState.imgUrl = prevImgUrl
+      imageFile.value = null
+    }
+  } catch (e) {
+    message.error('图片上传失败，请重试')
+    formState.imgUrl = prevImgUrl
+    imageFile.value = null
+  } finally {
+    uploading.value = false
+  }
 }
 
 const removeImage = () => {
@@ -216,10 +221,7 @@ const handleSubmit = async () => {
       categoryId: formState.categoryId,
       description: formState.description?.trim() || '',
       isAvailable: formState.isAvailable,
-      // 处理图片：如果是新上传的图片，提取base64部分
-      imgUrl: formState.imgUrl?.startsWith('data:image/')
-          ? formState.imgUrl.split(',')[1]
-          : formState.imgUrl || null,
+      imgUrl: formState.imgUrl || null,
       // 处理口味数据
       flavors: formState.flavors
           .filter(flavor => flavor.tag?.trim() || flavor.list?.trim())
@@ -347,9 +349,10 @@ const goBack = () => {
                     <!-- 显示现有图片 -->
                     <div v-if="formState.imgUrl" class="image-preview">
                       <img :src="formState.imgUrl" alt="菜品图片" />
+                      <a-spin v-if="uploading" size="small" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)" />
                       <div class="image-actions">
-                        <a-button type="link" @click="triggerUpload">更换</a-button>
-                        <a-button type="link" danger @click="removeImage">删除</a-button>
+                        <a-button type="link" @click="triggerUpload" :disabled="uploading">更换</a-button>
+                        <a-button type="link" danger @click="removeImage" :disabled="uploading">删除</a-button>
                       </div>
                       <input
                           ref="fileInputRef"

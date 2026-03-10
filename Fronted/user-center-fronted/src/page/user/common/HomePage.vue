@@ -60,7 +60,7 @@
             <div class="dish-image">
               <img
                   v-if="dish.imgUrl"
-                  :src="`data:image/jpeg;base64,${dish.imgUrl}`"
+                  :src="dish.imgUrl"
                   :alt="dish.dishName"
                   class="dish-img"
               />

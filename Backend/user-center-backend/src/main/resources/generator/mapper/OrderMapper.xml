@@ -35,6 +35,15 @@
     riderId
     </sql>
 
+    <!-- 根据 QueryWrapper 查询单个订单 -->
+    <select id="selectOne" resultType="com.leese.usercenter.model.entity.OrderEntity">
+        SELECT * FROM orders
+        <if test="ew != null">
+            ${ew.customSqlSegment}
+        </if>
+        LIMIT 1
+    </select>
+
     <select id="findByUserId" resultMap="BaseResultMap">
         SELECT <include refid="Base_Column_List"/>
         FROM orders
@@ -70,6 +79,12 @@
                 #{remark}, #{cancelReason}, #{cancelTime}, #{rejectionReason}, #{estimatedDeliveryTime},
                 #{deliveryStatus}, #{deliveryTime}, #{packAmount}, #{riderId})
     </insert>
+
+    <update id="updatePayStatus">
+        update orders
+        set status = #{status},payStatus = #{payStatus} ,updateTime = NOW()
+        where id = #{id} and payStatus = 0
+    </update>
 
     <update id="updateStatus">
         UPDATE orders

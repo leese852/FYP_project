@@ -148,6 +148,7 @@ import type { TableColumnsType } from 'ant-design-vue'
 import {getAllCart, deleteCart, deleteAllCart, addCart, updateQty} from '@/api/cart'
 import { getAddressList } from '@/api/address'
 import { placeOrderFromCart } from '@/api/cart'
+import {processPayment} from "@/api/payment";
 
 const router = useRouter()
 const cartItems = ref<any[]>([])
@@ -456,18 +457,24 @@ const handleCheckout = async () => {
     if (response && response.data) {
       const orderData = response.data.data || response.data
       const orderId = orderData.orderId || orderData.id
+      const amount = orderData.totalAmount || orderData.amount
+      message.success(`订单生成成功，前往付款...`)
 
-      message.success(`下单成功，订单号: ${orderId}`)
+      // 2. 拿着生成的订单号和金额，去请求刚才写的 AlipayController 获取表单
+      // 这里也可以自己用 axios 写一个 get 请求，为了简单直接用 window.open 或者下面这种方式：
+      const payUrl = `http://localhost:8080/api/alipay/pay?orderId=${orderId}&amount=${amount}`
 
-      // 重新加载购物车
-      await loadCart()
-
-      // 清空选择状态
-      selectedRowKeys.value = []
-      selectAll.value = false
-
-      // 跳转到"我的订单"页面
-      router.push('/order/customeorderlist')
+      // 推荐方式：跳转到后端的 /pay 接口，浏览器会收到 HTML 并自动变成支付宝页面
+      window.location.href = payUrl;
+      // // 重新加载购物车
+      // await loadCart()
+      //
+      // // 清空选择状态
+      // selectedRowKeys.value = []
+      // selectAll.value = false
+      //
+      // // 跳转到"我的订单"页面
+      // router.push('/order/customeorderlist')
     } else {
       message.error('下单失败，请稍后重试')
     }

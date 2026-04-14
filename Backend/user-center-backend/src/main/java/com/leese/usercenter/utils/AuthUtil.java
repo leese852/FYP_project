@@ -11,7 +11,7 @@ import static com.leese.usercenter.constant.UserConstant.ADMIN_ROLE;
 import static com.leese.usercenter.constant.UserConstant.USER_LOGIN_STATE;
 
 @Slf4j
-public class AuthUtil {
+public class    AuthUtil {
     public static User checkUserLogin(HttpServletRequest request){
         HttpSession session = request.getSession(false);
         if (session == null) {

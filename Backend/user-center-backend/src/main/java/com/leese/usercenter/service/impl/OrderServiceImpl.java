@@ -50,6 +50,14 @@ public class OrderServiceImpl implements OrderService {
         this.cartMapper = cartMapper;
     }
 
+
+    @Override
+    @Transactional
+    public boolean updatePaymentStatus(Long orderId, Integer payStatus, Integer status){
+        int rows = orderMapper.updatePayStatus(orderId, payStatus, status);
+        return rows > 0;
+    }
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public OrderEntity createOrderFromCart(PlaceOrderDTO dto, Integer userId) {
@@ -71,7 +79,7 @@ public class OrderServiceImpl implements OrderService {
                 .orderId(orderNo)
                 .userId(userId)
                 .addressId(dto.getAddressId())      // 使用前端選中的地址
-                .status(2)            // 默認狀態：待接單
+                .status(1)            // 默認狀態：待接單
                 .totalAmount(totalAmount)
                 .payMethod("線上支付")
                 .payStatus(0)         // 未支付

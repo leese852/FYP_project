@@ -31,4 +31,6 @@ public interface OrderService {
      * 從當前用戶購物車生成訂單，必須指定收貨地址
      */
     OrderEntity createOrderFromCart(PlaceOrderDTO dto, Integer userId);
+
+    boolean updatePaymentStatus(Long orderId, Integer payStatus, Integer status);
 }

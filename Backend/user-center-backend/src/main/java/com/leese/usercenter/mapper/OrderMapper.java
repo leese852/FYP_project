@@ -1,5 +1,6 @@
 package com.leese.usercenter.mapper;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.leese.usercenter.model.entity.Dish;
 import com.leese.usercenter.model.entity.OrderEntity;
@@ -37,4 +38,13 @@ public interface OrderMapper extends BaseMapper<OrderEntity> {
      * 檢查訂單是否存在（新增）
      */
     boolean existsById(@Param("id") Long id);
+
+    //更新支付状态和状态
+    int updatePayStatus(@Param("id") Long id,
+                        @Param("payStatus") Integer payStatus,
+                        @Param("status") Integer status);
+
+    // 根据条件查询单个订单
+    OrderEntity selectOne(@Param("ew") QueryWrapper<OrderEntity> queryWrapper);
+
 }

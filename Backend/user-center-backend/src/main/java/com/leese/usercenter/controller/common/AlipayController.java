@@ -68,7 +68,7 @@ public class AlipayController {
 
             if (signVerified) {
                 String tradeStatus = params.get("trade_status");
-                String outTradeNo = params.get("out_trade_no"); // 这就是你的 orderId (比如 ORD123456)
+                String outTradeNo = params.get("out_trade_no"); // 这就是 orderId (比如 ORD123456)
 
                 if ("TRADE_SUCCESS".equals(tradeStatus) || "TRADE_FINISHED".equals(tradeStatus)) {
                     log.info("订单支付成功！订单号: {}", outTradeNo);

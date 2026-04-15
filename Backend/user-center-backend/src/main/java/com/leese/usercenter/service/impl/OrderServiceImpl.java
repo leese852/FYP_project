@@ -79,10 +79,10 @@ public class OrderServiceImpl implements OrderService {
                 .orderId(orderNo)
                 .userId(userId)
                 .addressId(dto.getAddressId())      // 使用前端選中的地址
-                .status(1)            // 默認狀態：待接單
+                .status(2)            // 默認狀態：待接單
                 .totalAmount(totalAmount)
                 .payMethod("線上支付")
-                .payStatus(0)         // 未支付
+                .payStatus(0)         // 待發貨
                 .deliveryStatus(1)    // 立即送出
                 .packAmount(0)
                 .isDelete(0)

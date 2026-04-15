@@ -43,7 +43,7 @@ alipay:
   # 支付成功后的异步回调地址（需内网穿透），必须是你后端的接口路径
   notify-url: https://reset-overstock-recliner.ngrok-free.dev/api/alipay/notify
   # 支付成功后的前端页面跳转地址（改成你本地前端的订单页地址）
-  return-url: http://localhost:3000/user/order
+  return-url: http://localhost:3000/order/customeorderlist
 
 server:
   port: 8080

@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
 @Data
 public class AlipayConfig {
 
-    // 这些属性会从 application.yml 中自动读取
+    // 从 application.yml 中自动读取
     private String appId;
     private String privateKey;
     private String alipayPublicKey;
@@ -24,8 +24,8 @@ public class AlipayConfig {
     private String returnUrl;
 
     /**
-     * 这里就是在实例化并注册 AlipayClient。
-     * 只有写了这个 @Bean，你在 Controller 里才能 @Autowired private AlipayClient alipayClient;
+     * 实例化并注册 AlipayClient。
+     * 只有写了这个 @Bean，在 Controller 里才能 @Autowired private AlipayClient alipayClient;
      */
     @Bean
     public AlipayClient alipayClient() {

@@ -18,12 +18,24 @@ export interface Order {
     deliveryStatus: number;
     deliveryTime?: string;
     packAmount?: number;
-    createTime: string;  // Changed from optional to required
-    updateTime: string;  // Changed from optional to required
+    createTime: string;
+    updateTime: string;
     isDelete: number;
     riderId?: number;
-    // rideAddress?: string;   // This might be in OrderVO but not OrderEntity
-    // orderComment?: string;  // This might be in OrderVO but not OrderEntity
+
+    // 🔥 添加坐标字段（从订单表获取）
+    restaurantLat?: number;
+    restaurantLng?: number;
+    customerLat?: number;
+    customerLng?: number;
+
+    // 骑手信息（从关联表获取）
+    rider?: {
+        id: number;
+        name: string;
+        phone: string;
+        location?: string;
+    };
 }
 
 // For order details with items

@@ -196,8 +196,8 @@ public class OrderServiceImpl implements OrderService {
 
     private OrderVO convertToVO(OrderEntity order, List<OrderItemEntity> items, RiderEntity rider) {
         OrderVO vo = new OrderVO();
-        vo.setId(order.getId());          // ✅ 主鍵 id
-        vo.setOrderId(order.getOrderId()); // 訂單編號（字串）
+        vo.setId(order.getId());
+        vo.setOrderId(order.getOrderId());
         vo.setUserId(order.getUserId());
         vo.setAddressId(Long.valueOf(order.getAddressId()));
 
@@ -219,6 +219,12 @@ public class OrderServiceImpl implements OrderService {
         vo.setDeliveryTime(order.getDeliveryTime() != null ? sdf.format(order.getDeliveryTime()) : null);
         vo.setCreateTime(order.getCreateTime() != null ? sdf.format(order.getCreateTime()) : null);
         vo.setUpdateTime(order.getUpdateTime() != null ? sdf.format(order.getUpdateTime()) : null);
+
+        // 🔥 添加坐标字段
+        vo.setRestaurantLat(order.getRestaurantLat());
+        vo.setRestaurantLng(order.getRestaurantLng());
+        vo.setCustomerLat(order.getCustomerLat());
+        vo.setCustomerLng(order.getCustomerLng());
 
         // 顧客資訊
         vo.setCustomerName("顧客姓名");
@@ -245,7 +251,6 @@ public class OrderServiceImpl implements OrderService {
 
         return vo;
     }
-
     @Override
     public OrderEntity findById(Long id) {
         return orderMapper.findById(id);

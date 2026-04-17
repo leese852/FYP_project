@@ -431,6 +431,8 @@ const handleQuantityChange = async (item: any) => {
 }
 
 // 结算选中的商品
+// 结算选中的商品
+// 结算选中的商品
 const handleCheckout = async () => {
   if (!selectedRowKeys.value.length) {
     message.warning('请选择要结算的商品')
@@ -442,45 +444,78 @@ const handleCheckout = async () => {
     return
   }
 
+  // 🔥 获取选中的地址坐标
+  const selectedAddress = addressList.value.find(addr => addr.id === selectedAddressId.value)
+  if (!selectedAddress) {
+    message.warning('请选择有效的收货地址')
+    return
+  }
+
+  // 🔥 检查地址是否有坐标
+  if (!selectedAddress.lng || !selectedAddress.lat) {
+    message.warning('所选地址缺少坐标信息，请重新选择或编辑地址')
+    return
+  }
+
   try {
-    // 构建请求参数
     const requestData = {
       addressId: selectedAddressId.value,
-      cartIds: selectedRowKeys.value
+      cartIds: selectedRowKeys.value,
+      addressLng: selectedAddress.lng,
+      addressLat: selectedAddress.lat
     }
 
     console.log('下单请求参数:', requestData)
 
-    // 调用下单接口
     const response = await placeOrderFromCart(requestData)
+    console.log('完整响应:', response)
 
-    if (response && response.data) {
-      const orderData = response.data.data || response.data
-      const orderId = orderData.orderId || orderData.id
-      const amount = orderData.totalAmount || orderData.amount
-      message.success(`订单生成成功，前往付款...`)
+    // 🔥 修复：正确获取订单数据
+    let orderData = null
+    let orderId = null
+    let amount = null
 
-      // 2. 拿着生成的订单号和金额，去请求刚才写的 AlipayController 获取表单
-      // 这里也可以自己用 axios 写一个 get 请求，为了简单直接用 window.open 或者下面这种方式：
-      const payUrl = `http://localhost:8080/api/alipay/pay?orderId=${orderId}&amount=${amount}`
-
-      // 推荐方式：跳转到后端的 /pay 接口，浏览器会收到 HTML 并自动变成支付宝页面
-      window.location.href = payUrl;
-      // // 重新加载购物车
-      // await loadCart()
-      //
-      // // 清空选择状态
-      // selectedRowKeys.value = []
-      // selectAll.value = false
-      //
-      // // 跳转到"我的订单"页面
-      // router.push('/order/customeorderlist')
-    } else {
-      message.error('下单失败，请稍后重试')
+    // 尝试多种可能的数据结构
+    if (response?.data?.data) {
+      orderData = response.data.data
+      console.log('从 response.data.data 获取:', orderData)
+    } else if (response?.data) {
+      orderData = response.data
+      console.log('从 response.data 获取:', orderData)
+    } else if (response) {
+      orderData = response
+      console.log('从 response 获取:', orderData)
     }
+
+    if (orderData) {
+      // 尝试获取 orderId
+      orderId = orderData.orderId || orderData.id || orderData.order_id
+      // 尝试获取 amount
+      amount = orderData.totalAmount || orderData.amount || orderData.total_amount
+
+      console.log('提取的订单信息:', { orderId, amount, orderData })
+    }
+
+    if (!orderId) {
+      console.error('无法获取订单ID，响应数据:', response)
+      message.error('订单创建失败：未获取到订单号')
+      return
+    }
+
+    if (!amount || amount <= 0) {
+      console.error('金额无效:', amount)
+      message.error('订单创建失败：金额无效')
+      return
+    }
+
+    message.success(`订单生成成功，前往付款...`)
+
+    const payUrl = `http://localhost:8080/api/alipay/pay?orderId=${orderId}&amount=${amount}`
+    console.log('跳转支付:', payUrl)
+    window.location.href = payUrl
+
   } catch (error: any) {
     console.error('下单失败:', error)
-
     let errorMsg = '下单失败'
     if (error.response) {
       errorMsg = error.response.data?.message || error.response.data?.msg || errorMsg
@@ -489,7 +524,6 @@ const handleCheckout = async () => {
     } else {
       errorMsg = error.message || errorMsg
     }
-
     message.error(errorMsg)
   }
 }

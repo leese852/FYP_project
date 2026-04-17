@@ -28,4 +28,9 @@ public class Address {
     private Date createTime;
     private Date updateTime;
     private Integer isDelete;
+
+    // 🔥 添加这两个字段
+    private Double lng;   // 经度
+    private Double lat;   // 纬度
+
 }

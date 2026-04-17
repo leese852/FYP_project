@@ -14,4 +14,9 @@ public class AddressDTO {
     private String contactPhone;
     private String address;
     private Integer isDefault;
+
+    // 🔥 添加这两个字段
+    private Double lng;   // 经度
+    private Double lat;   // 纬度
+
 }

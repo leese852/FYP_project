@@ -75,6 +75,14 @@ public class OrderServiceImpl implements OrderService {
 
         String orderNo = "ORD"+System.currentTimeMillis()+ "-" + UUID.randomUUID().toString().substring(0, 6);
         log.info("地址id:{}",dto.getAddressId());
+
+        // 🔥 青衣IVE餐厅坐标 (香港专业教育学院 - 青衣分校)
+        double restaurantLat = 22.3476;
+        double restaurantLng = 114.1065;
+
+        // 🔥 顾客坐标（从前端传递）
+        Double customerLat = dto.getAddressLat();
+        Double customerLng = dto.getAddressLng();
         OrderEntity order = OrderEntity.builder()
                 .orderId(orderNo)
                 .userId(userId)
@@ -86,6 +94,11 @@ public class OrderServiceImpl implements OrderService {
                 .deliveryStatus(1)    // 立即送出
                 .packAmount(0)
                 .isDelete(0)
+                // 🔥 添加坐标
+                .restaurantLat(restaurantLat)
+                .restaurantLng(restaurantLng)
+                .customerLat(customerLat)
+                .customerLng(customerLng)
                 .build();
 
         orderMapper.insert(order);

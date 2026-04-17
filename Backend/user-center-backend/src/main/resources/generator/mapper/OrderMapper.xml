@@ -26,13 +26,27 @@
         <result property="updateTime" column="updateTime"/>
         <result property="isDelete" column="isDelete"/>
         <result property="riderId" column="riderId"/>
+        <!-- 🔥 添加坐标字段映射 -->
+        <result property="restaurantLat" column="restaurant_lat"/>
+        <result property="restaurantLng" column="restaurant_lng"/>
+        <result property="customerLat" column="customer_lat"/>
+        <result property="customerLng" column="customer_lng"/>
+        <!-- 🔥 添加其他新字段 -->
+        <result property="riderEarning" column="rider_earning"/>
+        <result property="earningMultiplier" column="earning_multiplier"/>
+        <result property="actualDeliveryTime" column="actual_delivery_time"/>
+        <result property="estimatedDeliveryDuration" column="estimated_delivery_duration"/>
+        <result property="preparationStatus" column="preparation_status"/>
+        <result property="pickupTime" column="pickup_time"/>
     </resultMap>
 
     <sql id="Base_Column_List">
         id, orderId, userId, addressId, status, totalAmount, payMethod, payStatus,
-    remark, cancelReason, cancelTime, rejectionReason, estimatedDeliveryTime,
-    deliveryStatus, deliveryTime, packAmount, createTime, updateTime, isDelete,
-    riderId
+        remark, cancelReason, cancelTime, rejectionReason, estimatedDeliveryTime,
+        deliveryStatus, deliveryTime, packAmount, createTime, updateTime, isDelete,
+        riderId, restaurant_lat, restaurant_lng, customer_lat, customer_lng,
+        rider_earning, earning_multiplier, actual_delivery_time,
+        estimated_delivery_duration, preparation_status, pickup_time
     </sql>
 
     <!-- 根据 QueryWrapper 查询单个订单 -->
@@ -49,16 +63,19 @@
         FROM orders
         WHERE userId = #{userId}
         AND isDelete = 0
+        ORDER BY createTime DESC
     </select>
 
     <select id="findAll" resultMap="BaseResultMap">
         SELECT <include refid="Base_Column_List"/>
         FROM orders
         WHERE isDelete = 0
+        ORDER BY createTime DESC
     </select>
 
-    <select id="findById" resultType="com.leese.usercenter.model.entity.OrderEntity">
-        SELECT * FROM orders WHERE id = #{id}
+    <select id="findById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM orders WHERE id = #{id} AND isDelete = 0
     </select>
 
     <!-- 新增：查询订单状态 -->
@@ -74,15 +91,17 @@
     <insert id="save" parameterType="com.leese.usercenter.model.entity.OrderEntity">
         INSERT INTO orders (orderId, userId, addressId, status, totalAmount, payMethod, payStatus,
                             remark, cancelReason, cancelTime, rejectionReason, estimatedDeliveryTime,
-                            deliveryStatus, deliveryTime, packAmount, riderId)
+                            deliveryStatus, deliveryTime, packAmount, riderId,
+                            restaurant_lat, restaurant_lng, customer_lat, customer_lng)
         VALUES (#{orderId}, #{userId}, #{addressId}, #{status}, #{totalAmount}, #{payMethod}, #{payStatus},
                 #{remark}, #{cancelReason}, #{cancelTime}, #{rejectionReason}, #{estimatedDeliveryTime},
-                #{deliveryStatus}, #{deliveryTime}, #{packAmount}, #{riderId})
+                #{deliveryStatus}, #{deliveryTime}, #{packAmount}, #{riderId},
+                #{restaurantLat}, #{restaurantLng}, #{customerLat}, #{customerLng})
     </insert>
 
     <update id="updatePayStatus">
         update orders
-        set status = #{status},payStatus = #{payStatus} ,updateTime = NOW()
+        set status = #{status}, payStatus = #{payStatus}, updateTime = NOW()
         where id = #{id} and payStatus = 0
     </update>
 

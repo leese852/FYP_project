@@ -12,4 +12,7 @@ import java.util.List;
 public class PlaceOrderDTO {
     private Integer addressId;
     private List<Integer> cartIds;
+
+    private Double addressLng;  // 顾客经度
+    private Double addressLat;  // 顾客纬度
 }

@@ -102,15 +102,16 @@ const itemColumns = [
 
 // 狀態轉換規則
 // 1(待付款) → 2(待接單) → 3(已接單) → 4(制作中) → 5(派送中) → 6(已完成)
-// 任何狀態都可以 → 7(已取消) (除了已完成和已取消)
-// 已完成 → 8(退款)
+// 顾客取消 → 8(待退款)
+// 管理员取消 → 7(已取消)
 
-// 檢查是否可以取消訂單
+// 🔥 檢查是否可以取消訂單（顾客端）
 const canCancelOrder = (status?: number): boolean => {
   if (!status) return false;
   const numStatus = Number(status);
-  // 待付款、待接單、已接單、制作中、派送中可以取消
-  return [1, 2, 3, 4, 5].includes(numStatus);
+  // 普通用户只能取消状态 1-4，会转为待退款(8)
+  // 派送中(5)需要联系客服
+  return [1, 2, 3, 4].includes(numStatus);
 }
 
 // 檢查是否可以確認送達
@@ -132,7 +133,7 @@ function statusText(status?: number) {
     case 5: return "派送中";
     case 6: return "已完成";
     case 7: return "已取消";
-    case 8: return "退款";
+    case 8: return "待退款";
     default: return "未知";
   }
 }
@@ -192,7 +193,7 @@ watch(() => order.value?.status, async (newStatus, oldStatus) => {
     await new Promise(resolve => setTimeout(resolve, 500));
     initMap();
     startPollingLocation();
-  } else if (Number(newStatus) === 6 || Number(newStatus) === 7) {
+  } else if (Number(newStatus) === 6 || Number(newStatus) === 7 || Number(newStatus) === 8) {
     stopPollingLocation();
   }
 }, { immediate: true });
@@ -337,38 +338,46 @@ const formatTime = (timeStr: string) => {
 
 // ==================== 订单操作函数 ====================
 
-// ❌ 取消訂單
+// ❌ 取消訂單 - 跳转到取消原因页面
 function confirmCancel() {
   if (!order.value) return;
 
   const status = Number(order.value.status);
-  let cancelMessage = "您確定要取消這個訂單嗎？";
 
+  // 派送中的订单特殊处理
   if (status === 5) {
-    cancelMessage = "訂單已在派送中，取消訂單可能需要聯繫客服，確定要取消嗎？";
-  }
-
-  Modal.confirm({
-    title: "確認取消訂單",
-    content: cancelMessage,
-    okText: "確認取消",
-    cancelText: "返回",
-    okType: "danger",
-    async onOk() {
-      try {
-        const success = await updateOrderStatus(order.value!.orderId, 7);
-        if (success) {
-          message.success('訂單已取消');
-          const res = await getOrderDetails(order.value!.id);
-          order.value = res;
-        } else {
+    Modal.confirm({
+      title: "確認取消訂單",
+      content: "訂單已在派送中，取消訂單可能需要聯繫客服，確定要取消嗎？",
+      okText: "確認取消",
+      cancelText: "返回",
+      okType: "danger",
+      async onOk() {
+        try {
+          const success = await updateOrderStatus(order.value!.id.toString(), 7);
+          if (success) {
+            message.success('取消申請已提交');
+            const res = await getOrderDetails(order.value!.id);
+            order.value = res;
+          } else {
+            message.error('取消訂單失敗');
+          }
+        } catch (error) {
+          console.error("取消訂單失敗:", error);
           message.error('取消訂單失敗');
         }
-      } catch (error) {
-        console.error("取消訂單失敗:", error);
-        message.error('取消訂單失敗');
-      }
-    },
+      },
+    });
+    return;
+  }
+
+  // 🔥 状态 1-4：跳转到取消原因页面
+  router.push({
+    path: '/order/cancel',
+    query: {
+      orderId: order.value.orderId,
+      orderDatabaseId: order.value.id.toString()
+    }
   });
 }
 
@@ -383,7 +392,7 @@ async function confirmDelivered() {
     cancelText: "返回",
     async onOk() {
       try {
-        const success = await updateOrderStatus(order.value!.orderId, 6);
+        const success = await updateOrderStatus(order.value!.id.toString(), 6);
         if (success) {
           order.value!.status = 6;
           stopPollingLocation();

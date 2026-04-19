@@ -31,20 +31,37 @@
           </template>
 
           <template v-if="column.key === 'status'">
-            <a-select
-                :value="record.status"
-            :disabled="!canChangeStatus(record.status)"
-            style="width: 120px"
-            @change="(value) => handleStatusChange(record, value)"
-            >
-            <a-select-option
-                v-for="option in getAvailableStatusOptions(record.status)"
-                :key="option.value"
-                :value="option.value"
-            >
-              {{ option.label }}
-            </a-select-option>
-            </a-select>
+            <div class="status-cell">
+              <a-tag :color="getStatusColor(record.status)">
+                {{ getStatusText(record.status) }}
+              </a-tag>
+              <!-- 🔥 待退款状态显示处理退款按钮 -->
+              <a-button
+                  v-if="record.status === 8"
+                  type="link"
+                  size="small"
+                  danger
+                  @click.stop="handleRefundOrder(record)"
+              >
+                處理退款
+              </a-button>
+              <!-- 其他状态显示下拉选择 -->
+              <a-select
+                  v-else
+                  :value="record.status"
+                  :disabled="!canChangeStatus(record.status)"
+                  style="width: 120px"
+                  @change="(value: number) => handleStatusChange(record, value)"
+              >
+                <a-select-option
+                    v-for="option in getAvailableStatusOptions(record.status)"
+                    :key="option.value"
+                    :value="option.value"
+                >
+                  {{ option.label }}
+                </a-select-option>
+              </a-select>
+            </div>
           </template>
 
           <template v-if="column.key === 'totalAmount'">
@@ -71,7 +88,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { message } from 'ant-design-vue'
+import { message, Modal } from 'ant-design-vue'
 import { getAllOrders, updateOrderStatus } from '@/api/order'
 import type { Order } from '@/types/order'
 
@@ -92,30 +109,17 @@ const pagination = ref({
 const columns = [
   { title: '訂單編號', dataIndex: 'orderId', key: 'orderId' },
   { title: '用戶ID', dataIndex: 'userId', key: 'userId' },
-  { title: '狀態', key: 'status' },
+  { title: '狀態', key: 'status', width: '200px' },
   { title: '總金額', key: 'totalAmount' },
   { title: '支付方式', dataIndex: 'payMethod', key: 'payMethod' },
   { title: '下單時間', key: 'createTime' },
   { title: '操作', key: 'actions' }
 ]
 
-// Get current state from query params
-const currentState = computed(() => {
-  const state = route.query.state
-  if (state) {
-    return Array.isArray(state) ? state.map(s => parseInt(s)) : [parseInt(state as string)]
-  }
-
-  const states = route.query.states
-  if (states) {
-    return (states as string).split(',').map(s => parseInt(s))
-  }
-
-  return [2, 3, 4, 5, 6, 7, 8] // Default: show all staff-visible states
-})
-
-const currentStateLabel = computed(() => {
-  const stateMap: Record<number, string> = {
+// 获取状态文本
+const getStatusText = (status: number): string => {
+  const statusMap: Record<number, string> = {
+    1: '待付款',
     2: '待接單',
     3: '已接單',
     4: '制作中',
@@ -124,18 +128,25 @@ const currentStateLabel = computed(() => {
     7: '已取消',
     8: '待退款'
   }
+  return statusMap[status] || `未知(${status})`
+}
 
-  if (currentState.value.length === 1) {
-    return stateMap[currentState.value[0]] || '未知狀態'
+// 获取状态颜色
+const getStatusColor = (status: number): string => {
+  const colorMap: Record<number, string> = {
+    1: 'purple',
+    2: 'orange',
+    3: 'blue',
+    4: 'cyan',
+    5: 'green',
+    6: 'lime',
+    7: 'red',
+    8: 'gold'
   }
+  return colorMap[status] || 'default'
+}
 
-  if (JSON.stringify(currentState.value.sort()) === JSON.stringify([4,5,6])) {
-    return '其他 (制作中、派送中、已完成)'
-  }
-
-  return `多個狀態: ${currentState.value.map(s => stateMap[s] || s).join(', ')}`
-})
-
+// 🔥 计算属性：过滤后的订单
 const filteredOrders = computed(() => {
   let orders = allOrders.value.filter(order =>
       currentState.value.includes(order.status)
@@ -153,21 +164,32 @@ const filteredOrders = computed(() => {
   return orders.slice(start, end)
 })
 
-// Check if staff can change this status
-const canChangeStatus = (currentStatus: number) => {
-  return [2, 3, 4, 7, 8].includes(currentStatus)
-}
+// 获取当前状态参数
+const currentState = computed(() => {
+  const state = route.query.state
+  const states = route.query.states
 
-// Get available status options based on current status
-// Get available status options based on current status
-const getAvailableStatusOptions = (currentStatus: number) => {
-  console.log('📋 获取状态选项 - 数据库当前状态:', currentStatus, getStatusText(currentStatus))
+  // 处理单个状态参数
+  if (state !== undefined && state !== null) {
+    if (Array.isArray(state)) {
+      return state.filter(s => s !== null).map(s => parseInt(s as string))
+    } else if (typeof state === 'string') {
+      return [parseInt(state)]
+    }
+  }
 
-  const options = []
+  // 处理多个状态参数（用逗号分隔）
+  if (states !== undefined && states !== null && typeof states === 'string') {
+    return states.split(',').map(s => parseInt(s))
+  }
 
-  // 状态映射表
-  const statusLabels: Record<number, string> = {
-    1: '待付款',
+  // 默认显示所有员工可见的状态
+  return [2, 3, 4, 5, 6, 7, 8]
+})
+
+// 当前状态标签
+const currentStateLabel = computed(() => {
+  const stateMap: Record<number, string> = {
     2: '待接單',
     3: '已接單',
     4: '制作中',
@@ -177,7 +199,36 @@ const getAvailableStatusOptions = (currentStatus: number) => {
     8: '待退款'
   }
 
-  // 根据当前状态添加可转换的目标状态
+  if (currentState.value.length === 1) {
+    return stateMap[currentState.value[0]] || '未知狀態'
+  }
+
+  if (JSON.stringify(currentState.value.sort()) === JSON.stringify([4, 5, 6])) {
+    return '其他 (制作中、派送中、已完成)'
+  }
+
+  return `多個狀態: ${currentState.value.map(s => stateMap[s] || s).join(', ')}`
+})
+
+// 检查是否可以更改状态
+const canChangeStatus = (currentStatus: number): boolean => {
+  return [2, 3, 4, 7].includes(currentStatus)
+}
+
+// 获取可用的状态选项
+const getAvailableStatusOptions = (currentStatus: number) => {
+  const options: { value: number; label: string }[] = []
+
+  const statusLabels: Record<number, string> = {
+    2: '待接單',
+    3: '已接單',
+    4: '制作中',
+    5: '派送中',
+    6: '已完成',
+    7: '已取消',
+    8: '待退款'
+  }
+
   if (currentStatus === 2) {
     options.push({ value: 3, label: statusLabels[3] })
     options.push({ value: 7, label: statusLabels[7] })
@@ -190,28 +241,42 @@ const getAvailableStatusOptions = (currentStatus: number) => {
   } else if (currentStatus === 5) {
     options.push({ value: 6, label: statusLabels[6] })
     options.push({ value: 7, label: statusLabels[7] })
-  } else if (currentStatus === 7 || currentStatus === 8) {
-    // 已取消和待退款不能更改
   }
 
-  console.log('📋 可用选项:', options)
-
-  // 重要：不要添加当前状态！
   return options
 }
 
-// Handle status change
-// 在 handleStatusChange 函数中修改
-// Handle status change
-const handleStatusChange = async (order: Order, newStatus: number) => {
-  console.log('🎯 handleStatusChange 被调用', {
-    订单对象: order,
-    原状态: order.status,
-    新状态: newStatus,
-    订单ID类型: typeof order.id,
-    订单编号类型: typeof order.orderId
-  })
+// 🔥 处理退款订单（将状态8改为状态7）
+const handleRefundOrder = (order: Order) => {
+  Modal.confirm({
+    title: '確認退款',
+    content: `確定要將訂單 ${order.orderId} 從「待退款」改為「已取消」並退款給顧客嗎？`,
+    okText: '確認退款',
+    cancelText: '取消',
+    okType: 'danger',
+    async onOk() {
+      try {
+        loading.value = true
+        const success = await updateOrderStatus(order.id.toString(), 7)
 
+        if (success) {
+          message.success('退款處理成功，訂單已取消')
+          await loadOrders()
+        } else {
+          message.error('操作失敗')
+        }
+      } catch (error) {
+        console.error('退款處理失敗:', error)
+        message.error('退款處理失敗')
+      } finally {
+        loading.value = false
+      }
+    }
+  })
+}
+
+// 处理状态变更
+const handleStatusChange = async (order: Order, newStatus: number) => {
   if (order.status === newStatus) return
 
   const originalStatus = order.status
@@ -219,122 +284,55 @@ const handleStatusChange = async (order: Order, newStatus: number) => {
   try {
     loading.value = true
 
-    console.log('🔍 验证状态转换:', {
-      从: originalStatus,
-      到: newStatus,
-      有效: validateStatusTransition(originalStatus, newStatus)
-    })
-
     if (!validateStatusTransition(originalStatus, newStatus)) {
       message.error('狀態轉換不符合規則')
       return
     }
 
-    // 调试：打印要调用的URL
-    console.log('📤 调用更新API:', {
-      方法: 'PUT',
-      URL: `/api/orders/${order.id}/status?status=${newStatus}`,
-      订单ID: order.id,
-      状态: newStatus
-    })
-
-    const success = await updateOrderStatus(order.id, newStatus)
-
-    console.log('📥 API响应:', {
-      成功: success,
-      原始状态: originalStatus,
-      新状态: newStatus
-    })
+    const success = await updateOrderStatus(order.id.toString(), newStatus)
 
     if (success) {
       message.success('訂單狀態更新成功')
-
-      // 更新本地状态
       order.status = newStatus
-      console.log('✅ 本地状态已更新')
-
-      // 重新加载数据
       setTimeout(() => {
         loadOrders()
-        console.log('🔄 重新加载订单列表')
       }, 500)
     } else {
       message.error('更新狀態失敗')
       order.status = originalStatus
-      console.log('❌ API调用失败，状态已恢复')
     }
-
   } catch (error: any) {
-    console.error('💥 发生异常:', error)
+    console.error('发生异常:', error)
     message.error('更新狀態失敗: ' + (error.message || '未知錯誤'))
     order.status = originalStatus
   } finally {
     loading.value = false
   }
 }
-// Validate status transition rules
-const validateStatusTransition = (from: number, to: number): boolean => {
-  // State 1 is not visible to staff
-  // Staff can only change states 2, 3, 4, 7, 8
 
-  if (![2, 3, 4, 7, 8].includes(from)) {
+// 验证状态转换规则
+const validateStatusTransition = (from: number, to: number): boolean => {
+  if (![2, 3, 4, 5, 7].includes(from)) {
     return false
   }
 
-  // Rules:
-  // 2 -> 3 (待接單 -> 已接單)
-  // 2 -> 7 (待接單 -> 已取消)
-  // 3 -> 4 (已接單 -> 制作中)
-  // 3 -> 7 (已接單 -> 已取消)
-  // 4 -> 5 (制作中 -> 派送中) - Note: but staff can't change to 5
-  // 4 -> 7 (制作中 -> 已取消)
-
-  const validTransitions = {
-    2: [3, 7],     // 待接單 can go to 已接單 or 已取消
-    3: [4, 7],     // 已接單 can go to 制作中 or 已取消
-    4: [5, 7],     // 制作中 can go to 派送中 or 已取消
-    7: [],         // 已取消 cannot change
-    8: []          // 待退款 cannot change (needs special handling)
+  const validTransitions: Record<number, number[]> = {
+    2: [3, 7],
+    3: [4, 7],
+    4: [5, 7],
+    5: [6, 7],
+    7: []
   }
 
   return validTransitions[from]?.includes(to) || false
 }
-const getStatusText = (status: number): string => {
-  const statusMap: Record<number, string> = {
-    1: '待付款',
-    2: '待接單',
-    3: '已接單',
-    4: '制作中',
-    5: '派送中',
-    6: '已完成',
-    7: '已取消',
-    8: '待退款'
-  }
-  return statusMap[status] || `未知(${status})`
-}
+
+// 加载订单
 const loadOrders = async () => {
   try {
     loading.value = true
     const orders = await getAllOrders()
-
-    // 检查所有订单状态
-    console.log('📊 所有订单状态:', orders.map(o => ({
-      id: o.id,
-      orderId: o.orderId,
-      status: o.status,
-      statusText: getStatusText(o.status)
-    })))
-
-    // 特别检查这个订单
-    const targetOrder = orders.find(o => o.orderId === 'ORD20260127001')
-    if (targetOrder) {
-      console.log('🎯 API返回的订单数据:', JSON.stringify(targetOrder, null, 2))
-    }
-
     allOrders.value = orders
-    pagination.value.total = orders.filter(order =>
-        currentState.value.includes(order.status)
-    ).length
   } catch (error) {
     message.error('載入訂單失敗')
     console.error(error)
@@ -364,7 +362,6 @@ const goBack = () => {
   router.push('/admin/orders')
 }
 
-// Watch for route changes to reload data
 watch(() => route.query, () => {
   loadOrders()
   pagination.value.current = 1
@@ -384,6 +381,13 @@ onMounted(() => {
 
 .order-table {
   margin-top: 20px;
+}
+
+.status-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 :deep(.ant-table-row) {

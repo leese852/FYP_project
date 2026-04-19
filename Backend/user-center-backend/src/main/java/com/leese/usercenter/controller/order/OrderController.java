@@ -35,13 +35,12 @@ public class OrderController {
     private CartMapper cartMapper;
 
     @Autowired
-    private OrderItemMapper orderItemMapper;  // 添加這行
-
+    private OrderItemMapper orderItemMapper;
 
     @PostMapping("/place")
-    public BaseResponse<OrderEntity> placeOrder(@RequestBody PlaceOrderDTO dto,HttpServletRequest request ){
+    public BaseResponse<OrderEntity> placeOrder(@RequestBody PlaceOrderDTO dto, HttpServletRequest request) {
         User user = AuthUtil.checkUserLogin(request);
-        OrderEntity order = orderService.createOrderFromCart(dto,user.getId());
+        OrderEntity order = orderService.createOrderFromCart(dto, user.getId());
         return ResultUtils.success(order);
     }
 
@@ -49,21 +48,13 @@ public class OrderController {
      * 獲取所有訂單（包含菜品詳情）- 用於後台管理
      */
     @GetMapping("/all")
-    public BaseResponse<List<OrderVO>> getAllOrdersWithDetails() {  // 修改方法名
+    public BaseResponse<List<OrderVO>> getAllOrdersWithDetails() {
         log.info("📋 獲取所有訂單列表（包含詳情）");
         try {
             List<OrderEntity> orders = orderService.findAll();
-
-            // Convert to VO list
             List<OrderVO> orderVOs = orders.stream()
-                    .map(order -> {
-                        // Get order items
-                        List<OrderItemEntity> items = orderItemMapper.findByOrderId(order.getId());
-                        // Convert to VO
-                        return orderService.getOrderDetails(order.getId());  // 使用已有的方法
-                    })
+                    .map(order -> orderService.getOrderDetails(order.getId()))
                     .collect(Collectors.toList());
-
             return ResultUtils.success(orderVOs);
         } catch (Exception e) {
             log.error("❌ 獲取所有訂單失敗", e);
@@ -86,7 +77,6 @@ public class OrderController {
         return ResultUtils.success(orders);
     }
 
-
     /**
      * 獲取訂單詳情（用主鍵 id 查詢，包含菜品列表）
      */
@@ -100,16 +90,33 @@ public class OrderController {
         return ResultUtils.success(order);
     }
 
-
-
-
     /**
      * 更新訂單狀態
+     * 🔥 顾客取消订单 → 状态8（待退款）
+     * 🔥 管理员取消订单 → 状态7（已取消）
      */
     @PutMapping("/{id}/status")
-    public BaseResponse<Void> updateOrderStatus(@PathVariable Long id, @RequestParam Integer status) {
+    public BaseResponse<Void> updateOrderStatus(@PathVariable Long id,
+                                                @RequestParam Integer status,
+                                                HttpServletRequest request) {
         log.info("✏️ 更新訂單狀態，id = {}, status = {}", id, status);
-        orderService.updateOrderStatus(id, status);
+
+        // 获取当前用户角色
+        User currentUser = AuthUtil.checkUserLogin(request);
+        boolean isAdmin = currentUser.getUserRole() == 1;
+
+        Integer finalStatus = status;
+
+        // 如果是取消操作 (status 7)
+        if (status == 7) {
+            if (!isAdmin) {
+                // 普通用户取消：转为状态8（待退款）
+                finalStatus = 8;
+                log.info("普通用户取消订单，转为待退款状态(8)");
+            }
+        }
+
+        orderService.updateOrderStatus(id, finalStatus);
         return ResultUtils.success();
     }
 

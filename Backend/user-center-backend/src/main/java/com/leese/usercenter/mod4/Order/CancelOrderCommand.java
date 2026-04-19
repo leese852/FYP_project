@@ -16,9 +16,9 @@ public class CancelOrderCommand extends AbstractOrderCommand {
 
     @Override
     protected boolean canExecute(Integer currentStatus, Integer newStatus) {
-        // 已取消(7)可以从多个状态转换
-        // 待付款(1)、待接单(2)、已接单(3)、制作中(4)都可以取消
-        return (currentStatus >= 1 && currentStatus <= 4) && newStatus == 7;
+        // 🔥 允许从以下状态转到状态7（已取消）：
+        // 待付款(1)、待接单(2)、已接单(3)、制作中(4)、待退款(8)
+        return (currentStatus >= 1 && currentStatus <= 4) || currentStatus == 8 && newStatus == 7;
     }
 
     @Override

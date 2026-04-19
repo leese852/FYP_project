@@ -32,6 +32,7 @@
         @ok="handleSubmit"
         @cancel="handleCancel"
         :confirmLoading="submitting"
+        width="700px"
     >
       <a-form
           ref="formRef"
@@ -47,8 +48,22 @@
           <a-input v-model:value="formState.contactPhone" placeholder="请输入8位电话号码" />
         </a-form-item>
 
-        <a-form-item label="详细地址" name="address">
-          <a-textarea v-model:value="formState.address" placeholder="请输入详细地址" :rows="3" />
+        <!-- 🔥 修改这里：地址选择 + 地图选点按钮 -->
+        <a-form-item label="详细地址" name="address" required>
+          <a-input-group compact>
+            <a-input
+                v-model:value="formState.address"
+                placeholder="请输入详细地址"
+                style="width: 65%"
+            />
+            <a-button
+                type="primary"
+                style="width: 35%"
+                @click="openMapPicker"
+            >
+              <EnvironmentOutlined /> 地图选点
+            </a-button>
+          </a-input-group>
         </a-form-item>
 
         <a-form-item name="isDefault">
@@ -56,14 +71,32 @@
         </a-form-item>
       </a-form>
     </a-modal>
+
+    <!-- 🔥 新增：地图选点弹窗 -->
+    <a-modal
+        v-model:visible="mapPickerVisible"
+        title="选择位置"
+        width="800px"
+        :footer="null"
+        :destroyOnClose="true"
+    >
+      <AddressMapPicker
+          :initialAddress="formState.address"
+          :initialLng="formState.lng || 114.1694"
+          :initialLat="formState.lat || 22.3193"
+          @confirm="onMapConfirm"
+          @cancel="mapPickerVisible = false"
+      />
+    </a-modal>
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { PlusOutlined } from '@ant-design/icons-vue'
+import { PlusOutlined, EnvironmentOutlined } from '@ant-design/icons-vue'  // 🔥 导入 EnvironmentOutlined
 import { message, Modal } from 'ant-design-vue'
 import { getAddressList, addAddress, updateAddress, deleteAddress } from '@/api/address'
+import AddressMapPicker from '@/components/AddressMapPicker.vue'  // 🔥 导入地图组件
 
 // 响应式数据
 const addressList = ref([])
@@ -73,13 +106,16 @@ const submitting = ref(false)
 const isEditing = ref(false)
 const formRef = ref()
 const currentId = ref(null)
+const mapPickerVisible = ref(false)  // 🔥 新增：地图弹窗显示状态
 
-// 表单数据
+// 表单数据 - 🔥 添加 lng 和 lat 字段
 const formState = reactive({
   contactName: '',
   contactPhone: '',
   address: '',
-  isDefault: false
+  isDefault: false,
+  lng: null,   // 经度
+  lat: null    // 纬度
 })
 
 // 表单验证规则
@@ -132,7 +168,7 @@ function showAddModal() {
   modalVisible.value = true
 }
 
-// 显示编辑地址弹窗
+// 显示编辑地址弹窗 - 🔥 添加坐标字段的赋值
 function showEditModal(record) {
   isEditing.value = true
   currentId.value = record.id
@@ -141,20 +177,24 @@ function showEditModal(record) {
   formState.contactPhone = record.contactPhone
   formState.address = record.address
   formState.isDefault = record.isDefault === 1
+  formState.lng = record.lng || null   // 添加经度
+  formState.lat = record.lat || null   // 添加纬度
 
   modalVisible.value = true
 }
 
-// 重置表单
+// 重置表单 - 🔥 重置坐标字段
 function resetForm() {
   formState.contactName = ''
   formState.contactPhone = ''
   formState.address = ''
   formState.isDefault = false
+  formState.lng = null
+  formState.lat = null
   formRef.value?.clearValidate()
 }
 
-// 提交表单
+// 提交表单 - 🔥 提交时包含坐标
 async function handleSubmit() {
   try {
     await formRef.value.validate()
@@ -164,7 +204,9 @@ async function handleSubmit() {
       contactName: formState.contactName,
       contactPhone: formState.contactPhone,
       address: formState.address,
-      isDefault: formState.isDefault ? 1 : 0
+      isDefault: formState.isDefault ? 1 : 0,
+      lng: formState.lng,   // 添加经度
+      lat: formState.lat    // 添加纬度
     }
 
     if (isEditing.value) {
@@ -213,17 +255,18 @@ function confirmDelete(addressId) {
   })
 }
 
-// // 设为默认地址
-// async function setDefault(addressId) {
-//   try {
-//     // 直接调用更新接口，不需要先获取详情
-//     await updateAddress({ id: addressId, isDefault: 1 })
-//     message.success('已设为默认地址')
-//     fetchAddressList()
-//   } catch (error) {
-//     console.error('设置失败:', error)
-//   }
-// }
+// 🔥 新增：打开地图选点
+const openMapPicker = () => {
+  mapPickerVisible.value = true
+}
+
+// 🔥 新增：地图选点确认
+const onMapConfirm = (location) => {
+  formState.address = location.formattedAddress
+  formState.lng = location.lng
+  formState.lat = location.lat
+  mapPickerVisible.value = false
+}
 </script>
 
 <style scoped>

@@ -93,10 +93,10 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { PlusOutlined, EnvironmentOutlined } from '@ant-design/icons-vue'  // 🔥 导入 EnvironmentOutlined
+import { PlusOutlined, EnvironmentOutlined } from '@ant-design/icons-vue'
 import { message, Modal } from 'ant-design-vue'
 import { getAddressList, addAddress, updateAddress, deleteAddress } from '@/api/address'
-import AddressMapPicker from '@/components/AddressMapPicker.vue'  // 🔥 导入地图组件
+import AddressMapPicker from '@/components/AddressMapPicker.vue'
 
 // 响应式数据
 const addressList = ref([])
@@ -106,16 +106,16 @@ const submitting = ref(false)
 const isEditing = ref(false)
 const formRef = ref()
 const currentId = ref(null)
-const mapPickerVisible = ref(false)  // 🔥 新增：地图弹窗显示状态
+const mapPickerVisible = ref(false)
 
-// 表单数据 - 🔥 添加 lng 和 lat 字段
+// 表单数据
 const formState = reactive({
   contactName: '',
   contactPhone: '',
   address: '',
   isDefault: false,
-  lng: null,   // 经度
-  lat: null    // 纬度
+  lng: null,
+  lat: null
 })
 
 // 表单验证规则
@@ -151,7 +151,12 @@ async function fetchAddressList() {
   try {
     loading.value = true
     const res = await getAddressList()
-    addressList.value = res?.data?.data || []
+    const data = res?.data?.data
+    if (Array.isArray(data)) {
+      addressList.value = data
+    } else {
+      addressList.value = []
+    }
   } catch (error) {
     console.error('获取地址列表失败:', error)
     addressList.value = []
@@ -168,7 +173,7 @@ function showAddModal() {
   modalVisible.value = true
 }
 
-// 显示编辑地址弹窗 - 🔥 添加坐标字段的赋值
+// 显示编辑地址弹窗
 function showEditModal(record) {
   isEditing.value = true
   currentId.value = record.id
@@ -177,13 +182,13 @@ function showEditModal(record) {
   formState.contactPhone = record.contactPhone
   formState.address = record.address
   formState.isDefault = record.isDefault === 1
-  formState.lng = record.lng || null   // 添加经度
-  formState.lat = record.lat || null   // 添加纬度
+  formState.lng = record.lng || null
+  formState.lat = record.lat || null
 
   modalVisible.value = true
 }
 
-// 重置表单 - 🔥 重置坐标字段
+// 重置表单
 function resetForm() {
   formState.contactName = ''
   formState.contactPhone = ''
@@ -194,7 +199,7 @@ function resetForm() {
   formRef.value?.clearValidate()
 }
 
-// 提交表单 - 🔥 提交时包含坐标
+// 提交表单
 async function handleSubmit() {
   try {
     await formRef.value.validate()
@@ -205,8 +210,8 @@ async function handleSubmit() {
       contactPhone: formState.contactPhone,
       address: formState.address,
       isDefault: formState.isDefault ? 1 : 0,
-      lng: formState.lng,   // 添加经度
-      lat: formState.lat    // 添加纬度
+      lng: formState.lng,
+      lat: formState.lat
     }
 
     if (isEditing.value) {
@@ -221,7 +226,7 @@ async function handleSubmit() {
     modalVisible.value = false
     fetchAddressList()
   } catch (error) {
-    if (error.errorFields) return // 表单验证错误
+    if (error.errorFields) return
     console.error('操作失败:', error)
     message.error('操作失败，请重试')
   } finally {
@@ -235,7 +240,7 @@ function handleCancel() {
   resetForm()
 }
 
-// 删除地址
+// 🔥 删除地址 - 优化：成功后直接移除本地数据
 function confirmDelete(addressId) {
   Modal.confirm({
     title: '确认删除',
@@ -246,21 +251,28 @@ function confirmDelete(addressId) {
         console.log('发送删除请求，地址ID:', addressId)
         const response = await deleteAddress(addressId)
         console.log('删除响应:', response)
-        message.success('地址删除成功')
-        fetchAddressList()
+
+        if (response?.data?.code === 0) {
+          message.success('地址删除成功')
+          // 直接从本地列表中移除，无需重新请求
+          addressList.value = addressList.value.filter(item => item.id !== addressId)
+        } else {
+          message.error(response?.data?.message || '删除失败')
+        }
       } catch (error) {
         console.error('删除失败:', error)
+        message.error(error.message || '删除失败')
       }
     }
   })
 }
 
-// 🔥 新增：打开地图选点
+// 打开地图选点
 const openMapPicker = () => {
   mapPickerVisible.value = true
 }
 
-// 🔥 新增：地图选点确认
+// 地图选点确认
 const onMapConfirm = (location) => {
   formState.address = location.formattedAddress
   formState.lng = location.lng

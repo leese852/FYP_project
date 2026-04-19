@@ -7,6 +7,7 @@ import lombok.Getter;
  */
 @Getter
 public enum ErrorCode {
+
     // 基础错误 (40000-49999)
     SUCCESS(0,"ok",""),
     PARAM_ERROR(40000, "請求參數錯誤", ""),
@@ -32,6 +33,8 @@ public enum ErrorCode {
     ORDER_CANCEL_FAILED(30003, "订单取消失敗", ""),
     ORDER_PAY_FAILED(30004, "订单支付失败", ""),
     ORDER_DELIVERY_FAILED(30005, "订单配送失败", "");
+
+
 
     private final int code;
     private final String message;

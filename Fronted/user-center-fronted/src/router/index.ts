@@ -17,6 +17,11 @@ import OrderList from "@/page/order/OrderList.vue";
 
 const routes: RouteRecordRaw[] = [
   {
+    path: "/admin/login",
+    name: "adminLogin",
+    component: () => import("@/page/employee/AdminLoginPage.vue"),
+  },
+  {
     path: "/",
     component: BasicLayout,
     children: [

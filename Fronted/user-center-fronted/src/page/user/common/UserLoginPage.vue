@@ -55,6 +55,12 @@
       <a-typography-link @click="toRegister" style="margin-left: 8px">
         立即注册
       </a-typography-link>
+      
+      <div style="margin-top: 15px;">
+        <a-typography-link @click="toAdminLogin" type="secondary">
+          → 前往管理员登录
+        </a-typography-link>
+      </div>
     </div>
   </div>
 </template>
@@ -80,6 +86,11 @@ const formState = reactive<FormState>({
 // 跳转到注册页面
 const toRegister = () => {
   router.push("/user/register");
+};
+
+// 跳转到管理员登录
+const toAdminLogin = () => {
+  router.push("/admin/login");
 };
 
 const loginUserStore = useLoginUserStore();

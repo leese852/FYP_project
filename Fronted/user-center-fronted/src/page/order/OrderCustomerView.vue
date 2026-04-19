@@ -1,10 +1,10 @@
 <template>
   <a-card title="訂單詳情" class="order-card">
     <!-- 訂單基本資訊 -->
-    <p>訂單編號：{{ order?.orderId }}</p>
-    <p>
+    <p class="order-number">訂單編號：{{ order?.orderId }}</p>
+    <p class="order-status">
       狀態：
-      <a-tag :color="statusColor(order?.status)">
+      <a-tag :color="statusColor(order?.status)" class="status-tag-custom">
         {{ statusText(order?.status) }}
       </a-tag>
     </p>
@@ -15,21 +15,22 @@
         :dataSource="order.items"
         :columns="itemColumns"
         rowKey="id"
-        size="small"
+        size="middle"
         bordered
         style="margin-top: 20px"
         :pagination="false"
+        class="order-items-table"
     />
 
     <!-- 🚚 骑手实时位置地图 (仅派送中状态显示) -->
     <div v-if="Number(order?.status) === 5" class="rider-map-section">
-      <h3>
+      <h3 class="section-title">
         <EnvironmentOutlined /> 骑手实时位置
         <a-spin v-if="riderLocationLoading" size="small" />
       </h3>
       <div id="riderMap" class="rider-map"></div>
       <div class="location-info">
-        <a-tag :color="riderLocation ? 'green' : 'orange'">
+        <a-tag :color="riderLocation ? 'green' : 'orange'" class="location-tag">
           {{ riderLocation ? '骑手正在配送中' : '等待骑手位置更新...' }}
         </a-tag>
         <span v-if="riderLocation" class="update-time">
@@ -39,28 +40,28 @@
     </div>
 
     <!-- 🚚 派送中顯示騎手資訊 -->
-    <div v-if="Number(order?.status) === 5 && order?.rider" style="margin-top: 20px">
-      <h3>騎手資訊</h3>
-      <p>騎手姓名：{{ order.rider.name }}</p>
-      <p>騎手電話：{{ order.rider.phone }}</p>
-      <p>派送位置：{{ order.rider.location }}</p>
+    <div v-if="Number(order?.status) === 5 && order?.rider" style="margin-top: 20px" class="rider-info">
+      <h3 class="section-title">騎手資訊</h3>
+      <p class="rider-name">騎手姓名：{{ order.rider.name }}</p>
+      <p class="rider-phone">騎手電話：{{ order.rider.phone }}</p>
+      <p class="rider-location">派送位置：{{ order.rider.location }}</p>
     </div>
 
     <!-- 💰 價格區塊 -->
     <div class="price-summary" v-if="order">
-      <div>打包費: ${{ order.packAmount }}</div>
-      <div>支付方式: {{ order.payMethod }}</div>
-      <div class="total">總金額: ${{ order.totalAmount }}</div>
+      <div class="pack-amount">打包費: ${{ order.packAmount }}</div>
+      <div class="pay-method">支付方式: {{ order.payMethod }}</div>
+      <div class="total-amount">總金額: ${{ order.totalAmount }}</div>
     </div>
 
     <!-- ❌ 取消訂單按鈕 (根據狀態顯示) -->
     <div class="cancel-btn" v-if="canCancelOrder(order?.status)">
-      <a-button type="primary" danger @click="confirmCancel">取消訂單</a-button>
+      <a-button type="primary" danger size="large" @click="confirmCancel">取消訂單</a-button>
     </div>
 
     <!-- 🚚 確認送達按鈕 (僅派送中狀態) -->
     <div class="confirm-btn" v-if="Number(order?.status) === 5">
-      <a-button type="primary" @click="confirmDelivered">確認送達</a-button>
+      <a-button type="primary" size="large" @click="confirmDelivered">確認送達</a-button>
     </div>
   </a-card>
 </template>
@@ -94,10 +95,10 @@ let riderMarker: any = null;
 let intervalId: any = null;
 
 const itemColumns = [
-  { title: "菜品名稱", dataIndex: "dishName", key: "dishName" },
-  { title: "口味", dataIndex: "dishFlavor", key: "dishFlavor" },
-  { title: "數量", dataIndex: "quantity", key: "quantity" },
-  { title: "單價", dataIndex: "price", key: "price" },
+  { title: "菜品名稱", dataIndex: "dishName", key: "dishName", width: "40%" },
+  { title: "口味", dataIndex: "dishFlavor", key: "dishFlavor", width: "20%" },
+  { title: "數量", dataIndex: "quantity", key: "quantity", width: "20%" },
+  { title: "單價", dataIndex: "price", key: "price", width: "20%" },
 ];
 
 // 狀態轉換規則
@@ -138,11 +139,11 @@ function statusText(status?: number) {
   }
 }
 
-// 狀態顏色映射
+// 狀態顏色映射 - 橙色主题
 function statusColor(status?: number) {
   const numStatus = Number(status);
   switch (numStatus) {
-    case 1: return "purple";
+    case 1: return "orange";
     case 2: return "orange";
     case 3: return "blue";
     case 4: return "cyan";
@@ -433,26 +434,94 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+/* 响应式字体 - 使用 rem 和 clamp 实现比例缩放 */
 .order-card {
   position: relative;
   padding-bottom: 120px;
   min-height: 500px;
+  font-size: clamp(14px, 1.8vw, 18px);
 }
 
+/* 订单编号 */
+.order-number {
+  font-size: clamp(16px, 2vw, 22px);
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 12px;
+}
+
+/* 订单状态 */
+.order-status {
+  font-size: clamp(14px, 1.6vw, 18px);
+  margin-bottom: 16px;
+}
+
+/* 状态标签 */
+.status-tag-custom {
+  font-size: clamp(12px, 1.4vw, 16px);
+  padding: 4px 12px;
+}
+
+/* 表格样式 */
+.order-items-table :deep(.ant-table) {
+  font-size: clamp(12px, 1.4vw, 16px);
+}
+
+.order-items-table :deep(.ant-table-thead > tr > th) {
+  font-size: clamp(13px, 1.5vw, 17px);
+  font-weight: 600;
+}
+
+.order-items-table :deep(.ant-table-tbody > tr > td) {
+  font-size: clamp(12px, 1.4vw, 16px);
+  padding: 12px 8px;
+}
+
+/* 区块标题 */
+.section-title {
+  font-size: clamp(16px, 1.8vw, 20px);
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #ff7a1a;
+}
+
+/* 骑手信息 */
+.rider-info p {
+  font-size: clamp(13px, 1.5vw, 17px);
+  margin-bottom: 8px;
+}
+
+.rider-name, .rider-phone, .rider-location {
+  font-size: clamp(13px, 1.5vw, 17px);
+}
+
+/* 价格区块 */
 .price-summary {
   position: absolute;
   bottom: 20px;
   right: 20px;
   text-align: right;
-  font-size: 14px;
-  color: #333;
 }
 
-.price-summary .total {
+.pack-amount, .pay-method {
+  font-size: clamp(12px, 1.4vw, 16px);
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.total-amount {
   font-weight: bold;
   margin-top: 8px;
-  font-size: 18px;
+  font-size: clamp(18px, 2.2vw, 24px);
   color: #fa541c;
+}
+
+/* 按钮样式 */
+.cancel-btn .ant-btn, .confirm-btn .ant-btn {
+  font-size: clamp(14px, 1.6vw, 18px);
+  height: auto;
+  padding: 8px 24px;
+  border-radius: 24px;
 }
 
 .cancel-btn {
@@ -472,16 +541,18 @@ onUnmounted(() => {
   margin-top: 20px;
   padding: 16px;
   background: #f5f5f5;
-  border-radius: 8px;
+  border-radius: 12px;
 }
 
 .rider-map-section h3 {
+  font-size: clamp(15px, 1.7vw, 19px);
   margin-bottom: 12px;
-  color: #1890ff;
+  color: #ff7a1a;
 }
 
 .rider-map-section h3 .anticon {
   margin-right: 8px;
+  font-size: clamp(14px, 1.6vw, 18px);
 }
 
 .rider-map {
@@ -497,14 +568,21 @@ onUnmounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.location-tag {
+  font-size: clamp(12px, 1.4vw, 15px);
+  padding: 4px 12px;
 }
 
 .update-time {
-  font-size: 12px;
+  font-size: clamp(11px, 1.2vw, 14px);
   color: #999;
 }
 
-/* 响应式 */
+/* 响应式 - 小屏幕 */
 @media (max-width: 768px) {
   .rider-map {
     height: 250px;
@@ -516,10 +594,35 @@ onUnmounted(() => {
     display: inline-block;
   }
 
+  .cancel-btn {
+    left: auto;
+    margin-right: 10px;
+  }
+
+  .confirm-btn {
+    left: auto;
+  }
+
   .price-summary {
     position: static;
     margin-top: 20px;
     text-align: right;
+  }
+}
+
+/* 大屏幕优化 */
+@media (min-width: 1200px) {
+  .order-card {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .order-number {
+    font-size: 24px;
+  }
+
+  .total-amount {
+    font-size: 28px;
   }
 }
 </style>

@@ -646,24 +646,26 @@ onMounted(() => {
   padding: 0 32px;
   font-size: 16px;
   font-weight: 500;
-  border-radius: 8px;
-  background: linear-gradient(135deg, #1890ff, #36cfc9);
+  border-radius: 24px;
+  background: linear-gradient(135deg, #ff7a1a 0%, #e66a0e 100%);
   border: none;
-  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.2);
+  box-shadow: 0 4px 12px rgba(255, 122, 26, 0.3);
   transition: all 0.3s ease;
 }
 
 .checkout-actions .ant-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(24, 144, 255, 0.3);
-  background: linear-gradient(135deg, #36cfc9, #1890ff);
+  box-shadow: 0 6px 16px rgba(255, 122, 26, 0.4);
+  background: linear-gradient(135deg, #ff944d 0%, #ff7a1a 100%);
 }
+
 
 .checkout-actions .ant-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
+  background: #d9d9d9;
 }
 
 /* 移动端适配 */

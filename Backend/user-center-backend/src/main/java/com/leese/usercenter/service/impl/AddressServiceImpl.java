@@ -34,6 +34,7 @@ public class AddressServiceImpl extends ServiceImpl<AddressMapper, Address> impl
         BeanUtils.copyProperties(dto, add);
         add.setUserId(curUser.getId());
         add.setId(null);
+        add.setIsDelete(NOT_DELETED); // 确保插入时 isDelete 为 0，避免数据库默认为 null 导致查不到
         int isDefault = add.getIsDefault();
         if (isDefault == 1) {
             cancelDefaultAddress(curUser.getId());

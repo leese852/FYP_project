@@ -6,6 +6,19 @@ module.exports = defineConfig({
   transpileDependencies: true,
   lintOnSave: false,
 
+  chainWebpack: (config) => {
+    // 修复路径中带有括号导致 copy-webpack-plugin 的 ignore glob 失效的问题
+    config.plugin("copy").tap((args) => {
+      if (args[0] && args[0].patterns && args[0].patterns[0]) {
+        args[0].patterns[0].globOptions.ignore = [
+          "**/.DS_Store",
+          "**/index.html", // 改为通配符忽略，避免绝对路径带有 () 导致正则匹配失败
+        ];
+      }
+      return args;
+    });
+  },
+
   // 配置開發伺服器代理
   devServer: {
     proxy: {

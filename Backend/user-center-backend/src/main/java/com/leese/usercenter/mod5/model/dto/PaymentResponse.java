@@ -54,4 +54,9 @@ public class PaymentResponse {
      * 消息
      */
     private String message;
+
+    /**
+     * 支付宝支付 HTML 表单（仅 ALIPAY 方式时有值，前端渲染后自动提交跳转）
+     */
+    private String payHtml;
 }

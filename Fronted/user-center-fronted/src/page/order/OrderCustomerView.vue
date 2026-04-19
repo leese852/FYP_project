@@ -73,7 +73,7 @@ interface Window {
   google: any;
 }
 
-import { ref, onMounted, onUnmounted, watch } from "vue";
+import { ref, onMounted, onUnmounted, watch,nextTick  } from "vue";
 import { Modal, message } from "ant-design-vue";
 import { EnvironmentOutlined } from "@ant-design/icons-vue";
 import { useRouter, useRoute } from "vue-router";
@@ -403,13 +403,16 @@ async function confirmDelivered() {
             okText: "前往評價",
             cancelText: "稍後評價",
             onOk() {
-              router.push({
-                path: '/user/feedback',
-                query: {
-                  orderId: order.value?.id,
-                  type: 'delivery',
-                  redirectFrom: 'order-completion'
-                }
+              // 🔥 使用 nextTick 确保 Vue 完成更新后再跳转
+              nextTick(() => {
+                router.push({
+                  path: '/user/feedback',
+                  query: {
+                    orderId: order.value?.id,
+                    type: 'delivery',
+                    redirectFrom: 'order-completion'
+                  }
+                });
               });
             },
           });

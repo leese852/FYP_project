@@ -1,3 +1,4 @@
+<!-- src/page/user/feedback/FeedbackSubmitPage.vue -->
 <template>
   <div style="padding: 30px; max-width: 800px; margin: 0 auto; background: #f5f7fa; min-height: 100vh;">
     <!-- 页面标题 -->
@@ -145,7 +146,6 @@
               @blur="$event.target.style.borderColor = '#d9d9d9'"
           ></textarea>
 
-          <!-- 字数统计 -->
           <div style="display: flex; justify-content: space-between; margin-top: 12px;">
             <div style="font-size: 13px; color: #8c8c8c;">
               <span v-if="feedbackContent.length < 100">💡 请详细描述</span>
@@ -240,7 +240,6 @@
         </button>
       </div>
 
-      <!-- 提示信息 -->
       <div style="margin-top: 32px; padding: 16px; background: #fafafa; border-radius: 8px; border-left: 4px solid #fa8c16;">
         <div style="display: flex; align-items: flex-start; gap: 12px;">
           <span style="color: #fa8c16; font-size: 18px;">💡</span>
@@ -319,10 +318,10 @@ export default {
     }
   },
   beforeMount() {
-    // 检查登录状态
+    // 🔥 检查登录状态 - 从 localStorage 读取
     const user = userUtils.getCurrentUser()
-    if (!user) {
-      this.$router.push('/login?redirect=/user/feedback')
+    if (!user || !user.id) {
+      this.$router.push('/user/login?redirect=/user/feedback')
     }
   },
   methods: {
@@ -347,7 +346,6 @@ export default {
         this.feedbackContent = ''
         this.feedbackType = 'SUGGESTION'
 
-        // 5秒后自动跳转到我的反馈页面
         setTimeout(() => {
           this.showSuccess = false
           this.$router.push('/user/feedback/my')
@@ -358,11 +356,12 @@ export default {
         this.errorMessage = error.message || '提交失败，请稍后重试'
 
         // 如果是未登录错误，清除本地存储并跳转登录
-        if (error.message.includes('登录') || error.message.includes('未授权') || error.response?.status === 401) {
+        if (error.message?.includes('登录') || error.message?.includes('未授权') || error.response?.status === 401) {
           userUtils.clearUser()
           this.errorMessage = '登录已过期，请重新登录'
           setTimeout(() => {
-            this.$router.push('/login?redirect=/user/feedback')
+            // 🔥 修正跳转路径
+            this.$router.push('/user/login?redirect=/user/feedback')
           }, 2000)
         }
       } finally {
@@ -379,30 +378,25 @@ export default {
   100% { transform: rotate(360deg); }
 }
 
-/* 悬停效果 */
 button:hover:not(:disabled),
 label:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
 }
 
-/* 类型选择卡片悬停 */
 label[style*="cursor: pointer"]:hover {
   border-color: #13c2c2 !important;
   background: #f0f9f9 !important;
 }
 
-/* 提交按钮悬停 */
 button[style*="background: #13c2c2"]:hover:not(:disabled) {
   background: #36cfc9 !important;
 }
 
-/* 查看反馈按钮悬停 */
 button[style*="background: #f0f0f0"]:hover:not(:disabled) {
   background: #e0e0e0 !important;
 }
 
-/* 返回首页按钮悬停 */
 button[style*="background: white"]:hover:not(:disabled) {
   background: #fafafa !important;
 }

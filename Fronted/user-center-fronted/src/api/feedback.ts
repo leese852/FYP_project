@@ -48,7 +48,7 @@ api.interceptors.response.use(
         // 处理401未授权
         if (error.response?.status === 401) {
             localStorage.removeItem('user')
-            window.location.href = '/login'
+            window.location.href = '/user/login'
         }
 
         // 处理403权限不足
@@ -60,7 +60,8 @@ api.interceptors.response.use(
     }
 )
 
-// 类型定义
+// ==================== 类型定义 ====================
+
 export interface FeedbackRequest {
     content: string
     type: string  // 'SUGGESTION' | 'COMPLAINT' | 'PRAISE'
@@ -82,7 +83,11 @@ export interface UserInfo {
     id: number
     username: string
     userAccount: string
+    avatarUrl?: string
     userRole?: number
+    email?: string
+    tel?: string
+    gender?: number
     [key: string]: any
 }
 
@@ -99,7 +104,8 @@ interface TestResult {
     myFeedbacks?: FeedbackResponse[]
 }
 
-// API函数 - 直接返回数据，不返回包装对象
+// ==================== API函数 ====================
+
 export const feedbackAPI = {
     // 提交反馈
     async submitFeedback(data: FeedbackRequest) {
@@ -144,23 +150,18 @@ export const feedbackAPI = {
     },
 
     // 标记为已处理
-    // async markAsProcessed(id: number) {
-    //     const response = await api.put<FeedbackResponse>(`/feedback/mark-processed/${id}`)
-    //     return response
-    // }
-
     async markAsProcessed(id: number) {
         const response = await api.put<FeedbackResponse>(`/feedback/update/${id}`, {
-            status: 'PROCESSED'  // 只更新状态
+            status: 'PROCESSED'
         })
         return response
     }
-
 }
 
-// 用户相关工具函数
+// ==================== 用户工具函数 ====================
+
 export const userUtils = {
-    // 获取当前登录用户
+    // 获取当前登录用户（直接从 localStorage 读取）
     getCurrentUser(): UserInfo | null {
         const userStr = localStorage.getItem('user')
         if (!userStr) {
@@ -210,14 +211,14 @@ export const userUtils = {
             }
 
             // 调用后端验证API
-            const response = await api.get('/user/current')  // 需要确认这个API是否存在
+            const response = await api.get('/user/current')
             return { loggedIn: true, user: response }
         } catch (error: any) {
             return { loggedIn: false, reason: 'API验证失败: ' + error.message }
         }
     },
 
-    // 保存用户信息
+    // 保存用户信息到 localStorage
     saveUser(user: UserInfo) {
         localStorage.setItem('user', JSON.stringify(user))
     },
@@ -225,10 +226,27 @@ export const userUtils = {
     // 清除用户信息
     clearUser() {
         localStorage.removeItem('user')
+    },
+
+    // 🔥 设置用户信息（登录时调用）
+    setUser(user: UserInfo) {
+        this.saveUser(user)
+    },
+
+    // 🔥 获取用户角色
+    getUserRole(): number {
+        const user = this.getCurrentUser()
+        return user?.userRole || 0
+    },
+
+    // 🔥 检查是否是管理员
+    isAdmin(): boolean {
+        return this.getUserRole() === 1
     }
 }
 
-// 测试API
+// ==================== 测试API ====================
+
 export const testAPI = {
     async testAll(): Promise<TestResult> {
         try {

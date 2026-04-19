@@ -52,6 +52,9 @@
                 <a-menu-item key="info">
                   <UserOutlined /> 个人信息
                 </a-menu-item>
+                <a-menu-item key="myFeedback">
+                  <MessageOutlined /> 我的反馈
+                </a-menu-item>
                 <a-menu-item key="logout">
                   <LogoutOutlined /> 退出登录
                 </a-menu-item>
@@ -75,6 +78,7 @@ import {
   PlusSquareOutlined,
   UserOutlined,
   LogoutOutlined,
+  MessageOutlined,
 } from "@ant-design/icons-vue";
 import { useRouter } from "vue-router";
 import { useLoginUserStore } from "@/store/useLoginUserStore";
@@ -117,6 +121,8 @@ const handleMenuClick = ({ key }: { key: string }) => {
   } else if (key === "profile") {
     // 个人信息，可以跳转到个人中心
     router.push({ path: "/user/info" });
+  }else if (key === "myFeedback") {  // 🔥 添加我的反馈跳转
+    router.push({ path: "/user/feedback/my" });
   }
 };
 

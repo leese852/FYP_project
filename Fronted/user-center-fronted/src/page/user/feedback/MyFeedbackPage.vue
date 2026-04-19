@@ -51,7 +51,7 @@
           登录后即可查看您的反馈记录和提交新的反馈
         </p>
         <div style="display: flex; gap: 12px; justify-content: center;">
-          <router-link to="/login"
+          <router-link to="/user/login"
                        style="padding: 12px 24px;
                               background: #4CAF50;
                               color: white;

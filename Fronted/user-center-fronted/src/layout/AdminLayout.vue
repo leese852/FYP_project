@@ -300,7 +300,7 @@ const menuList = ref([
     path: '/admin/feedback',
     iconComponent: CoffeeOutlined,
   },{
-    title: 'order msng',
+    title: '訂單管理',
     path: '/admin/orders',
     iconComponent: CoffeeOutlined,
   }

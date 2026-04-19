@@ -32,6 +32,14 @@ export const getDishById = async (id:number)=>{
     });
 }
 
+// 获取推荐菜品
+export const getRecommendedDishes = async () => {
+    return await myAxios.request({
+        url: "/user/dish/recommendations",
+        method: "get",
+    });
+};
+
 export const setOnOff = async(data:any)=> {
     return await myAxios.request({
         url: "/admin/dish/status",

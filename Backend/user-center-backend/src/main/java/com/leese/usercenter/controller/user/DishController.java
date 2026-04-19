@@ -29,4 +29,10 @@ public class DishController {
         DishVO result= dishService.getDishById(id);
         return ResultUtils.success(result);
     }
+
+    @GetMapping("/recommendations")
+    public BaseResponse<List<DishVO>> getRecommendedDishes(){
+        List<DishVO> result = dishService.getRecommendedDishes();
+        return ResultUtils.success(result);
+    }
 }

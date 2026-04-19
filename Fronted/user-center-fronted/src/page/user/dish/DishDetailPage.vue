@@ -190,7 +190,7 @@
             推荐菜品
           </h3>
           <div class="recommendations-list">
-            <div v-for="(rec, index) in recommendations" :key="index" class="recommendation-item">
+            <div v-for="(rec, index) in recommendations" :key="index" class="recommendation-item" @click="goToDish(rec.id)">
               <div class="rec-image">
                 <img v-if="rec.imgUrl" :src="rec.imgUrl" :alt="rec.dishName">
                 <div v-else class="rec-placeholder">
@@ -250,7 +250,7 @@
 import { ref, onMounted, computed, watch } from "vue";
 import { dishItem } from "@/types/dish";
 import { useRoute, useRouter } from 'vue-router'
-import { getDishById } from "@/api/dish";
+import { getDishById, getRecommendedDishes } from "@/api/dish";
 import SelectFlavors from '@/page/user/dish/components/SelectFlavors.vue'
 
 const route = useRoute()
@@ -263,11 +263,23 @@ const showZoomModal = ref(false)
 const showModal =ref(false)
 const quantity = ref(1)
 const notes = ref('')
-const recommendations = ref<any[]>([
-  { id: 2, dishName: "招牌红烧肉", price: 68, imgUrl: null },
-  { id: 3, dishName: "清蒸鲈鱼", price: 88, imgUrl: null },
-  { id: 4, dishName: "麻婆豆腐", price: 32, imgUrl: null }
-])
+const recommendations = ref<any[]>([])
+
+// 加载推荐菜品
+const loadRecommendations = async () => {
+  try {
+    const res = await getRecommendedDishes()
+    // 过滤掉当前菜品，如果推荐了自己
+    recommendations.value = res.data.data.filter((item: any) => item.id !== Number(route.params.id)).slice(0, 3)
+  } catch(error) {
+    console.log('获取推荐菜品失败:', error)
+  }
+}
+
+// 跳转到推荐菜品
+const goToDish = (id: number) => {
+  router.push({ path: `/user/dish/${id}` })
+}
 
 // 加载菜品详情
 const loadDishDetail = async (id: number) => {
@@ -279,7 +291,9 @@ const loadDishDetail = async (id: number) => {
     const result = await getDishById(id)
     dish.value = result.data.data;
     console.log('获取菜品详情成功:', result);
-
+    
+    // 加载当前菜品后加载推荐
+    await loadRecommendations();
   } catch(error: any) {
     console.log('获取菜品详情失败:', error)
     error.value = "加载菜品详情失败，请稍后重试"
@@ -317,6 +331,14 @@ const handleOrderConfirm = (orderData:any) => {
 watch(dish, () => {
   quantity.value = 1
   notes.value = ''
+})
+
+// 监听路由参数变化，如果是不同的菜品ID则重新加载数据
+watch(() => route.params.id, (newId) => {
+  if (newId) {
+    loadDishDetail(Number(newId));
+    window.scrollTo(0, 0); // 滚动到顶部
+  }
 })
 
 onMounted(() => {

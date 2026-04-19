@@ -178,6 +178,12 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
         return dishVO;
     }
 
+    @Override
+    public List<DishVO> getRecommendedDishes() {
+        List<Dish> topDishes = dishMapper.getTopRecommendedDishes();
+        return convertToVOList(topDishes);
+    }
+
     public List<DishVO> convertToVOList(List<Dish> dishList){
         List<DishVO> voList = new ArrayList<>();
         for(Dish d : dishList){

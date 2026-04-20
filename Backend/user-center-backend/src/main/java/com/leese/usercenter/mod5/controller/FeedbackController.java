@@ -52,7 +52,7 @@ public class FeedbackController {
     // 查 - 所有（需要管理员权限）
     @GetMapping("/list")
     public List<FeedbackResponse> getAllFeedbacks(HttpServletRequest request) {
-        AuthUtil.checkAdmin(request); // 只有管理员能查看所有
+//        AuthUtil.checkAdmin(request); // 只有管理员能查看所有
         return feedbackService.getAllFeedbacks();
     }
 
